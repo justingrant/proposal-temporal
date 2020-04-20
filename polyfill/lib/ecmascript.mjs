@@ -11,9 +11,9 @@ import {
   HasSlot,
   EPOCHNANOSECONDS,
   TIMEZONE_ID,
-  YEAR,
-  MONTH,
-  DAY,
+  ISO_YEAR,
+  ISO_MONTH,
+  ISO_DAY,
   HOUR,
   MINUTE,
   SECOND,
@@ -45,13 +45,15 @@ export const ES = ObjectAssign({}, ES2019, {
   IsTemporalDuration: (item) =>
     HasSlot(item, YEARS, MONTHS, DAYS, HOURS, MINUTES, SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS),
   IsTemporalDate: (item) =>
-    HasSlot(item, YEAR, MONTH, DAY) && !HasSlot(item, HOUR, MINUTE, SECOND, MILLISECOND, MICROSECOND, NANOSECOND),
+    HasSlot(item, ISO_YEAR, ISO_MONTH, ISO_DAY) &&
+    !HasSlot(item, HOUR, MINUTE, SECOND, MILLISECOND, MICROSECOND, NANOSECOND),
   IsTemporalTime: (item) =>
-    HasSlot(item, HOUR, MINUTE, SECOND, MILLISECOND, MICROSECOND, NANOSECOND) && !HasSlot(item, YEAR, MONTH, DAY),
+    HasSlot(item, HOUR, MINUTE, SECOND, MILLISECOND, MICROSECOND, NANOSECOND) &&
+    !HasSlot(item, ISO_YEAR, ISO_MONTH, ISO_DAY),
   IsTemporalDateTime: (item) =>
-    HasSlot(item, YEAR, MONTH, DAY, HOUR, MINUTE, SECOND, MILLISECOND, MICROSECOND, NANOSECOND),
-  IsTemporalYearMonth: (item) => HasSlot(item, YEAR, MONTH) && !HasSlot(item, DAY),
-  IsTemporalMonthDay: (item) => HasSlot(item, MONTH, DAY) && !HasSlot(item, YEAR),
+    HasSlot(item, ISO_YEAR, ISO_MONTH, ISO_DAY, HOUR, MINUTE, SECOND, MILLISECOND, MICROSECOND, NANOSECOND),
+  IsTemporalYearMonth: (item) => HasSlot(item, ISO_YEAR, ISO_MONTH) && !HasSlot(item, ISO_DAY),
+  IsTemporalMonthDay: (item) => HasSlot(item, ISO_MONTH, ISO_DAY) && !HasSlot(item, ISO_YEAR),
   ToTemporalTimeZone: (item) => {
     if (ES.IsTemporalTimeZone(item)) return item;
     const TimeZone = GetIntrinsic('%Temporal.TimeZone%');
@@ -953,7 +955,7 @@ export const ES = ObjectAssign({}, ES2019, {
   },
 
   CompareDate: (one, two) => {
-    for (const slot of [YEAR, MONTH, DAY]) {
+    for (const slot of [ISO_YEAR, ISO_MONTH, ISO_DAY]) {
       const val1 = GetSlot(one, slot);
       const val2 = GetSlot(two, slot);
       if (val1 !== val2) return ES.ComparisonResult(val1 - val2);
@@ -961,7 +963,7 @@ export const ES = ObjectAssign({}, ES2019, {
     return ES.ComparisonResult(0);
   },
   CompareDateTime: (one, two) => {
-    for (const slot of [YEAR, MONTH, DAY, HOUR, MINUTE, SECOND, MILLISECOND, MICROSECOND, NANOSECOND]) {
+    for (const slot of [ISO_YEAR, ISO_MONTH, ISO_DAY, HOUR, MINUTE, SECOND, MILLISECOND, MICROSECOND, NANOSECOND]) {
       const val1 = GetSlot(one, slot);
       const val2 = GetSlot(two, slot);
       if (val1 !== val2) return ES.ComparisonResult(val1 - val2);
@@ -969,7 +971,7 @@ export const ES = ObjectAssign({}, ES2019, {
     return ES.ComparisonResult(0);
   },
   CompareMonthDay: (one, two) => {
-    for (const slot of [MONTH, DAY]) {
+    for (const slot of [ISO_MONTH, ISO_DAY]) {
       const val1 = GetSlot(one, slot);
       const val2 = GetSlot(two, slot);
       if (val1 !== val2) return ES.ComparisonResult(val1 - val2);
@@ -977,7 +979,7 @@ export const ES = ObjectAssign({}, ES2019, {
     return ES.ComparisonResult(0);
   },
   CompareYearMonth: (one, two) => {
-    for (const slot of [YEAR, MONTH]) {
+    for (const slot of [ISO_YEAR, ISO_MONTH]) {
       const val1 = GetSlot(one, slot);
       const val2 = GetSlot(two, slot);
       if (val1 !== val2) return ES.ComparisonResult(val1 - val2);

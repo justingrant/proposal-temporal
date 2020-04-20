@@ -18,16 +18,16 @@
     </p>
 
     <emu-clause id="sec-temporal.monthday">
-      <h1>Temporal.MonthDay ( _month_, _day_ )</h1>
+      <h1>Temporal.MonthDay ( _isoMonth_, _isoDay_ )</h1>
       <p>
         When the `Temporal.MonthDay` function is called, the following steps are taken:
       </p>
       <emu-alg>
         1. If NewTarget is *undefined*, then
           1. Throw a *TypeError* exception.
-        1. Let _m_ be ? ToInteger(_month_).
-        1. Let _d_ be ? ToInteger(_day_).
-        1. Return ? CreateTemporalMonthDay(_result_.[[Month]], _result_.[[Day]], NewTarget).
+        1. Let _m_ be ? ToInteger(_isoMonth_).
+        1. Let _d_ be ? ToInteger(_isoDay_).
+        1. Return ? CreateTemporalMonthDay(_m_, _d_, NewTarget).
       </emu-alg>
     </emu-clause>
   </emu-clause>
@@ -124,7 +124,7 @@
       <emu-alg>
         1. Let _monthDay_ be the *this* value.
         1. Perform ? RequireInternalSlot(_monthDay_, [[InitializedTemporalMonthDay]]).
-        1. Return _monthDay_.[[Month]].
+        1. Return _monthDay_.[[IsoMonth]].
       </emu-alg>
     </emu-clause>
 
@@ -137,7 +137,7 @@
       <emu-alg>
         1. Let _monthDay_ be the *this* value.
         1. Perform ? RequireInternalSlot(_monthDay_, [[InitializedTemporalMonthDay]]).
-        1. Return _monthDay_.[[Day]].
+        1. Return _monthDay_.[[IsoDay]].
       </emu-alg>
     </emu-clause>
 
@@ -155,11 +155,11 @@
         1. If _partialMonthDay_.[[Month]] is not *undefined*, then
           1. Let _m_ be _partialMonthDay_.[[Month]].
         1. Else
-          1. Let _m_ be _monthDay_.[[Month]].
+          1. Let _m_ be _monthDay_.[[IsoMonth]].
         1. If _partialMonthDay_.[[Day]] is not *undefined*, then
           1. Let _d_ be _partialMonthDay_.[[Day]].
         1. Else
-          1. Let _d_ be _monthDay_.[[Day]].
+          1. Let _d_ be _monthDay_.[[IsoDay]].
         1. Let _result_ be ? RegulateMonthDay(_m_, _d_, _disambiguation_).
         1. Return ? CreateTemporalMonthDayFromInstance(_monthDay_, _result_.[[Month]], _result_.[[Day]]).
       </emu-alg>
@@ -215,7 +215,7 @@
         1. Let _monthDay_ be the *this* value.
         1. Perform ? RequireInternalSlot(_monthDay_, [[InitializedTemporalMonthDay]]).
         1. Let _y_ be ? ToInteger(_year_).
-        1. Return ? CreateTemporalDate(_y_, _monthDay_.[[Month]], _monthDay_.[[Day]]).
+        1. Return ? CreateTemporalDate(_y_, _monthDay_.[[IsoMonth]], _monthDay_.[[IsoDay]]).
       </emu-alg>
     </emu-clause>
   </emu-clause>
@@ -312,9 +312,9 @@
         1. If ! ValidateMonthDay(_month_, _day_) is *false*, then
           1. Throw a *RangeError* exception.
         1. If _newTarget_ is not given, set it to %Temporal.MonthDay%.
-        1. Let _object_ be ? OrdinaryCreateFromConstructor(_newTarget_, `"%Temporal.MonthDay.prototype%"`, « [[InitializedTemporalMonthDay]], [[Month]], [[Day]] »).
-        1. Set _object_.[[Month]] to _month_.
-        1. Set _object_.[[Day]] to _day_.
+        1. Let _object_ be ? OrdinaryCreateFromConstructor(_newTarget_, `"%Temporal.MonthDay.prototype%"`, « [[InitializedTemporalMonthDay]], [[IsoMonth]], [[IsoDay]] »).
+        1. Set _object_.[[IsoMonth]] to _month_.
+        1. Set _object_.[[IsoDay]] to _day_.
         1. Return _object_.
       </emu-alg>
     </emu-clause>
@@ -369,8 +369,8 @@
       <emu-alg>
         1. Assert: Type(_monthDay_) is Object.
         1. Assert: _monthDay_ has an [[InitializedTemporalMonthDay]] internal slot.
-        1. Let _month_ be _date_.[[Month]] formatted as a two-digit decimal number, padded to the left with a zero if necessary.
-        1. Let _day_ be _date_.[[Day]] formatted as a two-digit decimal number, padded to the left with a zero if necessary.
+        1. Let _month_ be _monthDay_.[[IsoMonth]] formatted as a two-digit decimal number, padded to the left with a zero if necessary.
+        1. Let _day_ be _monthDay_.[[IsoDay]] formatted as a two-digit decimal number, padded to the left with a zero if necessary.
         1. Return the string-concatenation of _month_, the code unit 0x002D (HYPHEN-MINUS), and _day_.
       </emu-alg>
     </emu-clause>
@@ -382,10 +382,10 @@
         1. Assert: _one_ has an [[InitializedTemporalMonthDay]] internal slot.
         1. Assert: Type(_two_) is Object.
         1. Assert: _two_ has an [[InitializedTemporalMonthDay]] internal slot.
-        1. If _one_.[[Month]] &gt; _two_.[[Month]], return 1.
-        1. If _one_.[[Month]] &lt; _two_.[[Month]], return -1.
-        1. If _one_.[[Day]] &gt; _two_.[[Day]], return 1.
-        1. If _one_.[[Day]] &lt; _two_.[[Day]], return -1.
+        1. If _one_.[[IsoMonth]] &gt; _two_.[[IsoMonth]], return 1.
+        1. If _one_.[[IsoMonth]] &lt; _two_.[[IsoMonth]], return -1.
+        1. If _one_.[[IsoDay]] &gt; _two_.[[IsoDay]], return 1.
+        1. If _one_.[[IsoDay]] &lt; _two_.[[IsoDay]], return -1.
         1. Return +0.
       </emu-alg>
     </emu-clause>

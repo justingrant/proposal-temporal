@@ -1,26 +1,26 @@
 import { ES } from './ecmascript.mjs';
 import { GetIntrinsic, MakeIntrinsicClass } from './intrinsicclass.mjs';
-import { MONTH, DAY, CreateSlots, GetSlot, SetSlot } from './slots.mjs';
+import { ISO_MONTH, ISO_DAY, CreateSlots, GetSlot, SetSlot } from './slots.mjs';
 
 export class MonthDay {
-  constructor(month, day) {
-    month = ES.ToInteger(month);
-    day = ES.ToInteger(day);
+  constructor(isoMonth, isoDay) {
+    isoMonth = ES.ToInteger(isoMonth);
+    isoDay = ES.ToInteger(isoDay);
     const leapYear = 1972; // XXX #261 leap year
-    ES.RejectDate(leapYear, month, day);
+    ES.RejectDate(leapYear, isoMonth, isoDay);
 
     CreateSlots(this);
-    SetSlot(this, MONTH, month);
-    SetSlot(this, DAY, day);
+    SetSlot(this, ISO_MONTH, isoMonth);
+    SetSlot(this, ISO_DAY, isoDay);
   }
 
   get month() {
     if (!ES.IsTemporalMonthDay(this)) throw new TypeError('invalid receiver');
-    return GetSlot(this, MONTH);
+    return GetSlot(this, ISO_MONTH);
   }
   get day() {
     if (!ES.IsTemporalMonthDay(this)) throw new TypeError('invalid receiver');
-    return GetSlot(this, DAY);
+    return GetSlot(this, ISO_DAY);
   }
 
   with(temporalMonthDayLike, options) {
@@ -30,7 +30,7 @@ export class MonthDay {
     if (!props) {
       throw new RangeError('invalid month-day-like');
     }
-    let { month = GetSlot(this, MONTH), day = GetSlot(this, DAY) } = props;
+    let { month = GetSlot(this, ISO_MONTH), day = GetSlot(this, ISO_DAY) } = props;
     ({ month, day } = ES.RegulateMonthDay(month, day, disambiguation));
     const Construct = ES.SpeciesConstructor(this, MonthDay);
     const result = new Construct(month, day);
@@ -39,8 +39,8 @@ export class MonthDay {
   }
   toString() {
     if (!ES.IsTemporalMonthDay(this)) throw new TypeError('invalid receiver');
-    let month = ES.ISODateTimePartString(GetSlot(this, MONTH));
-    let day = ES.ISODateTimePartString(GetSlot(this, DAY));
+    let month = ES.ISODateTimePartString(GetSlot(this, ISO_MONTH));
+    let day = ES.ISODateTimePartString(GetSlot(this, ISO_DAY));
     let resultString = `${month}-${day}`;
     return resultString;
   }
@@ -50,8 +50,8 @@ export class MonthDay {
   }
   withYear(year) {
     if (!ES.IsTemporalMonthDay(this)) throw new TypeError('invalid receiver');
-    const month = GetSlot(this, MONTH);
-    const day = GetSlot(this, DAY);
+    const month = GetSlot(this, ISO_MONTH);
+    const day = GetSlot(this, ISO_DAY);
     const Date = GetIntrinsic('%Temporal.Date%');
     return new Date(year, month, day);
   }
@@ -60,8 +60,8 @@ export class MonthDay {
     let month, day;
     if (typeof item === 'object' && item) {
       if (ES.IsTemporalMonthDay(item)) {
-        month = GetSlot(item, MONTH);
-        day = GetSlot(item, DAY);
+        month = GetSlot(item, ISO_MONTH);
+        day = GetSlot(item, ISO_DAY);
       } else {
         // Intentionally alphabetical
         ({ month, day } = ES.ToRecord(item, [['day'], ['month']]));
