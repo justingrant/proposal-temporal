@@ -323,6 +323,20 @@ export class DateTime {
       GetSlot(this, NANOSECOND)
     );
   }
+  getFields() {
+    if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
+    return ES.ToRecord(this, [
+      ['day'],
+      ['hour'],
+      ['microsecond'],
+      ['millisecond'],
+      ['minute'],
+      ['month'],
+      ['nanosecond'],
+      ['second'],
+      ['year']
+    ]);
+  }
 
   static from(item, options = undefined) {
     const disambiguation = ES.ToTemporalDisambiguation(options);

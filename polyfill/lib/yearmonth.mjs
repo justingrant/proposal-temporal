@@ -130,6 +130,10 @@ export class YearMonth {
     const Date = GetIntrinsic('%Temporal.Date%');
     return new Date(year, month, day);
   }
+  getFields() {
+    if (!ES.IsTemporalYearMonth(this)) throw new TypeError('invalid receiver');
+    return ES.ToRecord(this, [['month'], ['year']]);
+  }
   static from(item, options = undefined) {
     const disambiguation = ES.ToTemporalDisambiguation(options);
     let year, month;

@@ -55,6 +55,10 @@ export class MonthDay {
     const Date = GetIntrinsic('%Temporal.Date%');
     return new Date(year, month, day);
   }
+  getFields() {
+    if (!ES.IsTemporalMonthDay(this)) throw new TypeError('invalid receiver');
+    return ES.ToRecord(this, [['day'], ['month']]);
+  }
   static from(item, options = undefined) {
     const disambiguation = ES.ToTemporalDisambiguation(options);
     let month, day;

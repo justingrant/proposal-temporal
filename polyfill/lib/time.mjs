@@ -225,6 +225,10 @@ export class Time {
     const DateTime = GetIntrinsic('%Temporal.DateTime%');
     return new DateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond);
   }
+  getFields() {
+    if (!ES.IsTemporalTime(this)) throw new TypeError('invalid receiver');
+    return ES.ToRecord(this, [['hour'], ['microsecond'], ['millisecond'], ['minute'], ['nanosecond'], ['second']]);
+  }
 
   static from(item, options = undefined) {
     const disambiguation = ES.ToTemporalDisambiguation(options);

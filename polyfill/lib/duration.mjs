@@ -214,6 +214,20 @@ export class Duration {
     if (!ES.IsTemporalDuration(result)) throw new TypeError('invalid result');
     return result;
   }
+  getFields() {
+    if (!ES.IsTemporalDuration(this)) throw new TypeError('invalid receiver');
+    return ES.ToRecord(this, [
+      ['days'],
+      ['hours'],
+      ['microseconds'],
+      ['milliseconds'],
+      ['minutes'],
+      ['months'],
+      ['nanoseconds'],
+      ['seconds'],
+      ['years']
+    ]);
+  }
   toString() {
     if (!ES.IsTemporalDuration(this)) throw new TypeError('invalid receiver');
     return ES.TemporalDurationToString(this);
