@@ -68,12 +68,6 @@ class Temporal.Calendar {
 		constructor: function
 	) : Temporal.DateTime;
 
-	/** Constructs a Temporal.Time from a free-form option bag */
-	timeFromFields(
-		fields: object,
-		constructor: function
-	) : Temporal.Time;
-
 	/** Constructs a Temporal.YearMonth from a free-form option bag */
 	yearMonthFromFields(
 		fields: object,
@@ -113,10 +107,10 @@ class Temporal.Calendar {
 		constructor: function
 	) : Temporal.Date;
 
-	/** Returns left minus right, which are dates in the same calendar. */
+	/** Returns larger minus smaller, which are dates in the same calendar. */
 	difference(
-		left: Temporal.Date,
-		right: Temporal.Date,
+		smaller: Temporal.Date,
+		larger: Temporal.Date,
 		options: /* options bag */
 	) : Temporal.Duration;
 
@@ -261,7 +255,7 @@ The calendar IDs are less clear.  If the partial ISO calendar used ID `"iso"`, t
 | Impact on i18n correctness | ☹️ Programmer needs to know to "opt in" to use the user's calendar preference | 😃 All operations require an explicit choice | 😃 Calendar-sensitive operations require an explicit choice | 🙂 Correct on front end, but programmer needs to know to "opt in" on back end |
 | Impact on interoperability | 😃 ISO is the industry standard format | 😃 Explicit choice | 😃 I/O operations operate in the ISO calendar space | ☹️ Temporal objects may not interop with the ISO calendar |
 
-\**See https://github.com/tc39/proposal-temporal/issues/240#issuecomment-557726669*
+\**See https://github.com/tc39/proposal-temporal/issues/240#issuecomment-557726669 *
 
 ## Temporal.Date API changes
 
