@@ -190,10 +190,7 @@ export class Date {
   }
   static compare(one, two) {
     if (!ES.IsTemporalDate(one) || !ES.IsTemporalDate(two)) throw new TypeError('invalid Date object');
-    if (one.year !== two.year) return ES.ComparisonResult(one.year - two.year);
-    if (one.month !== two.month) return ES.ComparisonResult(one.month - two.month);
-    if (one.day !== two.day) return ES.ComparisonResult(one.day - two.day);
-    return ES.ComparisonResult(0);
+    return ES.CompareDate(one, two);
   }
 }
 Date.prototype.toJSON = Date.prototype.toString;

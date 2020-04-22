@@ -952,6 +952,39 @@ export const ES = ObjectAssign({}, ES2019, {
     return { days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds };
   },
 
+  CompareDate: (one, two) => {
+    for (const slot of [YEAR, MONTH, DAY]) {
+      const val1 = GetSlot(one, slot);
+      const val2 = GetSlot(two, slot);
+      if (val1 !== val2) return ES.ComparisonResult(val1 - val2);
+    }
+    return ES.ComparisonResult(0);
+  },
+  CompareDateTime: (one, two) => {
+    for (const slot of [YEAR, MONTH, DAY, HOUR, MINUTE, SECOND, MILLISECOND, MICROSECOND, NANOSECOND]) {
+      const val1 = GetSlot(one, slot);
+      const val2 = GetSlot(two, slot);
+      if (val1 !== val2) return ES.ComparisonResult(val1 - val2);
+    }
+    return ES.ComparisonResult(0);
+  },
+  CompareMonthDay: (one, two) => {
+    for (const slot of [MONTH, DAY]) {
+      const val1 = GetSlot(one, slot);
+      const val2 = GetSlot(two, slot);
+      if (val1 !== val2) return ES.ComparisonResult(val1 - val2);
+    }
+    return ES.ComparisonResult(0);
+  },
+  CompareYearMonth: (one, two) => {
+    for (const slot of [YEAR, MONTH]) {
+      const val1 = GetSlot(one, slot);
+      const val2 = GetSlot(two, slot);
+      if (val1 !== val2) return ES.ComparisonResult(val1 - val2);
+    }
+    return ES.ComparisonResult(0);
+  },
+
   ConstrainToRange: (value, min, max) => Math.min(max, Math.max(min, value)),
   ConstrainDate: (year, month, day) => {
     // Noon avoids trouble at edges of DateTime range (excludes midnight)

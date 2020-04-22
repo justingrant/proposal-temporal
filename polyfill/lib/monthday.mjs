@@ -76,9 +76,7 @@ export class MonthDay {
   }
   static compare(one, two) {
     if (!ES.IsTemporalMonthDay(one) || !ES.IsTemporalMonthDay(two)) throw new TypeError('invalid MonthDay object');
-    if (one.month !== two.month) return ES.ComparisonResult(one.month - two.month);
-    if (one.day !== two.day) return ES.ComparisonResult(one.day - two.day);
-    return ES.ComparisonResult(0);
+    return ES.CompareMonthDay(one, two);
   }
 }
 MonthDay.prototype.toJSON = MonthDay.prototype.toString;
