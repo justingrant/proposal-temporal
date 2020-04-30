@@ -134,6 +134,13 @@ export class YearMonth {
     if (!ES.IsTemporalYearMonth(this)) throw new TypeError('invalid receiver');
     return ES.ToRecord(this, [['month'], ['year']]);
   }
+  getISOFields() {
+    if (!ES.IsTemporalYearMonth(this)) throw new TypeError('invalid receiver');
+    return {
+      year: GetSlot(this, ISO_YEAR),
+      month: GetSlot(this, ISO_MONTH)
+    };
+  }
   static from(item, options = undefined) {
     const disambiguation = ES.ToTemporalDisambiguation(options);
     let year, month;

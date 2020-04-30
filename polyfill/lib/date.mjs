@@ -172,6 +172,14 @@ export class Date {
     if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
     return ES.ToRecord(this, [['day'], ['month'], ['year']]);
   }
+  getISOFields() {
+    if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
+    return {
+      year: GetSlot(this, ISO_YEAR),
+      month: GetSlot(this, ISO_MONTH),
+      day: GetSlot(this, ISO_DAY)
+    };
+  }
   static from(item, options = undefined) {
     const disambiguation = ES.ToTemporalDisambiguation(options);
     let year, month, day;
