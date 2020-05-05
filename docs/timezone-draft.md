@@ -58,7 +58,6 @@ Temporal.TimeZone.from('1820-04-01T18:16:25-06:00[America/St_Louis]', { idToTime
 > Maybe we need to only throw if `new.target === Temporal.TimeZone`?
 
 In order to lock down any leakage of information about the host system's time zone database, one would monkeypatch the `Temporal.TimeZone.fromId()` function which performs the built-in mapping, and replace `Temporal.now.timeZone()` to avoid exposing the current time zone.
-Or just replace the `Temporal.TimeZone` class and `Temporal.now` object altogether:
 
 ```javascript
 // For example, to allow only offset time zones:
@@ -70,11 +69,6 @@ Temporal.TimeZone.fromId = function (id) {
   return null;
 }
 Temporal.now.timeZone = function () { return Temporal.TimeZone.fromId('UTC'); }
-
-// or, to replace the built-in implementation altogether:
-
-Temporal.TimeZone = LockedDownTimeZoneImplementation;
-Temporal.now = lockedDownNowObject;
 ```
 
 ## Implementation of a custom time zone
