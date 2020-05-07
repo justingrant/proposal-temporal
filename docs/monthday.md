@@ -251,6 +251,19 @@ md.withYear(2017)  // throws
 md.withYear(2020)  // => 2020-02-29
 ```
 
+In calendars where more information than just the year is needed to convert a `Temporal.MonthDay` to a `Temporal.Date`, you can pass an object to `withYear()` that contains the necessary properties.
+
+Example:
+```javascript
+md = Temporal.MonthDay.from({
+  calendar: 'japanese',
+  month: 1,
+  day: 1
+});
+
+date = md.withYear({ era: 'reiwa', year: 2 });
+```
+
 ### monthDay.**getFields**() : { month: number, day: number }
 
 **Returns:** a plain object with properties equal to the fields of `monthDay`.
