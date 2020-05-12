@@ -57,7 +57,7 @@ Temporal.TimeZone.from('1820-04-01T18:16:25-06:00[America/St_Louis]', { idToTime
 > However, this must change, because implementations would need to call `super(id)` to set the _[[Identifier]]_ and _[[InitializedTemporalTimeZone]]_ internal slots.
 > Maybe we need to only throw if `new.target === Temporal.TimeZone`?
 
-In order to lock down any leakage of information about the host system's time zone database, one would monkeypatch the `Temporal.TimeZone.fromId()` function which performs the built-in mapping, change the list of allowed time zones that `Temporal.TimeZone` iterates through, and replace `Temporal.now.timeZone()` to avoid exposing the current time zone.
+In order to lock down any leakage of information about the host system's time zone database, one would monkeypatch the `Temporal.TimeZone.fromId()` function which performs the built-in mapping, and replace `Temporal.now.timeZone()` to avoid exposing the current time zone.
 Or just replace the `Temporal.TimeZone` class and `Temporal.now` object altogether:
 
 ```javascript
@@ -69,7 +69,6 @@ Temporal.TimeZone.fromId = function (id) {
     return TemporalTimeZone_fromId(id);
   return null;
 }
-Temporal.TimeZone[Symbol.iterator] = function* () { return null; }
 Temporal.now.timeZone = function () { return Temporal.TimeZone.fromId('UTC'); }
 
 // or, to replace the built-in implementation altogether:
@@ -119,7 +118,6 @@ class Temporal.TimeZone {
 
   static from(item : any, options?: object) : Temporal.TimeZone;
   static fromId(id: string) : Temporal.TimeZone;
-  static [Symbol.iterator]() : iterator<Temporal.TimeZone>;
 }
 ```
 
@@ -133,8 +131,6 @@ Alternatively, a custom time zone doesn't have to be a subclass of `Temporal.Tim
 In this case, it can be a plain object, which must implement `getOffsetAtInstant()`, `possibleInstants()`, and `toString()`.
 
 > **FIXME:** This means we have to remove any checks for the _[[InitializedTemporalTimeZone]]_ slot in all APIs, so that plain objects can use them with e.g. `Temporal.TimeZone.prototype.getOffsetFor.call(plainObject, absolute)`.
-
-> **FIXME:** `Temporal.TimeZone` is supposed to be an iterable through all time zones known to the implementation, but what do we do about custom time zones there?
 
 ## Show Me The Code
 
