@@ -150,6 +150,27 @@ md.with({ day: 31 })  // => 11-30
 Temporal.MonthDay.from('02-01').with({ day: 31 });  // => 02-29
 ```
 
+### monthDay.**equal**(_other_: Temporal.MonthDay) : boolean
+
+**Parameters:**
+- `other` (`Temporal.MonthDay`): Another month-day to compare.
+
+**Returns:** `true` if `monthDay` and `other` are equal, or `false` if not.
+
+Compares two `Temporal.MonthDay` objects for equality.
+
+This function exists because it's not possible to compare using `monthDay == other` or `monthDay === other`, due to ambiguity in the primitive representation and between Temporal types.
+
+Note that this function will return `false` if the two inputs are expressed in different calendar systems.
+
+Example usage:
+```javascript
+dt1 = Temporal.DateTime.from('1995-12-07T03:24:30.000003500');
+dt2 = Temporal.DateTime.from('2019-01-31T15:30');
+dt1.equal(dt2)  // => false
+dt1.equal(dt1)  // => true
+```
+
 ### monthDay.**toString**() : string
 
 **Returns:** a string in the ISO 8601 date format representing `monthDay`.

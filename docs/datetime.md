@@ -429,6 +429,28 @@ feb1.difference(mar1);                             // => P29D
 feb1.difference(mar1, { largestUnit: 'months' });  // => P1M
 ```
 
+### datetime.**equal**(_other_: Temporal.DateTime) : boolean
+
+**Parameters:**
+- `other` (`Temporal.DateTime`): Another date/time to compare.
+
+**Returns:** `true` if `datetime` and `other` are equal, or `false` if not.
+
+Compares two `Temporal.DateTime` objects for equality.
+
+This function exists because it's not possible to compare using `datetime == other` or `datetime === other`, due to ambiguity in the primitive representation and between Temporal types.
+
+The difference with `Temporal.DateTime.compare` is that this function will return `false` if the two dates/times are expressed in different calendar systems.
+Even if you are using the same calendar system, if you don't need to know the order in which the two dates/times occur, then this function may be less typing and more efficient than `Temporal.DateTime.compare`.
+
+Example usage:
+```javascript
+dt1 = Temporal.DateTime.from('1995-12-07T03:24:30.000003500');
+dt2 = Temporal.DateTime.from('2019-01-31T15:30');
+dt1.equal(dt2)  // => false
+dt1.equal(dt1)  // => true
+```
+
 ### datetime.**toString**() : string
 
 **Returns:** a string in the ISO 8601 date format representing `datetime`.

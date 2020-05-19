@@ -313,6 +313,28 @@ ym.difference(other, { largestUnit: 'months' })  // => P154M
 ym.withDay(1).difference(other.withDay(1), { largestUnit: 'days' });  // => P4687D
 ```
 
+### yearMonth.**equal**(_other_: Temporal.YearMonth) : boolean
+
+**Parameters:**
+- `other` (`Temporal.YearMonth`): Another month to compare.
+
+**Returns:** `true` if `yearMonth` and `other` are equal, or `false` if not.
+
+Compares two `Temporal.YearMonth` objects for equality.
+
+This function exists because it's not possible to compare using `yearMonth == other` or `yearMonth === other`, due to ambiguity in the primitive representation and between Temporal types.
+
+Note that this function will return `false` if the two months are expressed in different calendar systems.
+Even if you are using the same calendar system, if you don't need to know the order in which the two months occur, then this function may be less typing and more efficient than `Temporal.YearMonth.compare`.
+
+Example usage:
+```javascript
+ym = Temporal.YearMonth.from('2019-06');
+other = Temporal.YearMonth.from('2006-08');
+ym.equal(other)  // => false
+ym.equal(ym)  // => true
+```
+
 ### yearMonth.**toString**() : string
 
 **Returns:** a string in the ISO 8601 date format representing `yearMonth`.

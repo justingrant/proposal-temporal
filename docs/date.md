@@ -371,6 +371,28 @@ date.withTime(midnight).difference(other.withTime(midnight), { largestUnit: 'hou
   // => PT109032H
 ```
 
+### date.**equal**(_other_: Temporal.Date) : boolean
+
+**Parameters:**
+- `other` (`Temporal.Date`): Another date to compare.
+
+**Returns:** `true` if `date` and `other` are equal, or `false` if not.
+
+Compares two `Temporal.Date` objects for equality.
+
+This function exists because it's not possible to compare using `date == other` or `date === other`, due to ambiguity in the primitive representation and between Temporal types.
+
+The difference with `Temporal.Date.compare` is that this function will return `false` if the two dates are expressed in different calendar systems.
+Even if you are using the same calendar system, if you don't need to know the order in which the two dates occur, then this function may be less typing and more efficient than `Temporal.Date.compare`.
+
+Example usage:
+```javascript
+date = Temporal.Date.from('2006-08-24');
+other = Temporal.Date.from('2019-01-31');
+date.equal(other)  // => false
+date.equal(date)  // => true
+```
+
 ### date.**toString**() : string
 
 **Returns:** a string in the ISO 8601 date format representing `date`.
