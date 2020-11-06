@@ -8478,7 +8478,7 @@
       var calendar = GetSlot(temporalObj, CALENDAR);
 
       if (calendar.id !== main[CAL_ID]) {
-        throw new RangeError("cannot format YearMonth with calendar ".concat(calendar.id, " in locale with calendar ").concat(main[CAL_ID]));
+        throw new RangeError("cannot format PlainYearMonth with calendar ".concat(calendar.id, " in locale with calendar ").concat(main[CAL_ID]));
       }
 
       var _datetime = new DateTime(isoYear, isoMonth, referenceISODay, 12, 0, 0, 0, 0, 0, calendar);
@@ -8499,7 +8499,7 @@
       var _calendar = GetSlot(temporalObj, CALENDAR);
 
       if (_calendar.id !== main[CAL_ID]) {
-        throw new RangeError("cannot format MonthDay with calendar ".concat(_calendar.id, " in locale with calendar ").concat(main[CAL_ID]));
+        throw new RangeError("cannot format PlainMonthDay with calendar ".concat(_calendar.id, " in locale with calendar ").concat(main[CAL_ID]));
       }
 
       var _datetime2 = new DateTime(referenceISOYear, _isoMonth, isoDay, 12, 0, 0, 0, 0, 0, _calendar);
@@ -8520,7 +8520,7 @@
       var _calendar2 = GetSlot(temporalObj, CALENDAR);
 
       if (_calendar2.id !== 'iso8601' && _calendar2.id !== main[CAL_ID]) {
-        throw new RangeError("cannot format Date with calendar ".concat(_calendar2.id, " in locale with calendar ").concat(main[CAL_ID]));
+        throw new RangeError("cannot format PlainDate with calendar ".concat(_calendar2.id, " in locale with calendar ").concat(main[CAL_ID]));
       }
 
       var _datetime3 = new DateTime(_isoYear, _isoMonth2, _isoDay, 12, 0, 0, 0, 0, 0, main[CAL_ID]);
@@ -8553,7 +8553,7 @@
       var _calendar3 = GetSlot(temporalObj, CALENDAR);
 
       if (_calendar3.id !== 'iso8601' && _calendar3.id !== main[CAL_ID]) {
-        throw new RangeError("cannot format Date with calendar ".concat(_calendar3.id, " in locale with calendar ").concat(main[CAL_ID]));
+        throw new RangeError("cannot format PlainDateTime with calendar ".concat(_calendar3.id, " in locale with calendar ").concat(main[CAL_ID]));
       }
 
       var _datetime4 = temporalObj;
@@ -9279,7 +9279,8 @@
         var year = GetSlot(this, ISO_YEAR);
         var month = GetSlot(this, ISO_MONTH);
         var day = GetSlot(this, ISO_DAY);
-        var calendar = GetSlot(this, CALENDAR);
+        var calendar = GetSlot(this, CALENDAR); // TODO: use start of day in calendar.
+
         var hour = 0,
             minute = 0,
             second = 0,
@@ -9294,7 +9295,7 @@
           second = GetSlot(temporalTime, ISO_SECOND);
           millisecond = GetSlot(temporalTime, ISO_MILLISECOND);
           microsecond = GetSlot(temporalTime, ISO_MICROSECOND);
-          nanosecond = GetSlot(temporalTime, ISO_NANOSECOND);
+          nanosecond = GetSlot(temporalTime, ISO_NANOSECOND); // TODO: verify calendars match
         }
 
         var PlainDateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
@@ -10676,7 +10677,6 @@
     }, {
       key: "toPlainDate",
       value: function toPlainDate(item) {
-        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
         if (!ES.IsTemporalMonthDay(this)) throw new TypeError('invalid receiver');
         var calendar = GetSlot(this, CALENDAR);
         var receiverFieldNames = ES.CalendarFields(calendar, ['day', 'month']);
@@ -10696,7 +10696,9 @@
         });
         ObjectAssign$4(fields, ES.ToRecord(item, entries));
         var Date = GetIntrinsic$1('%Temporal.PlainDate%');
-        return calendar.dateFromFields(fields, options, Date);
+        return calendar.dateFromFields(fields, {
+          overflow: 'constrain'
+        }, Date);
       }
     }, {
       key: "getFields",
@@ -11275,7 +11277,8 @@
         var timeZone = ES.ToTemporalTimeZone(timeZoneLike);
         var year = GetSlot(temporalDate, ISO_YEAR);
         var month = GetSlot(temporalDate, ISO_MONTH);
-        var day = GetSlot(temporalDate, ISO_DAY);
+        var day = GetSlot(temporalDate, ISO_DAY); // TODO: verify calendars match
+
         var calendar = GetSlot(temporalDate, CALENDAR);
         var hour = GetSlot(this, ISO_HOUR);
         var minute = GetSlot(this, ISO_MINUTE);
