@@ -69,6 +69,22 @@ export class PlainDate {
     if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
     return GetSlot(this, CALENDAR).era(this);
   }
+  get eraYear() {
+    if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
+    return GetSlot(this, CALENDAR).eraYear(this);
+  }
+  get monthCode() {
+    if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
+    return GetSlot(this, CALENDAR).monthCode(this);
+  }
+  get regularMonth() {
+    if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
+    return GetSlot(this, CALENDAR).regularMonth(this);
+  }
+  get monthType() {
+    if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
+    return GetSlot(this, CALENDAR).monthType(this);
+  }
   get year() {
     if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
     return GetSlot(this, CALENDAR).year(this);

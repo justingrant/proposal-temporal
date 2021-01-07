@@ -5,17 +5,33 @@
 esid: sec-temporal-sec-temporal.yearmonth.compare
 ---*/
 
-function CustomError() {}
+let calls = 0;
 
-class AvoidGettersYearMonth extends Temporal.PlainYearMonth {
+class TrackGettersYearMonth extends Temporal.PlainYearMonth {
   get year() {
-    throw new CustomError();
+    calls++;
+    return super.year;
   }
   get month() {
-    throw new CustomError();
+    calls++;
+    return super.month;
   }
 }
 
-const one = new AvoidGettersYearMonth(2000, 5);
-const two = new AvoidGettersYearMonth(2006, 3);
-assert.sameValue(Temporal.PlainYearMonth.compare(one, two), -1);
+// if instances are equal, getters won't be called
+{
+  const one = new TrackGettersYearMonth(2000, 5);
+  const two = new TrackGettersYearMonth(2000, 5);
+  assert.sameValue(Temporal.PlainYearMonth.compare(one, two), 0);
+  assert.sameValue(calls, 0);
+}
+
+// If instances are not equal, then getters must be called to
+// determine if the year and month match, even if the reference
+// year is different.
+{
+  const one = new TrackGettersYearMonth(2000, 5);
+  const two = new TrackGettersYearMonth(2006, 3);
+  assert.sameValue(Temporal.PlainYearMonth.compare(one, two), -1);
+  assert.sameValue(calls, 2);
+}

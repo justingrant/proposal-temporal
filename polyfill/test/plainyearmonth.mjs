@@ -188,11 +188,11 @@ describe('YearMonth', () => {
       throws(() => PlainYearMonth.compare({ year: 1994 }, jun13), TypeError);
       throws(() => PlainYearMonth.compare(nov94, { year: 2013 }), TypeError);
     });
-    it('takes [[ISODay]] into account', () => {
+    it('does not take [[ISODay]] into account', () => {
       const iso = Temporal.Calendar.from('iso8601');
       const ym1 = new PlainYearMonth(2000, 1, iso, 1);
       const ym2 = new PlainYearMonth(2000, 1, iso, 2);
-      equal(PlainYearMonth.compare(ym1, ym2), -1);
+      equal(PlainYearMonth.compare(ym1, ym2), 0);
     });
   });
   describe('YearMonth.equals() works', () => {
@@ -207,11 +207,11 @@ describe('YearMonth', () => {
     it('object must contain at least the required properties', () => {
       throws(() => nov94.equals({ year: 1994 }), TypeError);
     });
-    it('takes [[ISODay]] into account', () => {
+    it('does not take [[ISODay]] into account', () => {
       const iso = Temporal.Calendar.from('iso8601');
       const ym1 = new PlainYearMonth(2000, 1, iso, 1);
       const ym2 = new PlainYearMonth(2000, 1, iso, 2);
-      assert(!ym1.equals(ym2));
+      assert(ym1.equals(ym2));
     });
   });
   describe("Comparison operators don't work", () => {

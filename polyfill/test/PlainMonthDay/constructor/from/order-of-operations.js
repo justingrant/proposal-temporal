@@ -12,6 +12,8 @@ const expected = [
   "valueOf day",
   "get month",
   "valueOf month",
+  "get monthCode",
+  "valueOf monthCode",
 ];
 const actual = [];
 const fields = {
@@ -30,7 +32,7 @@ const argument = new Proxy(fields, {
       },
       toString() {
         actual.push(`toString ${key}`);
-        return result.toString();
+        return result === undefined ? undefined : result.toString();
       }
     };
   },

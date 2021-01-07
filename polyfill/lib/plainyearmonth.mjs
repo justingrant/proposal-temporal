@@ -69,6 +69,22 @@ export class PlainYearMonth {
     if (!ES.IsTemporalYearMonth(this)) throw new TypeError('invalid receiver');
     return GetSlot(this, CALENDAR).era(this);
   }
+  get eraYear() {
+    if (!ES.IsTemporalYearMonth(this)) throw new TypeError('invalid receiver');
+    return GetSlot(this, CALENDAR).eraYear(this);
+  }
+  get monthCode() {
+    if (!ES.IsTemporalYearMonth(this)) throw new TypeError('invalid receiver');
+    return GetSlot(this, CALENDAR).monthCode(this);
+  }
+  get regularMonth() {
+    if (!ES.IsTemporalYearMonth(this)) throw new TypeError('invalid receiver');
+    return GetSlot(this, CALENDAR).regularMonth(this);
+  }
+  get monthType() {
+    if (!ES.IsTemporalYearMonth(this)) throw new TypeError('invalid receiver');
+    return GetSlot(this, CALENDAR).monthType(this);
+  }
   get daysInMonth() {
     if (!ES.IsTemporalYearMonth(this)) throw new TypeError('invalid receiver');
     return GetSlot(this, CALENDAR).daysInMonth(this);
@@ -319,10 +335,18 @@ export class PlainYearMonth {
   equals(other) {
     if (!ES.IsTemporalYearMonth(this)) throw new TypeError('invalid receiver');
     other = ES.ToTemporalYearMonth(other, PlainYearMonth);
-    for (const slot of [ISO_YEAR, ISO_MONTH, ISO_DAY]) {
-      const val1 = GetSlot(this, slot);
-      const val2 = GetSlot(other, slot);
-      if (val1 !== val2) return false;
+    // optimization: avoid calling getters if slots are equal
+    if (
+      GetSlot(this, ISO_YEAR) !== GetSlot(other, ISO_YEAR) ||
+      GetSlot(this, ISO_MONTH) !== GetSlot(other, ISO_MONTH) ||
+      GetSlot(this, ISO_DAY) !== GetSlot(other, ISO_DAY)
+    ) {
+      // Call getters; year/month may match even if reference year doesn't
+      for (const prop of ['year', 'month']) {
+        const val1 = this[prop];
+        const val2 = other[prop];
+        if (val1 !== val2) return false;
+      }
     }
     return ES.CalendarEquals(this, other);
   }
@@ -389,10 +413,19 @@ export class PlainYearMonth {
   static compare(one, two) {
     one = ES.ToTemporalYearMonth(one, PlainYearMonth);
     two = ES.ToTemporalYearMonth(two, PlainYearMonth);
-    for (const slot of [ISO_YEAR, ISO_MONTH, ISO_DAY]) {
-      const val1 = GetSlot(one, slot);
-      const val2 = GetSlot(two, slot);
-      if (val1 !== val2) return ES.ComparisonResult(val1 - val2);
+
+    // optimization: avoid calling getters if slots are equal
+    if (
+      GetSlot(one, ISO_YEAR) !== GetSlot(two, ISO_YEAR) ||
+      GetSlot(one, ISO_MONTH) !== GetSlot(two, ISO_MONTH) ||
+      GetSlot(one, ISO_DAY) !== GetSlot(two, ISO_DAY)
+    ) {
+      // Call getters; year/month may match even if reference year doesn't
+      for (const prop of ['year', 'month']) {
+        const val1 = one[prop];
+        const val2 = two[prop];
+        if (val1 !== val2) return ES.ComparisonResult(val1 - val2);
+      }
     }
     return ES.CalendarCompare(GetSlot(one, CALENDAR), GetSlot(two, CALENDAR));
   }

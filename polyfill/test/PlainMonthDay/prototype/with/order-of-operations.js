@@ -14,6 +14,7 @@ const expected = [
   "valueOf day",
   "get month",
   "valueOf month",
+  "get monthCode",
 ];
 const actual = [];
 const fields = {

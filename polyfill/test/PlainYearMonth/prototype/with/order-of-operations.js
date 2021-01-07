@@ -14,6 +14,9 @@ const expected = [
   "valueOf month",
   "get year",
   "valueOf year",
+  "get era",
+  "get eraYear",
+  "get monthCode",
 ];
 const actual = [];
 const fields = {

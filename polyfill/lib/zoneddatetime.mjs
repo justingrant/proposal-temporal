@@ -107,6 +107,22 @@ export class ZonedDateTime {
     if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
     return GetSlot(this, CALENDAR).era(dateTime(this));
   }
+  get eraYear() {
+    if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
+    return GetSlot(this, CALENDAR).eraYear(dateTime(this));
+  }
+  get monthCode() {
+    if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
+    return GetSlot(this, CALENDAR).monthCode(dateTime(this));
+  }
+  get regularMonth() {
+    if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
+    return GetSlot(this, CALENDAR).regularMonth(dateTime(this));
+  }
+  get monthType() {
+    if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
+    return GetSlot(this, CALENDAR).monthType(dateTime(this));
+  }
   get epochSeconds() {
     if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
     const value = GetSlot(this, EPOCHNANOSECONDS);

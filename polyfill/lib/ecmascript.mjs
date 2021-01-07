@@ -27,6 +27,7 @@ import ToNumber from 'es-abstract/2020/ToNumber.js';
 import ToPrimitive from 'es-abstract/2020/ToPrimitive.js';
 import ToString from 'es-abstract/2020/ToString.js';
 import Type from 'es-abstract/2020/Type.js';
+import GetOwnPropertyKeys from 'es-abstract/2020/GetOwnPropertyKeys.js';
 
 import { GetIntrinsic } from './intrinsicclass.mjs';
 import {
@@ -68,26 +69,29 @@ const NS_MAX = bigInt(86400).multiply(1e17);
 const YEAR_MIN = -271821;
 const YEAR_MAX = 275760;
 const BEFORE_FIRST_DST = bigInt(-388152).multiply(1e13); // 1847-01-01T00:00:00Z
-const BUILTIN_FIELDS = new Set([
-  'year',
-  'month',
-  'day',
-  'hour',
-  'minute',
-  'second',
-  'millisecond',
-  'microsecond',
-  'nanosecond',
-  'years',
-  'months',
-  'weeks',
-  'days',
-  'hours',
-  'minutes',
-  'seconds',
-  'milliseconds',
-  'microseconds',
-  'nanoseconds'
+const BUILTIN_FIELDS = new Map([
+  ['year', ToInteger],
+  ['month', ToInteger],
+  ['day', ToInteger],
+  ['hour', ToInteger],
+  ['minute', ToInteger],
+  ['second', ToInteger],
+  ['millisecond', ToInteger],
+  ['microsecond', ToInteger],
+  ['nanosecond', ToInteger],
+  ['years', ToInteger],
+  ['months', ToInteger],
+  ['weeks', ToInteger],
+  ['days', ToInteger],
+  ['hours', ToInteger],
+  ['minutes', ToInteger],
+  ['seconds', ToInteger],
+  ['milliseconds', ToInteger],
+  ['microseconds', ToInteger],
+  ['nanoseconds', ToInteger],
+  ['monthCode', ToString],
+  ['era', ToString],
+  ['eraYear', ToInteger]
 ]);
 
 import * as PARSE from './regex.mjs';
@@ -101,7 +105,8 @@ const ES2020 = {
   ToNumber,
   ToPrimitive,
   ToString,
-  Type
+  Type,
+  GetOwnPropertyKeys
 };
 
 export const ES = ObjectAssign({}, ES2020, {
@@ -406,8 +411,7 @@ export const ES = ObjectAssign({}, ES2020, {
     }
     return { year, month };
   },
-  RegulateMonthDay: (month, day, overflow) => {
-    const referenceISOYear = 1972;
+  RegulateMonthDay: (month, day, referenceISOYear, overflow) => {
     switch (overflow) {
       case 'reject':
         ES.RejectDate(referenceISOYear, month, day);
@@ -951,15 +955,20 @@ export const ES = ObjectAssign({}, ES2020, {
     if (validUnits.indexOf(unit1) > validUnits.indexOf(unit2)) return unit2;
     return unit1;
   },
-  ToPartialRecord: (bag, fields, cast = ES.ToInteger) => {
+  ToPartialRecord: (bag, fields, numberCast = ES.ToInteger) => {
     if (ES.Type(bag) !== 'Object') return false;
     let any;
     for (const property of fields) {
       const value = bag[property];
       if (value !== undefined) {
         any = any || {};
-        if (BUILTIN_FIELDS.has(property)) {
-          any[property] = cast(value);
+        let cast = BUILTIN_FIELDS.get(property);
+        if (cast) {
+          if (cast === ES.ToInteger) cast = numberCast;
+          const prim = ES.ToPrimitive(value);
+          if (prim !== undefined) {
+            any[property] = cast(prim);
+          }
         } else {
           any[property] = value;
         }
@@ -967,13 +976,18 @@ export const ES = ObjectAssign({}, ES2020, {
     }
     return any ? any : false;
   },
-  ToRecord: (bag, fields) => {
+  ToRecord: (bag, fields, someRequired = true) => {
     if (ES.Type(bag) !== 'Object') return false;
     const result = {};
     let any = false;
     for (const fieldRecord of fields) {
       const [property, defaultValue] = fieldRecord;
       let value = bag[property];
+      const cast = BUILTIN_FIELDS.get(property);
+      if (value !== undefined && cast) {
+        const prim = ES.ToPrimitive(value);
+        value = prim === undefined ? undefined : cast(prim);
+      }
       if (value === undefined) {
         if (fieldRecord.length === 1) {
           throw new TypeError(`required property '${property}' missing or undefined`);
@@ -982,39 +996,19 @@ export const ES = ObjectAssign({}, ES2020, {
       } else {
         any = true;
       }
-      if (BUILTIN_FIELDS.has(property)) {
-        result[property] = ES.ToInteger(value);
-      } else {
-        result[property] = value;
-      }
+      result[property] = value;
     }
-    if (!any) {
+    if (!any && someRequired) {
       throw new TypeError('no supported properties found');
     }
     return result;
   },
   // field access in the following operations is intentionally alphabetical
   ToTemporalDateFields: (bag, fieldNames) => {
-    const entries = [['day'], ['month'], ['year']];
-    // Add extra fields from the calendar at the end
-    fieldNames.forEach((fieldName) => {
-      if (!entries.some(([name]) => name === fieldName)) {
-        entries.push([fieldName, undefined]);
-      }
-    });
-    return ES.ToRecord(bag, entries);
-  },
-  ToTemporalDateTimeFields: (bag, fieldNames) => {
     const entries = [
-      ['day'],
-      ['hour', 0],
-      ['microsecond', 0],
-      ['millisecond', 0],
-      ['minute', 0],
-      ['month'],
-      ['nanosecond', 0],
-      ['second', 0],
-      ['year']
+      ['day', undefined],
+      ['month', undefined],
+      ['year', undefined]
     ];
     // Add extra fields from the calendar at the end
     fieldNames.forEach((fieldName) => {
@@ -1022,17 +1016,40 @@ export const ES = ObjectAssign({}, ES2020, {
         entries.push([fieldName, undefined]);
       }
     });
-    return ES.ToRecord(bag, entries);
+    return ES.ToRecord(bag, entries, false);
   },
-  ToTemporalMonthDayFields: (bag, fieldNames) => {
-    const entries = [['day'], ['month']];
+  ToTemporalDateTimeFields: (bag, fieldNames) => {
+    const entries = [
+      ['day', undefined],
+      ['hour', 0],
+      ['microsecond', 0],
+      ['millisecond', 0],
+      ['minute', 0],
+      ['month', undefined],
+      ['nanosecond', 0],
+      ['second', 0],
+      ['year', undefined]
+    ];
     // Add extra fields from the calendar at the end
     fieldNames.forEach((fieldName) => {
       if (!entries.some(([name]) => name === fieldName)) {
         entries.push([fieldName, undefined]);
       }
     });
-    return ES.ToRecord(bag, entries);
+    return ES.ToRecord(bag, entries, false);
+  },
+  ToTemporalMonthDayFields: (bag, fieldNames) => {
+    const entries = [
+      ['day', undefined],
+      ['month', undefined]
+    ];
+    // Add extra fields from the calendar at the end
+    fieldNames.forEach((fieldName) => {
+      if (!entries.some(([name]) => name === fieldName)) {
+        entries.push([fieldName, undefined]);
+      }
+    });
+    return ES.ToRecord(bag, entries, false);
   },
   ToTemporalTimeRecord: (bag) => {
     return ES.ToRecord(bag, [
@@ -1045,28 +1062,9 @@ export const ES = ObjectAssign({}, ES2020, {
     ]);
   },
   ToTemporalYearMonthFields: (bag, fieldNames) => {
-    const entries = [['month'], ['year']];
-    // Add extra fields from the calendar at the end
-    fieldNames.forEach((fieldName) => {
-      if (!entries.some(([name]) => name === fieldName)) {
-        entries.push([fieldName, undefined]);
-      }
-    });
-    return ES.ToRecord(bag, entries);
-  },
-  ToTemporalZonedDateTimeFields: (bag, fieldNames) => {
     const entries = [
-      ['day'],
-      ['hour', 0],
-      ['microsecond', 0],
-      ['millisecond', 0],
-      ['minute', 0],
-      ['month'],
-      ['nanosecond', 0],
-      ['offset', undefined],
-      ['second', 0],
-      ['timeZone'],
-      ['year']
+      ['month', undefined],
+      ['year', undefined]
     ];
     // Add extra fields from the calendar at the end
     fieldNames.forEach((fieldName) => {
@@ -1074,12 +1072,39 @@ export const ES = ObjectAssign({}, ES2020, {
         entries.push([fieldName, undefined]);
       }
     });
-    return ES.ToRecord(bag, entries);
+    return ES.ToRecord(bag, entries, false);
+  },
+  ToTemporalZonedDateTimeFields: (bag, fieldNames) => {
+    const entries = [
+      ['day', undefined],
+      ['hour', 0],
+      ['microsecond', 0],
+      ['millisecond', 0],
+      ['minute', 0],
+      ['month', undefined],
+      ['nanosecond', 0],
+      ['offset', undefined],
+      ['second', 0],
+      ['timeZone'],
+      ['year', undefined]
+    ];
+    // Add extra fields from the calendar at the end
+    fieldNames.forEach((fieldName) => {
+      if (!entries.some(([name]) => name === fieldName)) {
+        entries.push([fieldName, undefined]);
+      }
+    });
+    return ES.ToRecord(bag, entries, false);
   },
 
   ToTemporalDate: (item, constructor, overflow = 'constrain') => {
     if (ES.Type(item) === 'Object') {
       if (ES.IsTemporalDate(item)) return item;
+      if (ES.IsTemporalDateTime(item)) return ES.TemporalDateTimeToDate(item);
+      if (ES.IsTemporalZonedDateTime(item)) {
+        const dt = ES.GetTemporalDateTimeFor(GetSlot(item, TIME_ZONE), GetSlot(item, INSTANT), GetSlot(item, CALENDAR));
+        return ES.TemporalDateTimeToDate(dt);
+      }
       let calendar = item.calendar;
       if (calendar === undefined) calendar = ES.GetISO8601Calendar();
       calendar = ES.ToTemporalCalendar(calendar);
@@ -1117,6 +1142,9 @@ export const ES = ObjectAssign({}, ES2020, {
     let year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, calendar;
     if (ES.Type(item) === 'Object') {
       if (ES.IsTemporalDateTime(item)) return item;
+      if (ES.IsTemporalZonedDateTime(item)) {
+        return ES.GetTemporalDateTimeFor(GetSlot(item, TIME_ZONE), GetSlot(item, INSTANT), GetSlot(item, CALENDAR));
+      }
 
       calendar = item.calendar;
       if (calendar === undefined) calendar = ES.GetISO8601Calendar();
@@ -1222,6 +1250,15 @@ export const ES = ObjectAssign({}, ES2020, {
   ToTemporalMonthDay: (item, constructor, overflow = 'constrain') => {
     if (ES.Type(item) === 'Object') {
       if (ES.IsTemporalMonthDay(item)) return item;
+      if (HasSlot(item, ISO_YEAR, ISO_MONTH, ISO_DAY, CALENDAR)) {
+        const MonthDay = GetIntrinsic('%Temporal.PlainMonthDay%');
+        return new MonthDay(
+          GetSlot(item, ISO_MONTH),
+          GetSlot(item, ISO_DAY),
+          GetSlot(item, CALENDAR),
+          GetSlot(item, ISO_YEAR)
+        );
+      }
       let calendar = item.calendar;
       if (calendar === undefined) calendar = ES.GetISO8601Calendar();
       calendar = ES.ToTemporalCalendar(calendar);
@@ -1276,6 +1313,15 @@ export const ES = ObjectAssign({}, ES2020, {
   ToTemporalYearMonth: (item, constructor, overflow = 'constrain') => {
     if (ES.Type(item) === 'Object') {
       if (ES.IsTemporalYearMonth(item)) return item;
+      if (HasSlot(item, ISO_YEAR, ISO_MONTH, ISO_DAY, CALENDAR)) {
+        const YearMonth = GetIntrinsic('%Temporal.PlainYearMonth%');
+        return new YearMonth(
+          GetSlot(item, ISO_YEAR),
+          GetSlot(item, ISO_MONTH),
+          GetSlot(item, CALENDAR),
+          GetSlot(item, ISO_DAY)
+        );
+      }
       let calendar = item.calendar;
       if (calendar === undefined) calendar = ES.GetISO8601Calendar();
       calendar = ES.ToTemporalCalendar(calendar);

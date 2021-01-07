@@ -100,10 +100,18 @@ export class PlainMonthDay {
   equals(other) {
     if (!ES.IsTemporalMonthDay(this)) throw new TypeError('invalid receiver');
     other = ES.ToTemporalMonthDay(other, PlainMonthDay);
-    for (const slot of [ISO_MONTH, ISO_DAY, ISO_YEAR]) {
-      const val1 = GetSlot(this, slot);
-      const val2 = GetSlot(other, slot);
-      if (val1 !== val2) return false;
+    // optimization: avoid calling getters if slots are equal
+    if (
+      GetSlot(this, ISO_YEAR) !== GetSlot(other, ISO_YEAR) ||
+      GetSlot(this, ISO_MONTH) !== GetSlot(other, ISO_MONTH) ||
+      GetSlot(this, ISO_DAY) !== GetSlot(other, ISO_DAY)
+    ) {
+      // Call getters; month/day may match even if reference year doesn't
+      for (const prop of ['day', 'month']) {
+        const val1 = this[prop];
+        const val2 = other[prop];
+        if (val1 !== val2) return false;
+      }
     }
     return ES.CalendarEquals(this, other);
   }
