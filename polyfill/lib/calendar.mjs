@@ -355,7 +355,7 @@ impl['iso8601'] = {
 // proposal for ECMA-262. An implementation of these calendars is present in
 // this polyfill in order to validate the Temporal API and to get early feedback
 // about non-ISO calendars. However, non-ISO calendar implementation is subject
-// to change because these calendars will be specified as part of ECMA-402.
+// to change because these calendars are implementation-defined.
 
 /**
  * This prototype implementation of non-ISO calendars makes many repeated calls
@@ -435,6 +435,9 @@ function resolveNonLunisolarMonth(calendarDate) {
     const numberPart = monthCodeNumberPart(monthCode);
     if (month !== undefined && month !== numberPart) {
       throw new RangeError(`monthCode ${monthCode} and month ${month} must match if both are present`);
+    }
+    if (!/^1?[0-9]$/.test(monthCode)) {
+      throw new RangeError(`invalid monthCode: ${monthCode}. Expected: numeric string "1"-"12".`);
     }
     month = numberPart;
   }
@@ -540,7 +543,7 @@ const nonIsoHelperBase = {
           .toLowerCase();
       }
     }
-    const calendarDate = this.adjustCalendarDate(result, cache, true);
+    const calendarDate = this.adjustCalendarDate(result, cache, 'constrain', true);
     if (calendarDate.year === undefined) throw new RangeError(`Missing year converting ${JSON.stringify(isoDate)}`);
     if (calendarDate.month === undefined) throw new RangeError(`Missing month converting ${JSON.stringify(isoDate)}`);
     if (calendarDate.day === undefined) throw new RangeError(`Missing day converting ${JSON.stringify(isoDate)}`);
@@ -576,7 +579,7 @@ const nonIsoHelperBase = {
    * - no eras or a constant era defined in `.constantEra`
    * - non-lunisolar calendar (no leap months)
    * */
-  adjustCalendarDate(calendarDate /*, cache, fromLegacyDate = false*/) {
+  adjustCalendarDate(calendarDate /*, cache, overflow, fromLegacyDate = false */) {
     if (this.calendarType === 'lunisolar') throw new RangeError('Override required for lunisolar calendars');
     this.validateCalendarDate(calendarDate);
     let { month, year, eraYear, monthCode } = calendarDate;
@@ -607,7 +610,7 @@ const nonIsoHelperBase = {
   calendarToIsoDate(date, overflow = 'constrain', cache) {
     // First, normalize the calendar date to ensure that (year, month, day)
     // are all present, converting monthCode and eraYear if needed.
-    date = this.adjustCalendarDate(date, cache, false);
+    date = this.adjustCalendarDate(date, cache, overflow, false);
 
     // Fix obviously out-of-bounds values. Values that are valid generally, but
     // not in this particular year, will be handled lower below.
@@ -620,6 +623,29 @@ const nonIsoHelperBase = {
 
     // First, try to roughly guess the result
     let isoEstimate = this.estimateIsoDate({ year, month, day });
+    const calculateSameMonthResult = (diffDays) => {
+      // If the estimate is in the same year & month as the target, then we can
+      // calculate the result exactly and short-circuit any additional logic.
+      // This optimization assumes that months are continuous (no skipped days)
+      // so it breaks in the case of calendar changes like 1582's skipping of
+      // days in October in the Roman calendar. This is just a prototype
+      // implementation so this error is OK for now.
+      let testIsoEstimate = this.addDaysIso(isoEstimate, diffDays);
+      if (date.day > this.minimumMonthLength(date)) {
+        // There's a chance that the calendar date is out of range. Throw or
+        // constrain if so.
+        let testCalendarDate = this.isoToCalendarDate(testIsoEstimate, cache);
+        while (testCalendarDate.month !== month || testCalendarDate.year !== year) {
+          if (overflow === 'reject') {
+            throw new RangeError(`day ${day} does not exist in month ${month} of year ${year}`);
+          }
+          // Back up a day at a time until we're not hanging over the month end
+          testIsoEstimate = this.addDaysIso(testIsoEstimate, -1);
+          testCalendarDate = this.isoToCalendarDate(testIsoEstimate, cache);
+        }
+      }
+      return testIsoEstimate;
+    };
     let roundtripEstimate = this.isoToCalendarDate(isoEstimate, cache);
     let diff = simpleDateDiff(date, roundtripEstimate);
     const diffTotalDaysEstimate = diff.years * 365 + diff.months * 30 + diff.days;
@@ -628,13 +654,7 @@ const nonIsoHelperBase = {
     diff = simpleDateDiff(date, roundtripEstimate);
     let sign = 0;
     if (diff.years === 0 && diff.months === 0) {
-      // If the estimate is in the same year & month as the target, then we
-      // can calculate the result exactly and short-circuit any additional
-      // logic. This optimization assumes that months are continuous (no
-      // skipped days) so it breaks in the case of calendar changes like
-      // 1582's skipping of days in October in the Roman calendar. This is
-      // just a prototype implementation so this error is OK for now.
-      isoEstimate = this.addDaysIso(isoEstimate, diff.days);
+      isoEstimate = calculateSameMonthResult(diff.days);
     } else {
       sign = this.compareCalendarDates(date, roundtripEstimate);
     }
@@ -651,8 +671,7 @@ const nonIsoHelperBase = {
       if (sign) {
         diff = simpleDateDiff(date, roundtripEstimate);
         if (diff.years === 0 && diff.months === 0) {
-          // Exact year/month match! See comment above for caveats.
-          isoEstimate = this.addDaysIso(isoEstimate, diff.days);
+          isoEstimate = calculateSameMonthResult(diff.days);
           sign = 0; // signal the loop condition that there's a match.
         } else if (oldSign && sign !== oldSign) {
           if (increment > 1) {
@@ -850,7 +869,8 @@ const nonIsoHelperBase = {
     );
     return duration.days;
   },
-  // The short era format works for all calendars except Japanese
+  // The short era format works for all calendars except Japanese, which will
+  // override.
   eraLength: 'short',
   // All built-in calendars except Chinese/Dangi and Hebrew use an era
   hasEra: true,
@@ -926,9 +946,11 @@ const helperHebrew = ObjectAssign({}, nonIsoHelperBase, {
   calendarType: 'lunisolar',
   inLeapYear(calendarDate /*, cache */) {
     const { year } = calendarDate;
-    // TODO: this isn't really a leap year as much as it's a year with an intercalary month.
-    // Is there another calendar with both intercalary months *and* leap days?  If so, may need
-    // to split into two methods.
+    // FYI: In addition to adding a month in leap years, the Hebrew calendar
+    // also has per-year changes to the number of days of Heshvan and Kislev.
+    // Given that these can be calculated by counting the number of days in
+    // those months, I assume that these DO NOT need to be exposed as
+    // Hebrew-only prototype fields or methods.
     return (7 * year + 1) % 19 < 7;
   },
   monthsInYear(calendarDate) {
@@ -993,7 +1015,7 @@ const helperHebrew = ObjectAssign({}, nonIsoHelperBase, {
     if (monthCode === undefined) throw new TypeError('missing monthCode');
     return monthCode === '5L' ? '6' : +monthCode;
   },
-  adjustCalendarDate(calendarDate, cache, fromLegacyDate = false) {
+  adjustCalendarDate(calendarDate, cache, overflow = 'constrain', fromLegacyDate = false) {
     // The current Intl implementation skips index 6 (Adar I) in non-leap years
     let { year, eraYear, month, monthCode, day, monthExtra } = calendarDate;
     if (year === undefined) year = eraYear;
@@ -1024,6 +1046,15 @@ const helperHebrew = ObjectAssign({}, nonIsoHelperBase, {
         if (monthCode.endsWith('L')) {
           if (monthCode !== '5L') throw new RangeError(`Hebrew leap month must have monthCode 5L, not ${monthCode}`);
           month = 6;
+          if (!this.inLeapYear({ year })) {
+            if (overflow === 'reject') {
+              throw new RangeError(`Hebrew monthCode 5L is invalid in year ${year} which is not a leap year`);
+            } else {
+              // constrain to last day of previous month (Av)
+              month = 5;
+              day = 30;
+            }
+          }
         } else {
           month = monthCodeNumberPart(monthCode);
           // if leap month is before this one, the month index is one more than the month code
@@ -1117,9 +1148,9 @@ const helperIndian = ObjectAssign({}, nonIsoHelperBase, {
   constantEra: 'saka',
   estimateIsoDate(calendarDate) {
     const { year } = this.adjustCalendarDate(calendarDate);
-    // TODO: the Indian calendar has a 1:1 correspondence to the ISO calendar.
-    // Indian months always start at the same well-known Gregorian month and
-    // day. So this conversion could be easy and much faster. See
+    // The Indian calendar has a 1:1 correspondence to the ISO calendar. Indian
+    // months always start at the same well-known Gregorian month and day. So
+    // this conversion could be easy and much faster. See
     // https://en.wikipedia.org/wiki/Indian_national_calendar
     return { year: year + 78, month: 1, day: 1 };
   }
@@ -1296,7 +1327,7 @@ const makeHelperGregorian = (id, originalEras) => {
       }
       return { ...calendarDate, year, eraYear, era };
     },
-    adjustCalendarDate(calendarDate /*, cache, fromLegacyDate = false*/) {
+    adjustCalendarDate(calendarDate /*, cache, overflow, fromLegacyDate = false */) {
       // Because this is not a lunisolar calendar, it's safe to convert monthCode to a number
       const { month, monthCode } = calendarDate;
       if (month === undefined) calendarDate = { ...calendarDate, month: monthCodeNumberPart(monthCode) };
@@ -1457,7 +1488,7 @@ const helperChinese = ObjectAssign({}, nonIsoHelperBase, {
       const isoStringFeb1 = toUtcIsoDateString({ isoYear, isoMonth: 2, isoDay: 1 });
       const legacyDate = new Date(isoStringFeb1);
       // Now add the requested number of days, which may wrap to the next month.
-      legacyDate.setUTCDate(daysPastFeb1 + 1);
+      legacyDate.setUTCDate(daysPastFeb1);
       const newYearGuess = dateTimeFormat.formatToParts(legacyDate);
       const calendarMonthString = newYearGuess.find((tv) => tv.type === 'month').value;
       const calendarDay = +newYearGuess.find((tv) => tv.type === 'day').value;
@@ -1465,36 +1496,45 @@ const helperChinese = ObjectAssign({}, nonIsoHelperBase, {
       return { calendarMonthString, calendarDay, calendarYearToVerify };
     };
 
-    // First, find a date close to Chinese new year. Feb 17 will either be in
+    // First, find a date close to Chinese New Year. Feb 17 will either be in
     // the first month or near the end of the last month of the previous year.
-    let isoDay = 17;
-    let { calendarMonthString, calendarDay, calendarYearToVerify } = getCalendarDate(calendarYear, isoDay);
+    let isoDaysDelta = 17;
+    let { calendarMonthString, calendarDay, calendarYearToVerify } = getCalendarDate(calendarYear, isoDaysDelta);
 
     // If we didn't guess the first month correctly, add (almost in some months)
     // a lunar month
     if (calendarMonthString !== '1') {
-      isoDay += 29;
-      ({ calendarMonthString, calendarDay } = getCalendarDate(calendarYear, isoDay));
+      isoDaysDelta += 29;
+      ({ calendarMonthString, calendarDay } = getCalendarDate(calendarYear, isoDaysDelta));
     }
 
     // Now back up to near the start of the first month, but not too near that
     // off-by-one issues matter.
-    isoDay -= calendarDay - 5;
+    isoDaysDelta -= calendarDay - 5;
     const result = {};
     let monthIndex = 1;
+    let oldCalendarDay;
+    let oldMonthString;
     let done = false;
     do {
-      ({ calendarMonthString, calendarDay, calendarYearToVerify } = getCalendarDate(calendarYear, isoDay));
+      ({ calendarMonthString, calendarDay, calendarYearToVerify } = getCalendarDate(calendarYear, isoDaysDelta));
+      if (oldCalendarDay) {
+        result[oldMonthString].daysInMonth = oldCalendarDay + 30 - calendarDay;
+      }
       if (calendarYearToVerify !== calendarYear) {
         done = true;
       } else {
-        result[calendarMonthString] = monthIndex++;
+        result[calendarMonthString] = { monthIndex: monthIndex++ };
         // Move to the next month. Because months are sometimes 29 days, the day of the
         // calendar month will move forward slowly but not enough to flip over to a new
         // month before the loop ends at 12-13 months.
-        isoDay += 30;
+        isoDaysDelta += 30;
       }
+      oldCalendarDay = calendarDay;
+      oldMonthString = calendarMonthString;
     } while (!done);
+    result[oldMonthString].daysInMonth = oldCalendarDay + 30 - calendarDay;
+
     cache.set(key, result);
     return result;
   },
@@ -1502,7 +1542,7 @@ const helperChinese = ObjectAssign({}, nonIsoHelperBase, {
     const { year } = calendarDate;
     return { year, month: 1, day: 1 };
   },
-  adjustCalendarDate(calendarDate, cache, fromLegacyDate = false) {
+  adjustCalendarDate(calendarDate, cache, overflow = 'constrain', fromLegacyDate = false) {
     let { year, month, monthExtra, day, monthCode, eraYear } = calendarDate;
     if (fromLegacyDate) {
       // Legacy Date output returns a string that's an integer with an optional
@@ -1513,8 +1553,9 @@ const helperChinese = ObjectAssign({}, nonIsoHelperBase, {
       const monthCode = monthExtra === undefined ? `${month}` : `${month}L`;
       const monthString = `${month}${monthExtra || ''}`;
       const months = this.getMonthList(year, cache);
-      month = months[monthString];
-      if (month === undefined) throw new RangeError(`Unmatched month ${monthString} in Chinese year ${year}`);
+      const monthInfo = months[monthString];
+      if (monthInfo === undefined) throw new RangeError(`Unmatched month ${monthString} in Chinese year ${year}`);
+      month = monthInfo.monthIndex;
       return { year, month, day, era: undefined, eraYear, monthCode };
     } else {
       // When called without input coming from legacy Date output,
@@ -1524,11 +1565,27 @@ const helperChinese = ObjectAssign({}, nonIsoHelperBase, {
       if (eraYear === undefined) eraYear = year;
       if (month === undefined) {
         const months = this.getMonthList(year, cache);
-        month = months[monthCode.replace('L', 'bis')];
-        if (month === undefined) throw new RangeError(`Unmatched month ${monthCode} in Chinese year ${year}`);
+        let monthInfo = months[monthCode.replace('L', 'bis')];
+        month = monthInfo && monthInfo.monthIndex;
+        // If this leap month isn't present in this year, constrain down to the last day of the previous month.
+        if (
+          month === undefined &&
+          monthCode.endsWith('L') &&
+          !['1L', '12L', '13L'].includes(monthCode) &&
+          overflow === 'constrain'
+        ) {
+          const withoutL = monthCode.slice(0, -1);
+          monthInfo = months[withoutL];
+          if (monthInfo) {
+            ({ daysInMonth: day, monthIndex: month } = monthInfo);
+          }
+        }
+        if (month === undefined) {
+          throw new RangeError(`Unmatched month ${monthCode} in Chinese year ${year}`);
+        }
       }
       if (monthCode === undefined) monthCode = +month;
-      return { ...calendarDate, year, eraYear, month, monthCode };
+      return { ...calendarDate, year, eraYear, month, monthCode, day };
     }
   },
   // All built-in calendars except Chinese/Dangi and Hebrew use an era
@@ -1728,8 +1785,8 @@ const nonIsoGeneralImpl = {
     const calendarDate = this.helper.temporalToCalendarDate(date, cache);
 
     // Easy case: if the helper knows the length without any heavy calculation.
-    const max = this.helper.maximumMonthLength(calendarDate, cache);
-    const min = this.helper.minimumMonthLength(calendarDate, cache);
+    const max = this.helper.maximumMonthLength(calendarDate);
+    const min = this.helper.minimumMonthLength(calendarDate);
     if (max === min) return max;
 
     // The harder case is where months vary every year, e.g. islamic calendars.

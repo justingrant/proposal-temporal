@@ -441,7 +441,7 @@ describe('Intl', () => {
       year1Content = ['iso8601', 'buddhist', 'chinese', 'coptic', 'dangi', 'ethioaa', 'ethiopic', 'hebrew',
           'indian', 'islamic', 'islamic-umalqura', 'islamic-tbla', 'islamic-civil', 'islamic-rgsa', 'islamicc',
           'japanese', 'persian', 'roc'].map((id) => {
-        const end = Temporal.PlainDate.from({ year: 2000, month: 1, day: 1, calendar: id }).add({months: 20});
+        const end = Temporal.PlainDate.from({ year: 2000, month: 1, day: 1, calendar: id }).add({months: 6});
         const { year, month, day, monthCode, eraYear, era } = end;
         const quotedId = id.includes('-') ? `'${id}'` : id;
         return `  ${quotedId}: { year: ${year}, month: ${month}, day: ${day}, monthCode: '${monthCode
@@ -531,8 +531,101 @@ describe('Intl', () => {
         });
       }
     }
+    /*
+      // content for tests below
+      ['iso8601', 'buddhist', 'chinese', 'coptic', 'dangi', 'ethioaa', 'ethiopic', 'hebrew',
+                'indian', 'islamic', 'islamic-umalqura', 'islamic-tbla', 'islamic-civil', 'islamic-rgsa', 'islamicc',
+                'japanese', 'persian', 'roc'].map((id) => {
+        const date = Temporal.PlainDate.from({ year: 2001, month: 1, day: 1, calendar: id });
+        const monthsInYear = date.monthsInYear;
+        const daysInMonthArray = [];
+        let { year, inLeapYear: leap } = date;
+        for (let i = 1; i <= monthsInYear; i++) {
+          const monthStart = date.with({month: i});
+          const { monthCode, daysInMonth } = monthStart;
+          daysInMonthArray.push(monthStart.daysInMonth);
+          if (monthStart.monthCode.endsWith('L')) leap = `'${monthCode}'`;
+        }
+        const quotedId = id.includes('-') ? `'${id}'` : id;
+        return `${quotedId}: { year: ${year}, leap: ${leap}, days: [${daysInMonthArray.join(', ')}] }`;
+      }).join(',\n');
+    */
+    const daysInMonthCases = {
+      iso8601: { year: 2001, leap: false, days: [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] },
+      buddhist: { year: 2001, leap: false, days: [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] },
+      chinese: { year: 2001, leap: '4L', days: [30, 30, 29, 30, 29, 30, 29, 29, 30, 29, 30, 29, 30] },
+      coptic: { year: 2001, leap: false, days: [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 5] },
+      dangi: { year: 2001, leap: '4L', days: [30, 30, 30, 29, 29, 30, 29, 29, 30, 29, 30, 29, 30] },
+      ethioaa: { year: 2001, leap: false, days: [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 5] },
+      ethiopic: { year: 2001, leap: false, days: [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 5] },
+      hebrew: { year: 2001, leap: '5L', days: [30, 30, 30, 29, 30, 30, 29, 30, 29, 30, 29, 30, 29] },
+      indian: { year: 2001, leap: false, days: [30, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 30] },
+      islamic: { year: 2001, leap: false, days: [29, 30, 29, 29, 30, 29, 30, 30, 29, 30, 30, 29] },
+      'islamic-umalqura': { year: 2001, leap: true, days: [30, 29, 30, 29, 30, 29, 30, 29, 30, 29, 30, 30] },
+      'islamic-tbla': { year: 2001, leap: true, days: [30, 29, 30, 29, 30, 29, 30, 29, 30, 29, 30, 30] },
+      'islamic-civil': { year: 2001, leap: true, days: [30, 29, 30, 29, 30, 29, 30, 29, 30, 29, 30, 30] },
+      'islamic-rgsa': { year: 2001, leap: false, days: [29, 30, 29, 29, 30, 29, 30, 30, 29, 30, 30, 29] },
+      islamicc: { year: 2001, leap: true, days: [30, 29, 30, 29, 30, 29, 30, 29, 30, 29, 30, 30] },
+      japanese: { year: 2001, leap: true, days: [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] },
+      persian: { year: 2001, leap: false, days: [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29] },
+      roc: { year: 2001, leap: true, days: [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] }
+    };
+    for (let id of calendars) {
+      let { year, leap, days } = daysInMonthCases[id];
+      let date = Temporal.PlainDate.from({ year, month: 1, day: 1, calendar: id });
+      it(`${id} leap year check for year ${year}`, () => {
+        if (typeof leap === 'boolean') {
+          equal(date.inLeapYear, leap);
+        } else {
+          equal(date.inLeapYear, true);
+          const leapMonth = date.with({ monthCode: leap });
+          equal(leapMonth.monthType, 'leap');
+        }
+      });
+      it(`${id} months check for year ${year}`, () => {
+        const { monthsInYear } = date;
+        equal(monthsInYear, days.length);
+        // This loop counts backwards so we'll have the right test for the month
+        // before a leap month in lunisolar calendars.
+        for (let i = monthsInYear, leapMonthIndex = undefined; i >= 1; i--) {
+          const monthStart = date.with({ month: i });
+          const { month, monthCode, daysInMonth } = monthStart;
+          equal(
+            `${id} month ${i} (code ${monthCode}) days: ${daysInMonth}`,
+            `${id} month ${i} (code ${monthCode}) days: ${days[i - 1]}`
+          );
+          if (monthCode.endsWith('L')) {
+            equal(date.with({ monthCode }).monthCode, monthCode);
+            leapMonthIndex = i;
+          } else {
+            if (leapMonthIndex && i === leapMonthIndex - 1) {
+              const inLeapMonth = monthStart.with({ monthCode: `${month}L` });
+              equal(inLeapMonth.monthCode, `${monthCode}L`);
+            } else {
+              throws(() => monthStart.with({ monthCode: `${month}L` }, { overflow: 'reject' }), RangeError);
+              if (['chinese', 'dangi'].includes(id)) {
+                if (i === 1 || i === 12 || i === 13) {
+                  throws(() => monthStart.with({ monthCode: `${month}L` }), RangeError);
+                } else {
+                  // verify that non-leap "L" months are constrained down to last day of previous month
+                  const fakeL = monthStart.with({ monthCode: `${month}L`, day: 5 });
+                  equal(fakeL.monthCode, `${month}`);
+                  equal(fakeL.day, fakeL.daysInMonth);
+                }
+              }
+            }
+            if (!['chinese', 'dangi', 'hebrew'].includes(id)) {
+              // leap months should only be allowed for lunisolar calendars
+              throws(() => monthStart.with({ monthCode: `${month}L` }), RangeError);
+            }
+          }
+          throws(() => monthStart.with({ day: daysInMonth + 1 }, { overflow: 'reject' }), RangeError);
+          const oneDayPastMonthEnd = monthStart.with({ day: daysInMonth + 1 });
+          equal(oneDayPastMonthEnd.day, daysInMonth);
+        }
+      });
+    }
   });
-
   describe('DateTimeFormat', () => {
     describe('supportedLocalesOf', () => {
       it('should return an Array', () => assert(Array.isArray(Intl.DateTimeFormat.supportedLocalesOf())));
