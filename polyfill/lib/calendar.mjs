@@ -1166,6 +1166,11 @@ const helperIndian = ObjectAssign({}, nonIsoHelperBase, {
  *   // name of the era
  *   name: string;
  *
+ *   // alternate name of the era used in old versions of ICU data
+ *   // format is `era{n}` where n is the zero-based index of the era
+ *   // with the oldest era being 0.
+ *   genericName: string;
+ *
  *   // Signed calendar year where this era begins. Will be
  *   // 1 (or 0 for zero-based eras) for the anchor era. In
  *   // cases where an era starts mid-year (e.g. Japanese)
@@ -1244,6 +1249,13 @@ function adjustEras(eras) {
     if (lastEraReversed !== eras[eras.length - 2]) throw new RangeError('Invalid era data: invalid reverse-sign era');
   }
 
+  // Finally, add a "genericName" property in the format "era{n} where `n` is
+  // zero-based index, with the oldest era being zero. This format is used by
+  // older versions of ICU data.
+  eras.forEach((e, i) => {
+    e.genericName = `era${eras.length - 1 - i}`;
+  });
+
   return { eras, anchorEra: anchorEra || eras[0] };
 }
 
@@ -1311,7 +1323,8 @@ const makeHelperGregorian = (id, originalEras) => {
         checkField('era', era);
         checkField('eraYear', eraYear);
       } else if (eraYear != null) {
-        const matchingEra = era === undefined ? this.anchorEra : this.eras.find((e) => e.name === era);
+        const matchingEra =
+          era === undefined ? this.anchorEra : this.eras.find((e) => e.name === era || e.genericName === era);
         if (!matchingEra) throw new RangeError(`Era ${era} (ISO year ${eraYear}) was not matched by any era`);
         if (eraYear < 1 && matchingEra.reverseOf) {
           throw new RangeError(`Years in ${era} era must be positive, not ${year}`);
