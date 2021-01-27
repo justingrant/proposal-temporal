@@ -489,8 +489,7 @@ const nonIsoHelperBase = {
     const cached = cache.get(key);
     if (cached) return cached;
 
-    const dateTimeFormat = new Intl.DateTimeFormat('en-US', {
-      calendar: this.id,
+    const dateTimeFormat = new Intl.DateTimeFormat(`en-US-u-ca-${this.id}`, {
       day: 'numeric',
       month: 'numeric',
       year: 'numeric',
@@ -527,7 +526,7 @@ const nonIsoHelperBase = {
         if (matches[2]) result.monthExtra = matches[2];
       }
       if (type === 'day') result.day = +value;
-      if (type === 'era' && value != null && value !== '') {
+      if (this.hasEra && type === 'era' && value != null && value !== '') {
         // The convention for Temporal era values is lowercase, so following
         // that convention in this prototype. Punctuation is removed, accented
         // letters are normalized, and spaces are replaced with dashes.
@@ -1488,8 +1487,7 @@ const helperChinese = ObjectAssign({}, nonIsoHelperBase, {
     const key = JSON.stringify({ func: 'getMonthList', calendarYear, id: this.id });
     const cached = cache.get(key);
     if (cached) return cached;
-    const dateTimeFormat = new Intl.DateTimeFormat('en-US', {
-      calendar: this.id,
+    const dateTimeFormat = new Intl.DateTimeFormat(`en-US-u-ca-${this.id}`, {
       day: 'numeric',
       month: 'numeric',
       year: 'numeric',
