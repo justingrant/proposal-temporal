@@ -256,8 +256,6 @@
     };
   }
 
-  var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
-
   function createCommonjsModule(fn, basedir, module) {
   	return module = {
   		path: basedir,
@@ -1743,7 +1741,7 @@
 
   	var symVal = 42;
   	obj[sym] = symVal;
-  	for (sym in obj) { return false; } // eslint-disable-line no-restricted-syntax
+  	for (sym in obj) { return false; } // eslint-disable-line no-restricted-syntax, no-unreachable-loop
   	if (typeof Object.keys === 'function' && Object.keys(obj).length !== 0) { return false; }
 
   	if (typeof Object.getOwnPropertyNames === 'function' && Object.getOwnPropertyNames(obj).length !== 0) { return false; }
@@ -1761,10 +1759,10 @@
   	return true;
   };
 
-  var origSymbol = commonjsGlobal.Symbol;
+  var origSymbol = typeof Symbol !== 'undefined' && Symbol;
 
 
-  var hasSymbols = function hasNativeSymbols() {
+  var hasSymbols$2 = function hasNativeSymbols() {
   	if (typeof origSymbol !== 'function') { return false; }
   	if (typeof Symbol !== 'function') { return false; }
   	if (typeof origSymbol('foo') !== 'symbol') { return false; }
@@ -1777,12 +1775,12 @@
 
   var ERROR_MESSAGE = 'Function.prototype.bind called on incompatible ';
   var slice = Array.prototype.slice;
-  var toStr = Object.prototype.toString;
+  var toStr$4 = Object.prototype.toString;
   var funcType = '[object Function]';
 
   var implementation = function bind(that) {
       var target = this;
-      if (typeof target !== 'function' || toStr.call(target) !== funcType) {
+      if (typeof target !== 'function' || toStr$4.call(target) !== funcType) {
           throw new TypeError(ERROR_MESSAGE + target);
       }
       var args = slice.call(arguments, 1);
@@ -1830,9 +1828,9 @@
 
   var undefined$1;
 
-  var $SyntaxError = SyntaxError;
+  var $SyntaxError$1 = SyntaxError;
   var $Function = Function;
-  var $TypeError = TypeError;
+  var $TypeError$b = TypeError;
 
   // eslint-disable-next-line consistent-return
   var getEvalledConstructor = function (expressionSyntax) {
@@ -1851,7 +1849,7 @@
   }
 
   var throwTypeError = function () {
-  	throw new $TypeError();
+  	throw new $TypeError$b();
   };
   var ThrowTypeError = $gOPD
   	? (function () {
@@ -1870,7 +1868,7 @@
   	}())
   	: throwTypeError;
 
-  var hasSymbols$1 = hasSymbols();
+  var hasSymbols$1 = hasSymbols$2();
 
   var getProto = Object.getPrototypeOf || function (x) { return x.__proto__; }; // eslint-disable-line no-proto
 
@@ -1878,7 +1876,7 @@
 
   var TypedArray = typeof Uint8Array === 'undefined' ? undefined$1 : getProto(Uint8Array);
 
-  var INTRINSICS = {
+  var INTRINSICS$1 = {
   	'%AggregateError%': typeof AggregateError === 'undefined' ? undefined$1 : AggregateError,
   	'%Array%': Array,
   	'%ArrayBuffer%': typeof ArrayBuffer === 'undefined' ? undefined$1 : ArrayBuffer,
@@ -1931,10 +1929,10 @@
   	'%String%': String,
   	'%StringIteratorPrototype%': hasSymbols$1 ? getProto(''[Symbol.iterator]()) : undefined$1,
   	'%Symbol%': hasSymbols$1 ? Symbol : undefined$1,
-  	'%SyntaxError%': $SyntaxError,
+  	'%SyntaxError%': $SyntaxError$1,
   	'%ThrowTypeError%': ThrowTypeError,
   	'%TypedArray%': TypedArray,
-  	'%TypeError%': $TypeError,
+  	'%TypeError%': $TypeError$b,
   	'%Uint8Array%': typeof Uint8Array === 'undefined' ? undefined$1 : Uint8Array,
   	'%Uint8ClampedArray%': typeof Uint8ClampedArray === 'undefined' ? undefined$1 : Uint8ClampedArray,
   	'%Uint16Array%': typeof Uint16Array === 'undefined' ? undefined$1 : Uint16Array,
@@ -1965,7 +1963,7 @@
   		}
   	}
 
-  	INTRINSICS[name] = value;
+  	INTRINSICS$1[name] = value;
 
   	return value;
   };
@@ -2028,23 +2026,23 @@
 
   var $concat = functionBind.call(Function.call, Array.prototype.concat);
   var $spliceApply = functionBind.call(Function.apply, Array.prototype.splice);
-  var $replace = functionBind.call(Function.call, String.prototype.replace);
-  var $strSlice = functionBind.call(Function.call, String.prototype.slice);
+  var $replace$1 = functionBind.call(Function.call, String.prototype.replace);
+  var $strSlice$1 = functionBind.call(Function.call, String.prototype.slice);
 
   /* adapted from https://github.com/lodash/lodash/blob/4.17.15/dist/lodash.js#L6735-L6744 */
   var rePropName = /[^%.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|%$))/g;
   var reEscapeChar = /\\(\\)?/g; /** Used to match backslashes in property paths. */
   var stringToPath = function stringToPath(string) {
-  	var first = $strSlice(string, 0, 1);
-  	var last = $strSlice(string, -1);
+  	var first = $strSlice$1(string, 0, 1);
+  	var last = $strSlice$1(string, -1);
   	if (first === '%' && last !== '%') {
-  		throw new $SyntaxError('invalid intrinsic syntax, expected closing `%`');
+  		throw new $SyntaxError$1('invalid intrinsic syntax, expected closing `%`');
   	} else if (last === '%' && first !== '%') {
-  		throw new $SyntaxError('invalid intrinsic syntax, expected opening `%`');
+  		throw new $SyntaxError$1('invalid intrinsic syntax, expected opening `%`');
   	}
   	var result = [];
-  	$replace(string, rePropName, function (match, number, quote, subString) {
-  		result[result.length] = quote ? $replace(subString, reEscapeChar, '$1') : number || match;
+  	$replace$1(string, rePropName, function (match, number, quote, subString) {
+  		result[result.length] = quote ? $replace$1(subString, reEscapeChar, '$1') : number || match;
   	});
   	return result;
   };
@@ -2058,13 +2056,13 @@
   		intrinsicName = '%' + alias[0] + '%';
   	}
 
-  	if (src(INTRINSICS, intrinsicName)) {
-  		var value = INTRINSICS[intrinsicName];
+  	if (src(INTRINSICS$1, intrinsicName)) {
+  		var value = INTRINSICS$1[intrinsicName];
   		if (value === needsEval) {
   			value = doEval(intrinsicName);
   		}
   		if (typeof value === 'undefined' && !allowMissing) {
-  			throw new $TypeError('intrinsic ' + name + ' exists, but is not available. Please file an issue!');
+  			throw new $TypeError$b('intrinsic ' + name + ' exists, but is not available. Please file an issue!');
   		}
 
   		return {
@@ -2074,15 +2072,15 @@
   		};
   	}
 
-  	throw new $SyntaxError('intrinsic ' + name + ' does not exist!');
+  	throw new $SyntaxError$1('intrinsic ' + name + ' does not exist!');
   };
 
   var getIntrinsic = function GetIntrinsic(name, allowMissing) {
   	if (typeof name !== 'string' || name.length === 0) {
-  		throw new $TypeError('intrinsic name must be a non-empty string');
+  		throw new $TypeError$b('intrinsic name must be a non-empty string');
   	}
   	if (arguments.length > 1 && typeof allowMissing !== 'boolean') {
-  		throw new $TypeError('"allowMissing" argument must be a boolean');
+  		throw new $TypeError$b('"allowMissing" argument must be a boolean');
   	}
 
   	var parts = stringToPath(name);
@@ -2101,8 +2099,8 @@
 
   	for (var i = 1, isOwn = true; i < parts.length; i += 1) {
   		var part = parts[i];
-  		var first = $strSlice(part, 0, 1);
-  		var last = $strSlice(part, -1);
+  		var first = $strSlice$1(part, 0, 1);
+  		var last = $strSlice$1(part, -1);
   		if (
   			(
   				(first === '"' || first === "'" || first === '`')
@@ -2110,7 +2108,7 @@
   			)
   			&& first !== last
   		) {
-  			throw new $SyntaxError('property names with quotes must have matching quotes');
+  			throw new $SyntaxError$1('property names with quotes must have matching quotes');
   		}
   		if (part === 'constructor' || !isOwn) {
   			skipFurtherCaching = true;
@@ -2119,12 +2117,12 @@
   		intrinsicBaseName += '.' + part;
   		intrinsicRealName = '%' + intrinsicBaseName + '%';
 
-  		if (src(INTRINSICS, intrinsicRealName)) {
-  			value = INTRINSICS[intrinsicRealName];
+  		if (src(INTRINSICS$1, intrinsicRealName)) {
+  			value = INTRINSICS$1[intrinsicRealName];
   		} else if (value != null) {
   			if (!(part in value)) {
   				if (!allowMissing) {
-  					throw new $TypeError('base intrinsic for ' + name + ' exists, but the property is not available.');
+  					throw new $TypeError$b('base intrinsic for ' + name + ' exists, but the property is not available.');
   				}
   				return void undefined$1;
   			}
@@ -2150,7 +2148,7 @@
   			}
 
   			if (isOwn && !skipFurtherCaching) {
-  				INTRINSICS[intrinsicRealName] = value;
+  				INTRINSICS$1[intrinsicRealName] = value;
   			}
   		}
   	}
@@ -2216,20 +2214,210 @@
   	return intrinsic;
   };
 
+  var $Array = getIntrinsic('%Array%');
+
+  // eslint-disable-next-line global-require
+  var toStr$3 = !$Array.isArray && callBound('Object.prototype.toString');
+
+  // https://ecma-international.org/ecma-262/6.0/#sec-isarray
+
+  var IsArray = $Array.isArray || function IsArray(argument) {
+  	return toStr$3(argument) === '[object Array]';
+  };
+
+  var $TypeError$a = getIntrinsic('%TypeError%');
+
+
+
   var $apply = getIntrinsic('%Reflect.apply%', true) || callBound('%Function.prototype.apply%');
 
   // https://ecma-international.org/ecma-262/6.0/#sec-call
 
   var Call = function Call(F, V) {
-  	var args = arguments.length > 2 ? arguments[2] : [];
-  	return $apply(F, V, args);
+  	var argumentsList = arguments.length > 2 ? arguments[2] : [];
+  	if (!IsArray(argumentsList)) {
+  		throw new $TypeError$a('Assertion failed: optional `argumentsList`, if provided, must be a List');
+  	}
+  	return $apply(F, V, argumentsList);
+  };
+
+  // https://ecma-international.org/ecma-262/6.0/#sec-ispropertykey
+
+  var IsPropertyKey = function IsPropertyKey(argument) {
+  	return typeof argument === 'string' || typeof argument === 'symbol';
+  };
+
+  var $TypeError$9 = getIntrinsic('%TypeError%');
+
+  // http://262.ecma-international.org/5.1/#sec-9.10
+
+  var CheckObjectCoercible = function CheckObjectCoercible(value, optMessage) {
+  	if (value == null) {
+  		throw new $TypeError$9(optMessage || ('Cannot call method on ' + value));
+  	}
+  	return value;
+  };
+
+  var RequireObjectCoercible = CheckObjectCoercible;
+
+  var $Object = getIntrinsic('%Object%');
+
+
+
+  // https://ecma-international.org/ecma-262/6.0/#sec-toobject
+
+  var ToObject = function ToObject(value) {
+  	RequireObjectCoercible(value);
+  	return $Object(value);
+  };
+
+  var $TypeError$8 = getIntrinsic('%TypeError%');
+
+
+
+
+  /**
+   * 7.3.2 GetV (V, P)
+   * 1. Assert: IsPropertyKey(P) is true.
+   * 2. Let O be ToObject(V).
+   * 3. ReturnIfAbrupt(O).
+   * 4. Return O.[[Get]](P, V).
+   */
+
+  var GetV = function GetV(V, P) {
+  	// 7.3.2.1
+  	if (!IsPropertyKey(P)) {
+  		throw new $TypeError$8('Assertion failed: IsPropertyKey(P) is not true');
+  	}
+
+  	// 7.3.2.2-3
+  	var O = ToObject(V);
+
+  	// 7.3.2.4
+  	return O[P];
+  };
+
+  var fnToStr = Function.prototype.toString;
+  var reflectApply = typeof Reflect === 'object' && Reflect !== null && Reflect.apply;
+  var badArrayLike;
+  var isCallableMarker;
+  if (typeof reflectApply === 'function' && typeof Object.defineProperty === 'function') {
+  	try {
+  		badArrayLike = Object.defineProperty({}, 'length', {
+  			get: function () {
+  				throw isCallableMarker;
+  			}
+  		});
+  		isCallableMarker = {};
+  		// eslint-disable-next-line no-throw-literal
+  		reflectApply(function () { throw 42; }, null, badArrayLike);
+  	} catch (_) {
+  		if (_ !== isCallableMarker) {
+  			reflectApply = null;
+  		}
+  	}
+  } else {
+  	reflectApply = null;
+  }
+
+  var constructorRegex = /^\s*class\b/;
+  var isES6ClassFn = function isES6ClassFunction(value) {
+  	try {
+  		var fnStr = fnToStr.call(value);
+  		return constructorRegex.test(fnStr);
+  	} catch (e) {
+  		return false; // not a function
+  	}
+  };
+
+  var tryFunctionObject = function tryFunctionToStr(value) {
+  	try {
+  		if (isES6ClassFn(value)) { return false; }
+  		fnToStr.call(value);
+  		return true;
+  	} catch (e) {
+  		return false;
+  	}
+  };
+  var toStr$2 = Object.prototype.toString;
+  var fnClass = '[object Function]';
+  var genClass = '[object GeneratorFunction]';
+  var hasToStringTag$1 = typeof Symbol === 'function' && typeof Symbol.toStringTag === 'symbol';
+  /* globals document: false */
+  var documentDotAll = typeof document === 'object' && typeof document.all === 'undefined' && document.all !== undefined ? document.all : {};
+
+  var isCallable = reflectApply
+  	? function isCallable(value) {
+  		if (value === documentDotAll) { return true; }
+  		if (!value) { return false; }
+  		if (typeof value !== 'function' && typeof value !== 'object') { return false; }
+  		if (typeof value === 'function' && !value.prototype) { return true; }
+  		try {
+  			reflectApply(value, null, badArrayLike);
+  		} catch (e) {
+  			if (e !== isCallableMarker) { return false; }
+  		}
+  		return !isES6ClassFn(value);
+  	}
+  	: function isCallable(value) {
+  		if (value === documentDotAll) { return true; }
+  		if (!value) { return false; }
+  		if (typeof value !== 'function' && typeof value !== 'object') { return false; }
+  		if (typeof value === 'function' && !value.prototype) { return true; }
+  		if (hasToStringTag$1) { return tryFunctionObject(value); }
+  		if (isES6ClassFn(value)) { return false; }
+  		var strClass = toStr$2.call(value);
+  		return strClass === fnClass || strClass === genClass;
+  	};
+
+  // http://262.ecma-international.org/5.1/#sec-9.11
+
+  var IsCallable = isCallable;
+
+  var $TypeError$7 = getIntrinsic('%TypeError%');
+
+
+
+
+
+  /**
+   * 7.3.9 - https://ecma-international.org/ecma-262/6.0/#sec-getmethod
+   * 1. Assert: IsPropertyKey(P) is true.
+   * 2. Let func be GetV(O, P).
+   * 3. ReturnIfAbrupt(func).
+   * 4. If func is either undefined or null, return undefined.
+   * 5. If IsCallable(func) is false, throw a TypeError exception.
+   * 6. Return func.
+   */
+
+  var GetMethod$1 = function GetMethod(O, P) {
+  	// 7.3.9.1
+  	if (!IsPropertyKey(P)) {
+  		throw new $TypeError$7('Assertion failed: IsPropertyKey(P) is not true');
+  	}
+
+  	// 7.3.9.2
+  	var func = GetV(O, P);
+
+  	// 7.3.9.4
+  	if (func == null) {
+  		return void 0;
+  	}
+
+  	// 7.3.9.5
+  	if (!IsCallable(func)) {
+  		throw new $TypeError$7(P + 'is not a function');
+  	}
+
+  	// 7.3.9.6
+  	return func;
   };
 
   // TODO: remove, semver-major
 
-  var GetIntrinsic = getIntrinsic;
+  var GetIntrinsic$1 = getIntrinsic;
 
-  var $TypeError$1 = getIntrinsic('%TypeError%');
+  var $TypeError$6 = getIntrinsic('%TypeError%');
 
   var isPropertyDescriptor = function IsPropertyDescriptor(ES, Desc) {
   	if (ES.Type(Desc) !== 'Object') {
@@ -2251,7 +2439,7 @@
   	}
 
   	if (ES.IsDataDescriptor(Desc) && ES.IsAccessorDescriptor(Desc)) {
-  		throw new $TypeError$1('Property Descriptors may not be both accessor and data descriptors');
+  		throw new $TypeError$6('Property Descriptors may not be both accessor and data descriptors');
   	}
   	return true;
   };
@@ -2298,13 +2486,13 @@
   	return true;
   };
 
-  var $TypeError$2 = getIntrinsic('%TypeError%');
-  var $SyntaxError$1 = getIntrinsic('%SyntaxError%');
+  var $TypeError$5 = getIntrinsic('%TypeError%');
+  var $SyntaxError = getIntrinsic('%SyntaxError%');
 
 
 
   var predicates = {
-  	// https://ecma-international.org/ecma-262/6.0/#sec-property-descriptor-specification-type
+  	// https://262.ecma-international.org/6.0/#sec-property-descriptor-specification-type
   	'Property Descriptor': function isPropertyDescriptor(Type, Desc) {
   		if (Type(Desc) !== 'Object') {
   			return false;
@@ -2327,7 +2515,7 @@
   		var isData = src(Desc, '[[Value]]');
   		var IsAccessor = src(Desc, '[[Get]]') || src(Desc, '[[Set]]');
   		if (isData && IsAccessor) {
-  			throw new $TypeError$2('Property Descriptors may not be both accessor and data descriptors');
+  			throw new $TypeError$5('Property Descriptors may not be both accessor and data descriptors');
   		}
   		return true;
   	}
@@ -2336,16 +2524,16 @@
   var assertRecord = function assertRecord(Type, recordType, argumentName, value) {
   	var predicate = predicates[recordType];
   	if (typeof predicate !== 'function') {
-  		throw new $SyntaxError$1('unknown record type: ' + recordType);
+  		throw new $SyntaxError('unknown record type: ' + recordType);
   	}
   	if (!predicate(Type, value)) {
-  		throw new $TypeError$2(argumentName + ' must be a ' + recordType);
+  		throw new $TypeError$5(argumentName + ' must be a ' + recordType);
   	}
   };
 
-  // https://ecma-international.org/ecma-262/5.1/#sec-8
+  // https://262.ecma-international.org/5.1/#sec-8
 
-  var Type = function Type(x) {
+  var Type$1 = function Type(x) {
   	if (x === null) {
   		return 'Null';
   	}
@@ -2366,16 +2554,16 @@
   	}
   };
 
-  // https://ecma-international.org/ecma-262/11.0/#sec-ecmascript-data-types-and-values
+  // https://262.ecma-international.org/11.0/#sec-ecmascript-data-types-and-values
 
-  var Type$1 = function Type$1(x) {
+  var Type = function Type(x) {
   	if (typeof x === 'symbol') {
   		return 'Symbol';
   	}
   	if (typeof x === 'bigint') {
   		return 'BigInt';
   	}
-  	return Type(x);
+  	return Type$1(x);
   };
 
   // https://ecma-international.org/ecma-262/6.0/#sec-frompropertydescriptor
@@ -2385,7 +2573,7 @@
   		return Desc;
   	}
 
-  	assertRecord(Type$1, 'Property Descriptor', 'Desc', Desc);
+  	assertRecord(Type, 'Property Descriptor', 'Desc', Desc);
 
   	var obj = {};
   	if ('[[Value]]' in Desc) {
@@ -2416,7 +2604,7 @@
   		return false;
   	}
 
-  	assertRecord(Type$1, 'Property Descriptor', 'Desc', Desc);
+  	assertRecord(Type, 'Property Descriptor', 'Desc', Desc);
 
   	if (!src(Desc, '[[Get]]') && !src(Desc, '[[Set]]')) {
   		return false;
@@ -2432,7 +2620,7 @@
   		return false;
   	}
 
-  	assertRecord(Type$1, 'Property Descriptor', 'Desc', Desc);
+  	assertRecord(Type, 'Property Descriptor', 'Desc', Desc);
 
   	if (!src(Desc, '[[Value]]') && !src(Desc, '[[Writable]]')) {
   		return false;
@@ -2441,17 +2629,11 @@
   	return true;
   };
 
-  // https://ecma-international.org/ecma-262/6.0/#sec-ispropertykey
-
-  var IsPropertyKey = function IsPropertyKey(argument) {
-  	return typeof argument === 'string' || typeof argument === 'symbol';
-  };
-
   var _isNaN = Number.isNaN || function isNaN(a) {
   	return a !== a;
   };
 
-  // http://ecma-international.org/ecma-262/5.1/#sec-9.12
+  // http://262.ecma-international.org/5.1/#sec-9.12
 
   var SameValue = function SameValue(x, y) {
   	if (x === y) { // 0 === -0, but they are not identical.
@@ -2461,98 +2643,21 @@
   	return _isNaN(x) && _isNaN(y);
   };
 
-  // http://ecma-international.org/ecma-262/5.1/#sec-9.2
+  // http://262.ecma-international.org/5.1/#sec-9.2
 
   var ToBoolean = function ToBoolean(value) { return !!value; };
 
-  var fnToStr = Function.prototype.toString;
-  var reflectApply = typeof Reflect === 'object' && Reflect !== null && Reflect.apply;
-  var badArrayLike;
-  var isCallableMarker;
-  if (typeof reflectApply === 'function' && typeof Object.defineProperty === 'function') {
-  	try {
-  		badArrayLike = Object.defineProperty({}, 'length', {
-  			get: function () {
-  				throw isCallableMarker;
-  			}
-  		});
-  		isCallableMarker = {};
-  		// eslint-disable-next-line no-throw-literal
-  		reflectApply(function () { throw 42; }, null, badArrayLike);
-  	} catch (_) {
-  		if (_ !== isCallableMarker) {
-  			reflectApply = null;
-  		}
-  	}
-  } else {
-  	reflectApply = null;
-  }
-
-  var constructorRegex = /^\s*class\b/;
-  var isES6ClassFn = function isES6ClassFunction(value) {
-  	try {
-  		var fnStr = fnToStr.call(value);
-  		return constructorRegex.test(fnStr);
-  	} catch (e) {
-  		return false; // not a function
-  	}
-  };
-
-  var tryFunctionObject = function tryFunctionToStr(value) {
-  	try {
-  		if (isES6ClassFn(value)) { return false; }
-  		fnToStr.call(value);
-  		return true;
-  	} catch (e) {
-  		return false;
-  	}
-  };
-  var toStr$1 = Object.prototype.toString;
-  var fnClass = '[object Function]';
-  var genClass = '[object GeneratorFunction]';
-  var hasToStringTag = typeof Symbol === 'function' && typeof Symbol.toStringTag === 'symbol';
-  /* globals document: false */
-  var documentDotAll = typeof document === 'object' && typeof document.all === 'undefined' && document.all !== undefined ? document.all : {};
-
-  var isCallable = reflectApply
-  	? function isCallable(value) {
-  		if (value === documentDotAll) { return true; }
-  		if (!value) { return false; }
-  		if (typeof value !== 'function' && typeof value !== 'object') { return false; }
-  		if (typeof value === 'function' && !value.prototype) { return true; }
-  		try {
-  			reflectApply(value, null, badArrayLike);
-  		} catch (e) {
-  			if (e !== isCallableMarker) { return false; }
-  		}
-  		return !isES6ClassFn(value);
-  	}
-  	: function isCallable(value) {
-  		if (value === documentDotAll) { return true; }
-  		if (!value) { return false; }
-  		if (typeof value !== 'function' && typeof value !== 'object') { return false; }
-  		if (typeof value === 'function' && !value.prototype) { return true; }
-  		if (hasToStringTag) { return tryFunctionObject(value); }
-  		if (isES6ClassFn(value)) { return false; }
-  		var strClass = toStr$1.call(value);
-  		return strClass === fnClass || strClass === genClass;
-  	};
-
-  // http://ecma-international.org/ecma-262/5.1/#sec-9.11
-
-  var IsCallable = isCallable;
-
-  var $TypeError$3 = getIntrinsic('%TypeError%');
+  var $TypeError$4 = getIntrinsic('%TypeError%');
 
 
 
 
 
-  // https://ecma-international.org/ecma-262/5.1/#sec-8.10.5
+  // https://262.ecma-international.org/5.1/#sec-8.10.5
 
   var ToPropertyDescriptor = function ToPropertyDescriptor(Obj) {
-  	if (Type$1(Obj) !== 'Object') {
-  		throw new $TypeError$3('ToPropertyDescriptor requires an object');
+  	if (Type(Obj) !== 'Object') {
+  		throw new $TypeError$4('ToPropertyDescriptor requires an object');
   	}
 
   	var desc = {};
@@ -2571,25 +2676,25 @@
   	if (src(Obj, 'get')) {
   		var getter = Obj.get;
   		if (typeof getter !== 'undefined' && !IsCallable(getter)) {
-  			throw new $TypeError$3('getter must be a function');
+  			throw new $TypeError$4('getter must be a function');
   		}
   		desc['[[Get]]'] = getter;
   	}
   	if (src(Obj, 'set')) {
   		var setter = Obj.set;
   		if (typeof setter !== 'undefined' && !IsCallable(setter)) {
-  			throw new $TypeError$3('setter must be a function');
+  			throw new $TypeError$4('setter must be a function');
   		}
   		desc['[[Set]]'] = setter;
   	}
 
   	if ((src(desc, '[[Get]]') || src(desc, '[[Set]]')) && (src(desc, '[[Value]]') || src(desc, '[[Writable]]'))) {
-  		throw new $TypeError$3('Invalid property descriptor. Cannot both specify accessors and a value or writable attribute');
+  		throw new $TypeError$4('Invalid property descriptor. Cannot both specify accessors and a value or writable attribute');
   	}
   	return desc;
   };
 
-  var $TypeError$4 = getIntrinsic('%TypeError%');
+  var $TypeError$3 = getIntrinsic('%TypeError%');
 
 
 
@@ -2605,25 +2710,25 @@
   // https://ecma-international.org/ecma-262/6.0/#sec-definepropertyorthrow
 
   var DefinePropertyOrThrow = function DefinePropertyOrThrow(O, P, desc) {
-  	if (Type$1(O) !== 'Object') {
-  		throw new $TypeError$4('Assertion failed: Type(O) is not Object');
+  	if (Type(O) !== 'Object') {
+  		throw new $TypeError$3('Assertion failed: Type(O) is not Object');
   	}
 
   	if (!IsPropertyKey(P)) {
-  		throw new $TypeError$4('Assertion failed: IsPropertyKey(P) is not true');
+  		throw new $TypeError$3('Assertion failed: IsPropertyKey(P) is not true');
   	}
 
   	var Desc = isPropertyDescriptor({
-  		Type: Type$1,
+  		Type: Type,
   		IsDataDescriptor: IsDataDescriptor,
   		IsAccessorDescriptor: IsAccessorDescriptor
   	}, desc) ? desc : ToPropertyDescriptor(desc);
   	if (!isPropertyDescriptor({
-  		Type: Type$1,
+  		Type: Type,
   		IsDataDescriptor: IsDataDescriptor,
   		IsAccessorDescriptor: IsAccessorDescriptor
   	}, Desc)) {
-  		throw new $TypeError$4('Assertion failed: Desc is not a valid Property Descriptor');
+  		throw new $TypeError$3('Assertion failed: Desc is not a valid Property Descriptor');
   	}
 
   	return DefineOwnProperty(
@@ -2640,7 +2745,7 @@
 
 
 
-  var $construct = GetIntrinsic('%Reflect.construct%', true);
+  var $construct = GetIntrinsic$1('%Reflect.construct%', true);
 
   var DefinePropertyOrThrow$1 = DefinePropertyOrThrow;
   try {
@@ -2679,7 +2784,7 @@
   });
 
   var $species = getIntrinsic('%Symbol.species%', true);
-  var $TypeError$5 = getIntrinsic('%TypeError%');
+  var $TypeError$2 = getIntrinsic('%TypeError%');
 
 
 
@@ -2687,15 +2792,15 @@
   // https://ecma-international.org/ecma-262/6.0/#sec-speciesconstructor
 
   var SpeciesConstructor = function SpeciesConstructor(O, defaultConstructor) {
-  	if (Type$1(O) !== 'Object') {
-  		throw new $TypeError$5('Assertion failed: Type(O) is not Object');
+  	if (Type(O) !== 'Object') {
+  		throw new $TypeError$2('Assertion failed: Type(O) is not Object');
   	}
   	var C = O.constructor;
   	if (typeof C === 'undefined') {
   		return defaultConstructor;
   	}
-  	if (Type$1(C) !== 'Object') {
-  		throw new $TypeError$5('O.constructor is not an Object');
+  	if (Type(C) !== 'Object') {
+  		throw new $TypeError$2('O.constructor is not an Object');
   	}
   	var S = $species ? C[$species] : void 0;
   	if (S == null) {
@@ -2704,25 +2809,25 @@
   	if (IsConstructor(S)) {
   		return S;
   	}
-  	throw new $TypeError$5('no constructor found');
+  	throw new $TypeError$2('no constructor found');
   };
 
-  var $abs = getIntrinsic('%Math.abs%');
+  var $abs$1 = getIntrinsic('%Math.abs%');
 
-  // http://ecma-international.org/ecma-262/5.1/#sec-5.2
+  // http://262.ecma-international.org/5.1/#sec-5.2
 
-  var abs = function abs(x) {
-  	return $abs(x);
+  var abs$1 = function abs(x) {
+  	return $abs$1(x);
   };
 
   // var modulo = require('./modulo');
-  var $floor = Math.floor;
+  var $floor$1 = Math.floor;
 
-  // http://ecma-international.org/ecma-262/5.1/#sec-5.2
+  // http://262.ecma-international.org/5.1/#sec-5.2
 
-  var floor = function floor(x) {
+  var floor$1 = function floor(x) {
   	// return x - modulo(x, 1);
-  	return $floor(x);
+  	return $floor$1(x);
   };
 
   var $isNaN = Number.isNaN || function (a) { return a !== a; };
@@ -2735,45 +2840,108 @@
   	if (typeof argument !== 'number' || _isNaN(argument) || !_isFinite(argument)) {
   		return false;
   	}
-  	var absValue = abs(argument);
-  	return floor(absValue) === absValue;
+  	var absValue = abs$1(argument);
+  	return floor$1(absValue) === absValue;
   };
 
-  var $abs$1 = getIntrinsic('%Math.abs%');
+  var $abs = getIntrinsic('%Math.abs%');
 
-  // http://ecma-international.org/ecma-262/5.1/#sec-5.2
+  // http://262.ecma-international.org/5.1/#sec-5.2
 
-  var abs$1 = function abs(x) {
-  	return $abs$1(x);
+  var abs = function abs(x) {
+  	return $abs(x);
   };
 
   // var modulo = require('./modulo');
-  var $floor$1 = Math.floor;
+  var $floor = Math.floor;
 
-  // http://ecma-international.org/ecma-262/5.1/#sec-5.2
+  // http://262.ecma-international.org/5.1/#sec-5.2
 
-  var floor$1 = function floor(x) {
+  var floor = function floor(x) {
   	// return x - modulo(x, 1);
-  	return $floor$1(x);
+  	return $floor(x);
   };
 
-  // http://ecma-international.org/ecma-262/5.1/#sec-9.3
+  var isPrimitive$1 = function isPrimitive(value) {
+  	return value === null || (typeof value !== 'function' && typeof value !== 'object');
+  };
 
-  var ToNumber = function ToNumber(value) {
-  	return +value; // eslint-disable-line no-implicit-coercion
+  var toStr$1 = Object.prototype.toString;
+
+
+
+
+
+  // http://ecma-international.org/ecma-262/5.1/#sec-8.12.8
+  var ES5internalSlots = {
+  	'[[DefaultValue]]': function (O) {
+  		var actualHint;
+  		if (arguments.length > 1) {
+  			actualHint = arguments[1];
+  		} else {
+  			actualHint = toStr$1.call(O) === '[object Date]' ? String : Number;
+  		}
+
+  		if (actualHint === String || actualHint === Number) {
+  			var methods = actualHint === String ? ['toString', 'valueOf'] : ['valueOf', 'toString'];
+  			var value, i;
+  			for (i = 0; i < methods.length; ++i) {
+  				if (isCallable(O[methods[i]])) {
+  					value = O[methods[i]]();
+  					if (isPrimitive$1(value)) {
+  						return value;
+  					}
+  				}
+  			}
+  			throw new TypeError('No default value');
+  		}
+  		throw new TypeError('invalid [[DefaultValue]] hint supplied');
+  	}
+  };
+
+  // http://ecma-international.org/ecma-262/5.1/#sec-9.1
+  var es5 = function ToPrimitive(input) {
+  	if (isPrimitive$1(input)) {
+  		return input;
+  	}
+  	if (arguments.length > 1) {
+  		return ES5internalSlots['[[DefaultValue]]'](input, arguments[1]);
+  	}
+  	return ES5internalSlots['[[DefaultValue]]'](input);
+  };
+
+  // http://262.ecma-international.org/5.1/#sec-9.1
+
+  var ToPrimitive$1 = es5;
+
+  // http://262.ecma-international.org/5.1/#sec-9.3
+
+  var ToNumber$1 = function ToNumber(value) {
+  	var prim = ToPrimitive$1(value, Number);
+  	if (typeof prim !== 'string') {
+  		return +prim; // eslint-disable-line no-implicit-coercion
+  	}
+
+  	// eslint-disable-next-line no-control-regex
+  	var trimmed = prim.replace(/^[ \t\x0b\f\xa0\ufeff\n\r\u2028\u2029\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000\u0085]+|[ \t\x0b\f\xa0\ufeff\n\r\u2028\u2029\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000\u0085]+$/g, '');
+  	if ((/^0[ob]|^[+-]0x/).test(trimmed)) {
+  		return NaN;
+  	}
+
+  	return +trimmed; // eslint-disable-line no-implicit-coercion
   };
 
   var sign = function sign(number) {
   	return number >= 0 ? 1 : -1;
   };
 
-  // http://ecma-international.org/ecma-262/5.1/#sec-9.4
+  // http://262.ecma-international.org/5.1/#sec-9.4
 
-  var ToInteger = function ToInteger(value) {
-  	var number = ToNumber(value);
+  var ToInteger$1 = function ToInteger(value) {
+  	var number = ToNumber$1(value);
   	if (_isNaN(number)) { return 0; }
   	if (number === 0 || !_isFinite(number)) { return number; }
-  	return sign(number) * floor$1(abs$1(number));
+  	return sign(number) * floor(abs(number));
   };
 
   var $test = getIntrinsic('RegExp.prototype.test');
@@ -2788,10 +2956,6 @@
   	return value === null || (typeof value !== 'function' && typeof value !== 'object');
   };
 
-  var isPrimitive$1 = function isPrimitive(value) {
-  	return value === null || (typeof value !== 'function' && typeof value !== 'object');
-  };
-
   var getDay = Date.prototype.getDay;
   var tryDateObject = function tryDateGetDayCall(value) {
   	try {
@@ -2802,23 +2966,23 @@
   	}
   };
 
-  var toStr$2 = Object.prototype.toString;
+  var toStr = Object.prototype.toString;
   var dateClass = '[object Date]';
-  var hasToStringTag$1 = typeof Symbol === 'function' && typeof Symbol.toStringTag === 'symbol';
+  var hasToStringTag = typeof Symbol === 'function' && typeof Symbol.toStringTag === 'symbol';
 
   var isDateObject = function isDateObject(value) {
   	if (typeof value !== 'object' || value === null) {
   		return false;
   	}
-  	return hasToStringTag$1 ? tryDateObject(value) : toStr$2.call(value) === dateClass;
+  	return hasToStringTag ? tryDateObject(value) : toStr.call(value) === dateClass;
   };
 
   var isSymbol = createCommonjsModule(function (module) {
 
   var toStr = Object.prototype.toString;
-  var hasSymbols$1 = hasSymbols();
+  var hasSymbols = hasSymbols$2();
 
-  if (hasSymbols$1) {
+  if (hasSymbols) {
   	var symToStr = Symbol.prototype.toString;
   	var symStringRegex = /^Symbol\(.*\)$/;
   	var isSymbolObject = function isRealSymbolObject(value) {
@@ -2850,7 +3014,7 @@
   }
   });
 
-  var hasSymbols$2 = typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol';
+  var hasSymbols = typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol';
 
 
 
@@ -2904,7 +3068,7 @@
   	}
 
   	var exoticToPrim;
-  	if (hasSymbols$2) {
+  	if (hasSymbols) {
   		if (Symbol.toPrimitive) {
   			exoticToPrim = GetMethod(input, Symbol.toPrimitive);
   		} else if (isSymbol(input)) {
@@ -2933,8 +3097,8 @@
   	return es2015(input);
   };
 
-  var $TypeError$6 = getIntrinsic('%TypeError%');
-  var $Number = getIntrinsic('%Number%');
+  var $TypeError$1 = getIntrinsic('%TypeError%');
+  var $Number$1 = getIntrinsic('%Number%');
   var $RegExp = getIntrinsic('%RegExp%');
   var $parseInteger = getIntrinsic('%parseInt%');
 
@@ -2942,7 +3106,7 @@
 
 
 
-  var $strSlice$1 = callBound('String.prototype.slice');
+  var $strSlice = callBound('String.prototype.slice');
   var isBinary = regexTester(/^0b[01]+$/i);
   var isOctal = regexTester(/^0o[0-7]+$/i);
   var isInvalidHexLiteral = regexTester(/^[-+]0x[0-9a-f]+$/i);
@@ -2958,25 +3122,25 @@
   	'\u2029\uFEFF'
   ].join('');
   var trimRegex = new RegExp('(^[' + ws + ']+)|([' + ws + ']+$)', 'g');
-  var $replace$1 = callBound('String.prototype.replace');
+  var $replace = callBound('String.prototype.replace');
   var $trim = function (value) {
-  	return $replace$1(value, trimRegex, '');
+  	return $replace(value, trimRegex, '');
   };
 
 
 
   // https://ecma-international.org/ecma-262/6.0/#sec-tonumber
 
-  var ToNumber$1 = function ToNumber(argument) {
-  	var value = isPrimitive(argument) ? argument : ToPrimitive(argument, $Number);
+  var ToNumber = function ToNumber(argument) {
+  	var value = isPrimitive(argument) ? argument : ToPrimitive(argument, $Number$1);
   	if (typeof value === 'symbol') {
-  		throw new $TypeError$6('Cannot convert a Symbol value to a number');
+  		throw new $TypeError$1('Cannot convert a Symbol value to a number');
   	}
   	if (typeof value === 'string') {
   		if (isBinary(value)) {
-  			return ToNumber($parseInteger($strSlice$1(value, 2), 2));
+  			return ToNumber($parseInteger($strSlice(value, 2), 2));
   		} else if (isOctal(value)) {
-  			return ToNumber($parseInteger($strSlice$1(value, 2), 8));
+  			return ToNumber($parseInteger($strSlice(value, 2), 8));
   		} else if (hasNonWS(value) || isInvalidHexLiteral(value)) {
   			return NaN;
   		} else {
@@ -2986,44 +3150,44 @@
   			}
   		}
   	}
-  	return $Number(value);
+  	return $Number$1(value);
   };
 
-  // https://ecma-international.org/ecma-262/11.0/#sec-tointeger
+  // https://262.ecma-international.org/11.0/#sec-tointeger
 
-  var ToInteger$1 = function ToInteger$1(value) {
-  	var number = ToNumber$1(value);
+  var ToInteger = function ToInteger(value) {
+  	var number = ToNumber(value);
   	if (number !== 0) {
-  		number = ToInteger(number);
+  		number = ToInteger$1(number);
   	}
   	return number === 0 ? 0 : number;
   };
 
   var $Math = getIntrinsic('%Math%');
-  var $Number$1 = getIntrinsic('%Number%');
+  var $Number = getIntrinsic('%Number%');
 
-  var maxSafeInteger = $Number$1.MAX_SAFE_INTEGER || $Math.pow(2, 53) - 1;
+  var maxSafeInteger = $Number.MAX_SAFE_INTEGER || $Math.pow(2, 53) - 1;
 
   var ToLength = function ToLength(argument) {
-  	var len = ToInteger$1(argument);
+  	var len = ToInteger(argument);
   	if (len <= 0) { return 0; } // includes converting -0 to +0
   	if (len > maxSafeInteger) { return maxSafeInteger; }
   	return len;
   };
 
   var $String = getIntrinsic('%String%');
-  var $TypeError$7 = getIntrinsic('%TypeError%');
+  var $TypeError = getIntrinsic('%TypeError%');
 
   // https://ecma-international.org/ecma-262/6.0/#sec-tostring
 
   var ToString = function ToString(argument) {
   	if (typeof argument === 'symbol') {
-  		throw new $TypeError$7('Cannot convert a Symbol value to a string');
+  		throw new $TypeError('Cannot convert a Symbol value to a string');
   	}
   	return $String(argument);
   };
 
-  var INTRINSICS$1 = {};
+  var INTRINSICS = {};
 
   var customUtilInspectFormatters = _defineProperty({}, 'Temporal.Duration', function TemporalDuration(depth, options) {
     var descr = options.stylize("".concat(this[Symbol.toStringTag], " <").concat(this, ">"), 'special');
@@ -3116,11 +3280,11 @@
   }
   function DefineIntrinsic(name, value) {
     var key = "%".concat(name, "%");
-    if (INTRINSICS$1[key] !== undefined) throw new Error("intrinsic ".concat(name, " already exists"));
-    INTRINSICS$1[key] = value;
+    if (INTRINSICS[key] !== undefined) throw new Error("intrinsic ".concat(name, " already exists"));
+    INTRINSICS[key] = value;
   }
-  function GetIntrinsic$1(intrinsic) {
-    return intrinsic in INTRINSICS$1 ? INTRINSICS$1[intrinsic] : GetIntrinsic(intrinsic);
+  function GetIntrinsic(intrinsic) {
+    return intrinsic in INTRINSICS ? INTRINSICS[intrinsic] : GetIntrinsic$1(intrinsic);
   }
 
   // Instant
@@ -3207,7 +3371,7 @@
   var offset = /([+\u2212-])([01][0-9]|2[0-3])(?::?([0-5][0-9])(?::?([0-5][0-9])(?:[.,](\d{1,9}))?)?)?/;
   var zonesplit = new RegExp("(?:([zZ])|(?:".concat(offset.source, ")?)(?:\\[(").concat(timeZoneID.source, ")\\])?"));
   var calendar = new RegExp("\\[u-ca-(".concat(calendarID.source, ")\\]"));
-  var instant = new RegExp("^".concat(datesplit.source, "(?:(?:T|\\s+)").concat(timesplit.source, ")?").concat(zonesplit.source, "(?:").concat(calendar.source, ")?$"), 'i');
+  var instant$1 = new RegExp("^".concat(datesplit.source, "(?:(?:T|\\s+)").concat(timesplit.source, ")?").concat(zonesplit.source, "(?:").concat(calendar.source, ")?$"), 'i');
   var datetime = new RegExp("^".concat(datesplit.source, "(?:(?:T|\\s+)").concat(timesplit.source, ")?(?:").concat(zonesplit.source, ")?(?:").concat(calendar.source, ")?$"), 'i');
   var time = new RegExp("^".concat(timesplit.source, "(?:").concat(zonesplit.source, ")?(?:").concat(calendar.source, ")?$"), 'i'); // The short forms of YearMonth and MonthDay are only for the ISO calendar.
   // Non-ISO calendar YearMonth and MonthDay have to parse as a Temporal.PlainDate,
@@ -3224,8 +3388,8 @@
 
   var ArrayIsArray = Array.isArray;
   var ArrayPrototypeIndexOf = Array.prototype.indexOf;
-  var ArrayPrototypePush = Array.prototype.push;
-  var IntlDateTimeFormat = globalThis.Intl.DateTimeFormat;
+  var ArrayPrototypePush$1 = Array.prototype.push;
+  var IntlDateTimeFormat$1 = globalThis.Intl.DateTimeFormat;
   var MathMin = Math.min;
   var MathMax = Math.max;
   var MathAbs = Math.abs;
@@ -3236,7 +3400,7 @@
   var NumberIsFinite = Number.isFinite;
   var NumberMaxSafeInteger = Number.MAX_SAFE_INTEGER;
   var NumberIsInteger = Number.isInteger;
-  var ObjectAssign = Object.assign;
+  var ObjectAssign$5 = Object.assign;
   var ObjectCreate = Object.create;
   var ObjectIs = Object.is;
   var ObjectEntries = Object.entries;
@@ -3248,7 +3412,7 @@
   var BEFORE_FIRST_DST = BigInteger(-388152).multiply(1e13); // 1847-01-01T00:00:00Z
 
   var ToPositiveInteger = function ToPositiveInteger(value, property) {
-    value = ToInteger$1(value);
+    value = ToInteger(value);
 
     if (value < 1) {
       if (property !== undefined) {
@@ -3261,19 +3425,20 @@
     return value;
   };
 
-  var BUILTIN_CASTS = new Map([['year', ToInteger$1], ['month', ToPositiveInteger], ['monthCode', ToString], ['day', ToPositiveInteger], ['hour', ToInteger$1], ['minute', ToInteger$1], ['second', ToInteger$1], ['millisecond', ToInteger$1], ['microsecond', ToInteger$1], ['nanosecond', ToInteger$1], ['years', ToInteger$1], ['months', ToInteger$1], ['weeks', ToInteger$1], ['days', ToInteger$1], ['hours', ToInteger$1], ['minutes', ToInteger$1], ['seconds', ToInteger$1], ['milliseconds', ToInteger$1], ['microseconds', ToInteger$1], ['nanoseconds', ToInteger$1], ['era', ToString], ['eraYear', ToInteger$1], ['offset', ToString]]);
+  var BUILTIN_CASTS = new Map([['year', ToInteger], ['month', ToPositiveInteger], ['monthCode', ToString], ['day', ToPositiveInteger], ['hour', ToInteger], ['minute', ToInteger], ['second', ToInteger], ['millisecond', ToInteger], ['microsecond', ToInteger], ['nanosecond', ToInteger], ['years', ToInteger], ['months', ToInteger], ['weeks', ToInteger], ['days', ToInteger], ['hours', ToInteger], ['minutes', ToInteger], ['seconds', ToInteger], ['milliseconds', ToInteger], ['microseconds', ToInteger], ['nanoseconds', ToInteger], ['era', ToString], ['eraYear', ToInteger], ['offset', ToString]]);
   var ES2020 = {
     Call: Call,
+    GetMethod: GetMethod$1,
     SpeciesConstructor: SpeciesConstructor,
     IsInteger: IsInteger,
-    ToInteger: ToInteger$1,
+    ToInteger: ToInteger,
     ToLength: ToLength,
-    ToNumber: ToNumber$1,
+    ToNumber: ToNumber,
     ToPrimitive: ToPrimitive,
     ToString: ToString,
-    Type: Type$1
+    Type: Type
   };
-  var ES = ObjectAssign({}, ES2020, {
+  var ES = ObjectAssign$5({}, ES2020, {
     ToPositiveInteger: ToPositiveInteger,
     IsTemporalInstant: function IsTemporalInstant(item) {
       return HasSlot(item, EPOCHNANOSECONDS) && !HasSlot(item, TIME_ZONE, CALENDAR);
@@ -3332,7 +3497,7 @@
     },
     ParseISODateTime: function ParseISODateTime(isoString, _ref) {
       var zoneRequired = _ref.zoneRequired;
-      var regex = zoneRequired ? instant : datetime;
+      var regex = zoneRequired ? instant$1 : datetime;
       var match = regex.exec(isoString);
       if (!match) throw new RangeError("invalid ISO 8601 string: ".concat(isoString));
       var yearString = match[1];
@@ -3597,30 +3762,30 @@
           nanosecond = _ES$ParseTemporalInst.nanosecond,
           offset = _ES$ParseTemporalInst.offset;
 
-      var epochNs = ES.GetEpochFromParts(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond);
+      var epochNs = ES.GetEpochFromISOParts(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond);
       if (epochNs === null) throw new RangeError('DateTime outside of supported range');
       if (!offset) throw new RangeError('Temporal.Instant requires a time zone offset');
       var offsetNs = ES.ParseOffsetString(offset);
       return epochNs.subtract(offsetNs);
     },
-    RegulateDateTime: function RegulateDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, overflow) {
+    RegulateISODateTime: function RegulateISODateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, overflow) {
       switch (overflow) {
         case 'reject':
           ES.RejectDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond);
           break;
 
         case 'constrain':
-          var _ES$ConstrainDateTime = ES.ConstrainDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond);
+          var _ES$ConstrainISODateT = ES.ConstrainISODateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond);
 
-          year = _ES$ConstrainDateTime.year;
-          month = _ES$ConstrainDateTime.month;
-          day = _ES$ConstrainDateTime.day;
-          hour = _ES$ConstrainDateTime.hour;
-          minute = _ES$ConstrainDateTime.minute;
-          second = _ES$ConstrainDateTime.second;
-          millisecond = _ES$ConstrainDateTime.millisecond;
-          microsecond = _ES$ConstrainDateTime.microsecond;
-          nanosecond = _ES$ConstrainDateTime.nanosecond;
+          year = _ES$ConstrainISODateT.year;
+          month = _ES$ConstrainISODateT.month;
+          day = _ES$ConstrainISODateT.day;
+          hour = _ES$ConstrainISODateT.hour;
+          minute = _ES$ConstrainISODateT.minute;
+          second = _ES$ConstrainISODateT.second;
+          millisecond = _ES$ConstrainISODateT.millisecond;
+          microsecond = _ES$ConstrainISODateT.microsecond;
+          nanosecond = _ES$ConstrainISODateT.nanosecond;
           break;
       }
 
@@ -3636,18 +3801,18 @@
         nanosecond: nanosecond
       };
     },
-    RegulateDate: function RegulateDate(year, month, day, overflow) {
+    RegulateISODate: function RegulateISODate(year, month, day, overflow) {
       switch (overflow) {
         case 'reject':
-          ES.RejectDate(year, month, day);
+          ES.RejectISODate(year, month, day);
           break;
 
         case 'constrain':
-          var _ES$ConstrainDate = ES.ConstrainDate(year, month, day);
+          var _ES$ConstrainISODate = ES.ConstrainISODate(year, month, day);
 
-          year = _ES$ConstrainDate.year;
-          month = _ES$ConstrainDate.month;
-          day = _ES$ConstrainDate.day;
+          year = _ES$ConstrainISODate.year;
+          month = _ES$ConstrainISODate.month;
+          day = _ES$ConstrainISODate.day;
           break;
       }
 
@@ -3684,46 +3849,25 @@
         nanosecond: nanosecond
       };
     },
-    RegulateYearMonth: function RegulateYearMonth(year, month, overflow) {
+    RegulateISOYearMonth: function RegulateISOYearMonth(year, month, overflow) {
       var referenceISODay = 1;
 
       switch (overflow) {
         case 'reject':
-          ES.RejectDate(year, month, referenceISODay);
+          ES.RejectISODate(year, month, referenceISODay);
           break;
 
         case 'constrain':
-          var _ES$ConstrainDate2 = ES.ConstrainDate(year, month);
+          var _ES$ConstrainISODate2 = ES.ConstrainISODate(year, month);
 
-          year = _ES$ConstrainDate2.year;
-          month = _ES$ConstrainDate2.month;
+          year = _ES$ConstrainISODate2.year;
+          month = _ES$ConstrainISODate2.month;
           break;
       }
 
       return {
         year: year,
         month: month
-      };
-    },
-    RegulateMonthDay: function RegulateMonthDay(month, day, overflow) {
-      var referenceISOYear = 1972;
-
-      switch (overflow) {
-        case 'reject':
-          ES.RejectDate(referenceISOYear, month, day);
-          break;
-
-        case 'constrain':
-          var _ES$ConstrainDate3 = ES.ConstrainDate(referenceISOYear, month, day);
-
-          month = _ES$ConstrainDate3.month;
-          day = _ES$ConstrainDate3.day;
-          break;
-      }
-
-      return {
-        month: month,
-        day: day
       };
     },
     DurationHandleFractions: function DurationHandleFractions(fHours, minutes, fMinutes, seconds, fSeconds, milliseconds, fMilliseconds, microseconds, fMicroseconds, nanoseconds, fNanoseconds) {
@@ -4154,6 +4298,12 @@
       if (plural.has(retval)) return plural.get(retval);
       return retval;
     },
+    ToLargestTemporalDurationUnit: function ToLargestTemporalDurationUnit(options) {
+      var plural = new Map([['year', 'years'], ['month', 'months'], ['day', 'days'], ['hour', 'hours'], ['minute', 'minutes'], ['second', 'seconds'], ['millisecond', 'milliseconds'], ['microsecond', 'microseconds'], ['nanosecond', 'nanoseconds']]);
+      var retval = ES.GetOption(options, 'largestUnit', ['auto'].concat(_toConsumableArray(plural.keys()), _toConsumableArray(plural.values()), ['weeks']));
+      if (plural.has(retval)) return plural.get(retval);
+      return retval;
+    },
     ToSmallestTemporalUnit: function ToSmallestTemporalUnit(options) {
       var disallowedStrings = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
       var singular = new Map([['days', 'day'], ['hours', 'hour'], ['minutes', 'minute'], ['seconds', 'second'], ['milliseconds', 'millisecond'], ['microseconds', 'microsecond'], ['nanoseconds', 'nanosecond']].filter(function (_ref4) {
@@ -4278,12 +4428,12 @@
         timeZone = ES.ToTemporalTimeZone(timeZone);
         var offsetNs = null;
         if (offset) offsetNs = ES.ParseOffsetString(ES.ToString(offset));
-        var epochNanoseconds = ES.InterpretTemporalZonedDateTimeOffset(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, offsetNs, timeZone, 'compatible', 'reject');
-        var TemporalZonedDateTime = GetIntrinsic$1('%Temporal.ZonedDateTime%');
+        var epochNanoseconds = ES.InterpretISODateTimeOffset(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, offsetNs, timeZone, 'compatible', 'reject');
+        var TemporalZonedDateTime = GetIntrinsic('%Temporal.ZonedDateTime%');
         return new TemporalZonedDateTime(epochNanoseconds, timeZone, calendar);
       }
 
-      var TemporalDateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
+      var TemporalDateTime = GetIntrinsic('%Temporal.PlainDateTime%');
       return new TemporalDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, calendar);
     },
     ValidateTemporalUnitRange: function ValidateTemporalUnitRange(largestUnit, smallestUnit) {
@@ -4502,13 +4652,6 @@
 
       if (ES.Type(item) === 'Object') {
         if (ES.IsTemporalDate(item)) return item;
-        if (ES.IsTemporalDateTime(item)) return ES.TemporalDateTimeToDate(item);
-
-        if (ES.IsTemporalZonedDateTime(item)) {
-          var dt = ES.GetTemporalDateTimeFor(GetSlot(item, TIME_ZONE), GetSlot(item, INSTANT), GetSlot(item, CALENDAR));
-          return ES.TemporalDateTimeToDate(dt);
-        }
-
         var _calendar = item.calendar;
         if (_calendar === undefined) _calendar = ES.GetISO8601Calendar();
         _calendar = ES.ToTemporalCalendar(_calendar);
@@ -4525,7 +4668,7 @@
           day = _ES$ParseTemporalDate.day,
           calendar = _ES$ParseTemporalDate.calendar;
 
-      ES.RejectDate(year, month, day);
+      ES.RejectISODate(year, month, day);
       if (calendar === undefined) calendar = ES.GetISO8601Calendar();
       calendar = ES.ToTemporalCalendar(calendar);
       var result = new constructor(year, month, day, calendar);
@@ -4533,7 +4676,7 @@
       return result;
     },
     InterpretTemporalDateTimeFields: function InterpretTemporalDateTimeFields(calendar, fields, options) {
-      var TemporalDate = GetIntrinsic$1('%Temporal.PlainDate%');
+      var TemporalDate = GetIntrinsic('%Temporal.PlainDate%');
       var date = ES.DateFromFields(calendar, fields, TemporalDate, options);
       var year = GetSlot(date, ISO_YEAR);
       var month = GetSlot(date, ISO_MONTH);
@@ -4656,7 +4799,7 @@
     ToTemporalInstant: function ToTemporalInstant(item, constructor) {
       if (ES.IsTemporalInstant(item)) return item;
       var ns = ES.ParseTemporalInstant(ES.ToString(item));
-      var result = new constructor(bigIntIfAvailable(ns));
+      var result = new constructor(bigIntIfAvailable$3(ns));
       if (!ES.IsTemporalInstant(result)) throw new TypeError('invalid result');
       return result;
     },
@@ -4693,7 +4836,7 @@
       calendar = ES.ToTemporalCalendar(calendar);
 
       if (referenceISOYear === undefined) {
-        ES.RejectDate(1972, month, day);
+        ES.RejectISODate(1972, month, day);
 
         var _result = new constructor(month, day, calendar);
 
@@ -4701,7 +4844,7 @@
         return _result;
       }
 
-      var PlainMonthDay = GetIntrinsic$1('%Temporal.PlainMonthDay%');
+      var PlainMonthDay = GetIntrinsic('%Temporal.PlainMonthDay%');
       var result = new PlainMonthDay(month, day, calendar, referenceISOYear);
       return ES.MonthDayFromFields(calendar, result, constructor, {});
     },
@@ -4784,7 +4927,7 @@
       calendar = ES.ToTemporalCalendar(calendar);
 
       if (referenceISODay === undefined) {
-        ES.RejectDate(year, month, 1);
+        ES.RejectISODate(year, month, 1);
 
         var _result2 = new constructor(year, month, calendar);
 
@@ -4792,18 +4935,18 @@
         return _result2;
       }
 
-      var PlainYearMonth = GetIntrinsic$1('%Temporal.PlainYearMonth%');
+      var PlainYearMonth = GetIntrinsic('%Temporal.PlainYearMonth%');
       var result = new PlainYearMonth(year, month, calendar, referenceISODay);
       return ES.YearMonthFromFields(calendar, result, constructor, {});
     },
-    InterpretTemporalZonedDateTimeOffset: function InterpretTemporalZonedDateTimeOffset(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, offsetNs, timeZone, disambiguation, offsetOpt) {
-      var DateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
+    InterpretISODateTimeOffset: function InterpretISODateTimeOffset(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, offsetNs, timeZone, disambiguation, offsetOpt) {
+      var DateTime = GetIntrinsic('%Temporal.PlainDateTime%');
       var dt = new DateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond);
 
       if (offsetNs === null || offsetOpt === 'ignore') {
         // Simple case: ISO string without a TZ offset (or caller wants to ignore
         // the offset), so just convert DateTime to Instant in the given time zone
-        var _instant = ES.GetTemporalInstantFor(timeZone, dt, disambiguation);
+        var _instant = ES.BuiltinTimeZoneGetInstantFor(timeZone, dt, disambiguation);
 
         return GetSlot(_instant, EPOCHNANOSECONDS);
       } // The caller wants the offset to always win ('use') OR the caller is OK
@@ -4813,7 +4956,7 @@
 
       if (offsetOpt === 'use') {
         // Calculate the instant for the input's date/time and offset
-        var epochNs = ES.GetEpochFromParts(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond);
+        var epochNs = ES.GetEpochFromISOParts(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond);
         if (epochNs === null) throw new RangeError('ZonedDateTime outside of supported range');
         return epochNs.minus(offsetNs);
       } // "prefer" or "reject"
@@ -4840,12 +4983,13 @@
 
       if (offsetOpt === 'reject') {
         var offsetStr = ES.FormatTimeZoneOffsetString(offsetNs);
-        throw new RangeError("Offset ".concat(offsetStr, " is invalid for ").concat(dt, " in ").concat(timeZone));
+        var timeZoneString = ES.IsTemporalTimeZone(timeZone) ? GetSlot(timeZone, TIMEZONE_ID) : 'time zone';
+        throw new RangeError("Offset ".concat(offsetStr, " is invalid for ").concat(dt, " in ").concat(timeZoneString));
       } // fall through: offsetOpt === 'prefer', but the offset doesn't match
       // so fall back to use the time zone instead.
 
 
-      var instant = ES.GetTemporalInstantFor(timeZone, dt, disambiguation);
+      var instant = ES.BuiltinTimeZoneGetInstantFor(timeZone, dt, disambiguation);
       return GetSlot(instant, EPOCHNANOSECONDS);
     },
     ToTemporalZonedDateTime: function ToTemporalZonedDateTime(item, constructor) {
@@ -4903,21 +5047,21 @@
       if (offset) offsetNs = ES.ParseOffsetString(offset);
       var disambiguation = ES.ToTemporalDisambiguation(options);
       var offsetOpt = ES.ToTemporalOffset(options, 'reject');
-      var epochNanoseconds = ES.InterpretTemporalZonedDateTimeOffset(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, offsetNs, timeZone, disambiguation, offsetOpt);
+      var epochNanoseconds = ES.InterpretISODateTimeOffset(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, offsetNs, timeZone, disambiguation, offsetOpt);
       var result = new constructor(epochNanoseconds, timeZone, calendar);
       if (!ES.IsTemporalZonedDateTime(result)) throw new TypeError('invalid result');
       return result;
     },
     GetISO8601Calendar: function GetISO8601Calendar() {
-      var TemporalCalendar = GetIntrinsic$1('%Temporal.Calendar%');
+      var TemporalCalendar = GetIntrinsic('%Temporal.Calendar%');
       return new TemporalCalendar('iso8601');
     },
     CalendarFrom: function CalendarFrom(calendarLike) {
-      var TemporalCalendar = GetIntrinsic$1('%Temporal.Calendar%');
+      var TemporalCalendar = GetIntrinsic('%Temporal.Calendar%');
       var from = TemporalCalendar.from;
 
       if (from === undefined) {
-        from = GetIntrinsic$1('%Temporal.Calendar.from%');
+        from = GetIntrinsic('%Temporal.Calendar.from%');
       }
 
       var calendar = ES.Call(from, TemporalCalendar, [calendarLike]);
@@ -4929,14 +5073,118 @@
       return calendar;
     },
     CalendarFields: function CalendarFields(calendar, fieldNames) {
-      var fields = calendar.fields;
+      var fields = ES.GetMethod(calendar, 'fields');
       if (fields !== undefined) fieldNames = ES.Call(fields, calendar, [fieldNames]);
       return ES.CreateListFromArrayLike(fieldNames, ['String']);
     },
     CalendarMergeFields: function CalendarMergeFields(calendar, fields, additionalFields) {
-      var mergeFields = calendar.mergeFields;
+      var mergeFields = ES.GetMethod(calendar, 'mergeFields');
       if (mergeFields === undefined) return _objectSpread2(_objectSpread2({}, fields), additionalFields);
       return ES.Call(mergeFields, calendar, [fields, additionalFields]);
+    },
+    CalendarDateAdd: function CalendarDateAdd(calendar, date, duration, options, constructor) {
+      var dateAdd = ES.GetMethod(calendar, 'dateAdd');
+      var result = ES.Call(dateAdd, calendar, [date, duration, options, constructor]);
+      if (!ES.IsTemporalDate(result)) throw new TypeError('invalid result');
+      return result;
+    },
+    CalendarDateUntil: function CalendarDateUntil(calendar, date, otherDate, options) {
+      var dateUntil = ES.GetMethod(calendar, 'dateUntil');
+      var result = ES.Call(dateUntil, calendar, [date, otherDate, options]);
+      if (!ES.IsTemporalDuration(result)) throw new TypeError('invalid result');
+      return result;
+    },
+    CalendarYear: function CalendarYear(calendar, dateLike) {
+      var year = ES.GetMethod(calendar, 'year');
+      var result = ES.Call(year, calendar, [dateLike]);
+
+      if (result === undefined) {
+        throw new RangeError('calendar year result must be an integer');
+      }
+
+      return ES.ToInteger(result);
+    },
+    CalendarMonth: function CalendarMonth(calendar, dateLike) {
+      var month = ES.GetMethod(calendar, 'month');
+      var result = ES.Call(month, calendar, [dateLike]);
+
+      if (result === undefined) {
+        throw new RangeError('calendar month result must be a positive integer');
+      }
+
+      return ES.ToPositiveInteger(result);
+    },
+    CalendarMonthCode: function CalendarMonthCode(calendar, dateLike) {
+      var monthCode = ES.GetMethod(calendar, 'monthCode');
+      var result = ES.Call(monthCode, calendar, [dateLike]);
+
+      if (result === undefined) {
+        throw new RangeError('calendar monthCode result must be a string');
+      }
+
+      return ES.ToString(result);
+    },
+    CalendarDay: function CalendarDay(calendar, dateLike) {
+      var day = ES.GetMethod(calendar, 'day');
+      var result = ES.Call(day, calendar, [dateLike]);
+
+      if (result === undefined) {
+        throw new RangeError('calendar day result must be a positive integer');
+      }
+
+      return ES.ToPositiveInteger(result);
+    },
+    CalendarEra: function CalendarEra(calendar, dateLike) {
+      var era = ES.GetMethod(calendar, 'era');
+      var result = ES.Call(era, calendar, [dateLike]);
+
+      if (result !== undefined) {
+        result = ES.ToString(result);
+      }
+
+      return result;
+    },
+    CalendarEraYear: function CalendarEraYear(calendar, dateLike) {
+      var eraYear = ES.GetMethod(calendar, 'eraYear');
+      var result = ES.Call(eraYear, calendar, [dateLike]);
+
+      if (result !== undefined) {
+        result = ES.ToInteger(result);
+      }
+
+      return result;
+    },
+    CalendarDayOfWeek: function CalendarDayOfWeek(calendar, dateLike) {
+      var dayOfWeek = ES.GetMethod(calendar, 'dayOfWeek');
+      return ES.Call(dayOfWeek, calendar, [dateLike]);
+    },
+    CalendarDayOfYear: function CalendarDayOfYear(calendar, dateLike) {
+      var dayOfYear = ES.GetMethod(calendar, 'dayOfYear');
+      return ES.Call(dayOfYear, calendar, [dateLike]);
+    },
+    CalendarWeekOfYear: function CalendarWeekOfYear(calendar, dateLike) {
+      var weekOfYear = ES.GetMethod(calendar, 'weekOfYear');
+      return ES.Call(weekOfYear, calendar, [dateLike]);
+    },
+    CalendarDaysInWeek: function CalendarDaysInWeek(calendar, dateLike) {
+      var daysInWeek = ES.GetMethod(calendar, 'daysInWeek');
+      return ES.Call(daysInWeek, calendar, [dateLike]);
+    },
+    CalendarDaysInMonth: function CalendarDaysInMonth(calendar, dateLike) {
+      var daysInMonth = ES.GetMethod(calendar, 'daysInMonth');
+      return ES.Call(daysInMonth, calendar, [dateLike]);
+    },
+    CalendarDaysInYear: function CalendarDaysInYear(calendar, dateLike) {
+      var daysInYear = ES.GetMethod(calendar, 'daysInYear');
+      return ES.Call(daysInYear, calendar, [dateLike]);
+    },
+    CalendarMonthsInYear: function CalendarMonthsInYear(calendar, dateLike) {
+      var monthsInYear = ES.GetMethod(calendar, 'monthsInYear');
+      return ES.Call(monthsInYear, calendar, [dateLike]);
+    },
+    CalendarInLeapYear: function CalendarInLeapYear(calendar, dateLike) {
+      var inLeapYear = ES.GetMethod(calendar, 'inLeapYear');
+      return ES.Call(inLeapYear, calendar, [dateLike]);
     },
     ToTemporalCalendar: function ToTemporalCalendar(calendarLike) {
       if (ES.Type(calendarLike) === 'Object') {
@@ -4969,26 +5217,29 @@
       }
     },
     DateFromFields: function DateFromFields(calendar, fields, constructor, options) {
-      var result = calendar.dateFromFields(fields, options, constructor);
+      var dateFromFields = ES.GetMethod(calendar, 'dateFromFields');
+      var result = ES.Call(dateFromFields, calendar, [fields, options, constructor]);
       if (!ES.IsTemporalDate(result)) throw new TypeError('invalid result');
       return result;
     },
     YearMonthFromFields: function YearMonthFromFields(calendar, fields, constructor, options) {
-      var result = calendar.yearMonthFromFields(fields, options, constructor);
+      var yearMonthFromFields = ES.GetMethod(calendar, 'yearMonthFromFields');
+      var result = ES.Call(yearMonthFromFields, calendar, [fields, options, constructor]);
       if (!ES.IsTemporalYearMonth(result)) throw new TypeError('invalid result');
       return result;
     },
     MonthDayFromFields: function MonthDayFromFields(calendar, fields, constructor, options) {
-      var result = calendar.monthDayFromFields(fields, options, constructor);
+      var monthDayFromFields = ES.GetMethod(calendar, 'monthDayFromFields');
+      var result = ES.Call(monthDayFromFields, calendar, [fields, options, constructor]);
       if (!ES.IsTemporalMonthDay(result)) throw new TypeError('invalid result');
       return result;
     },
     TimeZoneFrom: function TimeZoneFrom(temporalTimeZoneLike) {
-      var TemporalTimeZone = GetIntrinsic$1('%Temporal.TimeZone%');
+      var TemporalTimeZone = GetIntrinsic('%Temporal.TimeZone%');
       var from = TemporalTimeZone.from;
 
       if (from === undefined) {
-        from = GetIntrinsic$1('%Temporal.TimeZone.from%');
+        from = GetIntrinsic('%Temporal.TimeZone.from%');
       }
 
       return ES.Call(from, TemporalTimeZone, [temporalTimeZoneLike]);
@@ -5012,18 +5263,18 @@
       return tz1 === tz2;
     },
     TemporalDateTimeToDate: function TemporalDateTimeToDate(dateTime) {
-      var Date = GetIntrinsic$1('%Temporal.PlainDate%');
+      var Date = GetIntrinsic('%Temporal.PlainDate%');
       return new Date(GetSlot(dateTime, ISO_YEAR), GetSlot(dateTime, ISO_MONTH), GetSlot(dateTime, ISO_DAY), GetSlot(dateTime, CALENDAR));
     },
     TemporalDateTimeToTime: function TemporalDateTimeToTime(dateTime) {
-      var Time = GetIntrinsic$1('%Temporal.PlainTime%');
-      return new Time(GetSlot(dateTime, ISO_HOUR), GetSlot(dateTime, ISO_MINUTE), GetSlot(dateTime, ISO_SECOND), GetSlot(dateTime, ISO_MILLISECOND), GetSlot(dateTime, ISO_MICROSECOND), GetSlot(dateTime, ISO_NANOSECOND), GetSlot(dateTime, CALENDAR));
+      var Time = GetIntrinsic('%Temporal.PlainTime%');
+      return new Time(GetSlot(dateTime, ISO_HOUR), GetSlot(dateTime, ISO_MINUTE), GetSlot(dateTime, ISO_SECOND), GetSlot(dateTime, ISO_MILLISECOND), GetSlot(dateTime, ISO_MICROSECOND), GetSlot(dateTime, ISO_NANOSECOND));
     },
     GetOffsetNanosecondsFor: function GetOffsetNanosecondsFor(timeZone, instant) {
-      var getOffsetNanosecondsFor = timeZone.getOffsetNanosecondsFor;
+      var getOffsetNanosecondsFor = ES.GetMethod(timeZone, 'getOffsetNanosecondsFor');
 
       if (getOffsetNanosecondsFor === undefined) {
-        getOffsetNanosecondsFor = GetIntrinsic$1('%Temporal.TimeZone.prototype.getOffsetNanosecondsFor%');
+        getOffsetNanosecondsFor = GetIntrinsic('%Temporal.TimeZone.prototype.getOffsetNanosecondsFor%');
       }
 
       var offsetNs = ES.Call(getOffsetNanosecondsFor, timeZone, [instant]);
@@ -5038,40 +5289,108 @@
 
       return offsetNs;
     },
-    GetOffsetStringFor: function GetOffsetStringFor(timeZone, instant) {
-      var getOffsetStringFor = timeZone.getOffsetStringFor;
-
-      if (getOffsetStringFor === undefined) {
-        getOffsetStringFor = GetIntrinsic$1('%Temporal.TimeZone.prototype.getOffsetStringFor%');
-      }
-
-      return ES.ToString(ES.Call(getOffsetStringFor, timeZone, [instant]));
+    BuiltinTimeZoneGetOffsetStringFor: function BuiltinTimeZoneGetOffsetStringFor(timeZone, instant) {
+      var offsetNs = ES.GetOffsetNanosecondsFor(timeZone, instant);
+      return ES.FormatTimeZoneOffsetString(offsetNs);
     },
-    GetTemporalDateTimeFor: function GetTemporalDateTimeFor(timeZone, instant, calendar) {
-      var getPlainDateTimeFor = timeZone.getPlainDateTimeFor;
+    BuiltinTimeZoneGetPlainDateTimeFor: function BuiltinTimeZoneGetPlainDateTimeFor(timeZone, instant, calendar) {
+      var ns = GetSlot(instant, EPOCHNANOSECONDS);
+      var offsetNs = ES.GetOffsetNanosecondsFor(timeZone, instant);
 
-      if (getPlainDateTimeFor === undefined) {
-        getPlainDateTimeFor = GetIntrinsic$1('%Temporal.TimeZone.prototype.getPlainDateTimeFor%');
-      }
+      var _ES$GetISOPartsFromEp = ES.GetISOPartsFromEpoch(ns),
+          year = _ES$GetISOPartsFromEp.year,
+          month = _ES$GetISOPartsFromEp.month,
+          day = _ES$GetISOPartsFromEp.day,
+          hour = _ES$GetISOPartsFromEp.hour,
+          minute = _ES$GetISOPartsFromEp.minute,
+          second = _ES$GetISOPartsFromEp.second,
+          millisecond = _ES$GetISOPartsFromEp.millisecond,
+          microsecond = _ES$GetISOPartsFromEp.microsecond,
+          nanosecond = _ES$GetISOPartsFromEp.nanosecond;
 
-      var dateTime = ES.Call(getPlainDateTimeFor, timeZone, [instant, calendar]);
+      var _ES$BalanceISODateTim = ES.BalanceISODateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond + offsetNs);
 
-      if (!ES.IsTemporalDateTime(dateTime)) {
-        throw new TypeError('Unexpected result from getPlainDateTimeFor');
-      }
-
-      return dateTime;
+      year = _ES$BalanceISODateTim.year;
+      month = _ES$BalanceISODateTim.month;
+      day = _ES$BalanceISODateTim.day;
+      hour = _ES$BalanceISODateTim.hour;
+      minute = _ES$BalanceISODateTim.minute;
+      second = _ES$BalanceISODateTim.second;
+      millisecond = _ES$BalanceISODateTim.millisecond;
+      microsecond = _ES$BalanceISODateTim.microsecond;
+      nanosecond = _ES$BalanceISODateTim.nanosecond;
+      var PlainDateTime = GetIntrinsic('%Temporal.PlainDateTime%');
+      return new PlainDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, calendar);
     },
-    GetTemporalInstantFor: function GetTemporalInstantFor(timeZone, dateTime, disambiguation) {
-      var getInstantFor = timeZone.getInstantFor;
+    BuiltinTimeZoneGetInstantFor: function BuiltinTimeZoneGetInstantFor(timeZone, dateTime, disambiguation) {
+      var Instant = GetIntrinsic('%Temporal.Instant%');
+      var possibleInstants = ES.GetPossibleInstantsFor(timeZone, dateTime);
+      var numInstants = possibleInstants.length;
+      if (numInstants === 1) return possibleInstants[0];
 
-      if (getInstantFor === undefined) {
-        getInstantFor = GetIntrinsic$1('%Temporal.TimeZone.prototype.getInstantFor%');
+      if (numInstants) {
+        switch (disambiguation) {
+          case 'compatible': // fall through because 'compatible' means 'earlier' for "fall back" transitions
+
+          case 'earlier':
+            return possibleInstants[0];
+
+          case 'later':
+            return possibleInstants[numInstants - 1];
+
+          case 'reject':
+            {
+              throw new RangeError('multiple instants found');
+            }
+        }
       }
 
-      return ES.Call(getInstantFor, timeZone, [dateTime, {
-        disambiguation: disambiguation
-      }]);
+      var utcns = ES.GetEpochFromISOParts(GetSlot(dateTime, ISO_YEAR), GetSlot(dateTime, ISO_MONTH), GetSlot(dateTime, ISO_DAY), GetSlot(dateTime, ISO_HOUR), GetSlot(dateTime, ISO_MINUTE), GetSlot(dateTime, ISO_SECOND), GetSlot(dateTime, ISO_MILLISECOND), GetSlot(dateTime, ISO_MICROSECOND), GetSlot(dateTime, ISO_NANOSECOND));
+      if (utcns === null) throw new RangeError('DateTime outside of supported range');
+      var dayBefore = new Instant(utcns.minus(86400e9));
+      var dayAfter = new Instant(utcns.plus(86400e9));
+      var offsetBefore = ES.GetOffsetNanosecondsFor(timeZone, dayBefore);
+      var offsetAfter = ES.GetOffsetNanosecondsFor(timeZone, dayAfter);
+      var nanoseconds = offsetAfter - offsetBefore;
+      var diff = ES.ToTemporalDurationRecord({
+        nanoseconds: nanoseconds
+      }, 'reject');
+
+      switch (disambiguation) {
+        case 'earlier':
+          {
+            var earlier = dateTime.subtract(diff);
+            return ES.GetPossibleInstantsFor(timeZone, earlier)[0];
+          }
+
+        case 'compatible': // fall through because 'compatible' means 'later' for "spring forward" transitions
+
+        case 'later':
+          {
+            var later = dateTime.add(diff);
+            var possible = ES.GetPossibleInstantsFor(timeZone, later);
+            return possible[possible.length - 1];
+          }
+
+        case 'reject':
+          {
+            throw new RangeError('no such instant found');
+          }
+      }
+    },
+    GetPossibleInstantsFor: function GetPossibleInstantsFor(timeZone, dateTime) {
+      var getPossibleInstantsFor = ES.GetMethod(timeZone, 'getPossibleInstantsFor');
+      var possibleInstants = ES.Call(getPossibleInstantsFor, timeZone, [dateTime]);
+      var result = ES.CreateListFromArrayLike(possibleInstants, ['Object']);
+      var numInstants = result.length;
+
+      for (var ix = 0; ix < numInstants; ix++) {
+        if (!ES.IsTemporalInstant(result[ix])) {
+          throw new TypeError('bad return from getPossibleInstantsFor');
+        }
+      }
+
+      return result;
     },
     ISOYearString: function ISOYearString(year) {
       var yearString;
@@ -5112,21 +5431,24 @@
       var outputTimeZone = timeZone;
 
       if (outputTimeZone === undefined) {
-        var TemporalTimeZone = GetIntrinsic$1('%Temporal.TimeZone%');
+        var TemporalTimeZone = GetIntrinsic('%Temporal.TimeZone%');
         outputTimeZone = new TemporalTimeZone('UTC');
       }
 
-      var dateTime = ES.GetTemporalDateTimeFor(outputTimeZone, instant, 'iso8601');
+      var iso = ES.GetISO8601Calendar();
+      var dateTime = ES.BuiltinTimeZoneGetPlainDateTimeFor(outputTimeZone, instant, iso);
       var year = ES.ISOYearString(GetSlot(dateTime, ISO_YEAR));
       var month = ES.ISODateTimePartString(GetSlot(dateTime, ISO_MONTH));
       var day = ES.ISODateTimePartString(GetSlot(dateTime, ISO_DAY));
       var hour = ES.ISODateTimePartString(GetSlot(dateTime, ISO_HOUR));
       var minute = ES.ISODateTimePartString(GetSlot(dateTime, ISO_MINUTE));
       var seconds = ES.FormatSecondsStringPart(GetSlot(dateTime, ISO_SECOND), GetSlot(dateTime, ISO_MILLISECOND), GetSlot(dateTime, ISO_MICROSECOND), GetSlot(dateTime, ISO_NANOSECOND), precision);
-      var timeZoneString = timeZone === undefined ? 'Z' : ES.GetOffsetStringFor(outputTimeZone, instant);
+      var timeZoneString = 'Z';
+      if (timeZone !== undefined) timeZoneString = ES.BuiltinTimeZoneGetOffsetStringFor(outputTimeZone, instant);
       return "".concat(year, "-").concat(month, "-").concat(day, "T").concat(hour, ":").concat(minute).concat(seconds).concat(timeZoneString);
     },
-    TemporalDurationToString: function TemporalDurationToString(duration, precision) {
+    TemporalDurationToString: function TemporalDurationToString(duration) {
+      var precision = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'auto';
       var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : undefined;
 
       function formatNumber(num) {
@@ -5196,7 +5518,7 @@
           }
         }
       } else if (precision !== 0) {
-        decimalPart = "".concat(fraction).slice(0, precision).padStart(precision, '0');
+        decimalPart = "".concat(fraction).padStart(9, '0').slice(0, precision);
       }
 
       if (decimalPart) secondParts.unshift('.', decimalPart);
@@ -5219,7 +5541,7 @@
     GetCanonicalTimeZoneIdentifier: function GetCanonicalTimeZoneIdentifier(timeZoneIdentifier) {
       var offsetNs = ES.ParseOffsetString(timeZoneIdentifier);
       if (offsetNs !== null) return ES.FormatTimeZoneOffsetString(offsetNs);
-      var formatter = new IntlDateTimeFormat('en-us', {
+      var formatter = new IntlDateTimeFormat$1('en-us', {
         timeZone: String(timeZoneIdentifier),
         hour12: false,
         year: 'numeric',
@@ -5243,7 +5565,7 @@
           microsecond = _ES$GetIANATimeZoneDa.microsecond,
           nanosecond = _ES$GetIANATimeZoneDa.nanosecond;
 
-      var utc = ES.GetEpochFromParts(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond);
+      var utc = ES.GetEpochFromISOParts(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond);
       if (utc === null) throw new RangeError('Date outside of supported range');
       return +utc.minus(epochNanoseconds);
     },
@@ -5273,7 +5595,7 @@
 
       return "".concat(sign).concat(hourString, ":").concat(minuteString).concat(post);
     },
-    GetEpochFromParts: function GetEpochFromParts(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond) {
+    GetEpochFromISOParts: function GetEpochFromISOParts(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond) {
       // Note: Date.UTC() interprets one and two-digit years as being in the
       // 20th century, so don't use it
       var legacyDate = new Date();
@@ -5287,7 +5609,7 @@
       if (ns.lesser(NS_MIN) || ns.greater(NS_MAX)) return null;
       return ns;
     },
-    GetPartsFromEpoch: function GetPartsFromEpoch(epochNanoseconds) {
+    GetISOPartsFromEpoch: function GetISOPartsFromEpoch(epochNanoseconds) {
       var _bigInt$divmod = BigInteger(epochNanoseconds).divmod(1e6),
           quotient = _bigInt$divmod.quotient,
           remainder = _bigInt$divmod.remainder;
@@ -5324,11 +5646,11 @@
       };
     },
     GetIANATimeZoneDateTimeParts: function GetIANATimeZoneDateTimeParts(epochNanoseconds, id) {
-      var _ES$GetPartsFromEpoch = ES.GetPartsFromEpoch(epochNanoseconds),
-          epochMilliseconds = _ES$GetPartsFromEpoch.epochMilliseconds,
-          millisecond = _ES$GetPartsFromEpoch.millisecond,
-          microsecond = _ES$GetPartsFromEpoch.microsecond,
-          nanosecond = _ES$GetPartsFromEpoch.nanosecond;
+      var _ES$GetISOPartsFromEp2 = ES.GetISOPartsFromEpoch(epochNanoseconds),
+          epochMilliseconds = _ES$GetISOPartsFromEp2.epochMilliseconds,
+          millisecond = _ES$GetISOPartsFromEp2.millisecond,
+          microsecond = _ES$GetISOPartsFromEp2.microsecond,
+          nanosecond = _ES$GetISOPartsFromEp2.nanosecond;
 
       var _ES$GetFormatterParts = ES.GetFormatterParts(id, epochMilliseconds),
           year = _ES$GetFormatterParts.year,
@@ -5338,7 +5660,7 @@
           minute = _ES$GetFormatterParts.minute,
           second = _ES$GetFormatterParts.second;
 
-      return ES.BalanceDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond);
+      return ES.BalanceISODateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond);
     },
     GetIANATimeZoneNextTransition: function GetIANATimeZoneNextTransition(epochNanoseconds, id) {
       var uppercap = ES.SystemUTCEpochNanoSeconds() + 366 * DAYMILLIS * 1e6;
@@ -5386,7 +5708,7 @@
       return result;
     },
     GetFormatterParts: function GetFormatterParts(timeZone, epochMilliseconds) {
-      var formatter = new IntlDateTimeFormat('en-us', {
+      var formatter = new IntlDateTimeFormat$1('en-us', {
         timeZone: timeZone,
         hour12: false,
         era: 'short',
@@ -5433,7 +5755,7 @@
       };
     },
     GetIANATimeZoneEpochValue: function GetIANATimeZoneEpochValue(id, year, month, day, hour, minute, second, millisecond, microsecond, nanosecond) {
-      var ns = ES.GetEpochFromParts(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond);
+      var ns = ES.GetEpochFromISOParts(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond);
       if (ns === null) throw new RangeError('DateTime outside of supported range');
       var dayNanos = BigInteger(DAYMILLIS).multiply(1e6);
       var nsEarlier = ns.minus(dayNanos);
@@ -5463,7 +5785,7 @@
       var isDiv400 = year % 400 === 0;
       return isDiv4 && (!isDiv100 || isDiv400);
     },
-    DaysInMonth: function DaysInMonth(year, month) {
+    ISODaysInMonth: function ISODaysInMonth(year, month) {
       var DoM = {
         standard: [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
         leapyear: [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
@@ -5487,7 +5809,7 @@
       var days = day;
 
       for (var m = month - 1; m > 0; m--) {
-        days += ES.DaysInMonth(year, m);
+        days += ES.ISODaysInMonth(year, m);
       }
 
       return days;
@@ -5499,7 +5821,7 @@
       var week = MathFloor((doy - dow + 10) / 7);
 
       if (week < 1) {
-        if (doj === (ES.LeapYear(year) ? 5 : 6)) {
+        if (doj === 5 || doj === 6 && ES.LeapYear(year - 1)) {
           return 53;
         } else {
           return 52;
@@ -5522,7 +5844,7 @@
 
       return 0;
     },
-    BalanceYearMonth: function BalanceYearMonth(year, month) {
+    BalanceISOYearMonth: function BalanceISOYearMonth(year, month) {
       if (!NumberIsFinite(year) || !NumberIsFinite(month)) throw new RangeError('infinity is out of range');
       month -= 1;
       year += MathFloor(month / 12);
@@ -5534,13 +5856,13 @@
         month: month
       };
     },
-    BalanceDate: function BalanceDate(year, month, day) {
+    BalanceISODate: function BalanceISODate(year, month, day) {
       if (!NumberIsFinite(day)) throw new RangeError('infinity is out of range');
 
-      var _ES$BalanceYearMonth = ES.BalanceYearMonth(year, month);
+      var _ES$BalanceISOYearMon = ES.BalanceISOYearMonth(year, month);
 
-      year = _ES$BalanceYearMonth.year;
-      month = _ES$BalanceYearMonth.month;
+      year = _ES$BalanceISOYearMon.year;
+      month = _ES$BalanceISOYearMon.month;
       var daysInYear = 0;
       var testYear = month > 2 ? year : year - 1;
 
@@ -5559,20 +5881,20 @@
       }
 
       while (day < 1) {
-        var _ES$BalanceYearMonth2 = ES.BalanceYearMonth(year, month - 1);
+        var _ES$BalanceISOYearMon2 = ES.BalanceISOYearMonth(year, month - 1);
 
-        year = _ES$BalanceYearMonth2.year;
-        month = _ES$BalanceYearMonth2.month;
-        day += ES.DaysInMonth(year, month);
+        year = _ES$BalanceISOYearMon2.year;
+        month = _ES$BalanceISOYearMon2.month;
+        day += ES.ISODaysInMonth(year, month);
       }
 
-      while (day > ES.DaysInMonth(year, month)) {
-        day -= ES.DaysInMonth(year, month);
+      while (day > ES.ISODaysInMonth(year, month)) {
+        day -= ES.ISODaysInMonth(year, month);
 
-        var _ES$BalanceYearMonth3 = ES.BalanceYearMonth(year, month + 1);
+        var _ES$BalanceISOYearMon3 = ES.BalanceISOYearMonth(year, month + 1);
 
-        year = _ES$BalanceYearMonth3.year;
-        month = _ES$BalanceYearMonth3.month;
+        year = _ES$BalanceISOYearMon3.year;
+        month = _ES$BalanceISOYearMon3.month;
       }
 
       return {
@@ -5581,7 +5903,7 @@
         day: day
       };
     },
-    BalanceDateTime: function BalanceDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond) {
+    BalanceISODateTime: function BalanceISODateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond) {
       var deltaDays;
 
       var _ES$BalanceTime = ES.BalanceTime(hour, minute, second, millisecond, microsecond, nanosecond);
@@ -5594,11 +5916,11 @@
       microsecond = _ES$BalanceTime.microsecond;
       nanosecond = _ES$BalanceTime.nanosecond;
 
-      var _ES$BalanceDate = ES.BalanceDate(year, month, day + deltaDays);
+      var _ES$BalanceISODate = ES.BalanceISODate(year, month, day + deltaDays);
 
-      year = _ES$BalanceDate.year;
-      month = _ES$BalanceDate.month;
-      day = _ES$BalanceDate.day;
+      year = _ES$BalanceISODate.year;
+      month = _ES$BalanceISODate.month;
+      day = _ES$BalanceISODate.day;
       return {
         year: year,
         month: month,
@@ -5648,7 +5970,7 @@
       return BigInteger(nanoseconds).add(microseconds.multiply(1000));
     },
     NanosecondsToDays: function NanosecondsToDays(nanoseconds, relativeTo) {
-      var TemporalInstant = GetIntrinsic$1('%Temporal.Instant%');
+      var TemporalInstant = GetIntrinsic('%Temporal.Instant%');
       var sign = MathSign(nanoseconds);
       nanoseconds = BigInteger(nanoseconds);
       var dayLengthNs = 86400e9;
@@ -5680,11 +6002,11 @@
       var timeZone = GetSlot(relativeTo, TIME_ZONE);
       var calendar = GetSlot(relativeTo, CALENDAR); // Find the difference in days only.
 
-      var dtStart = ES.GetTemporalDateTimeFor(timeZone, start, calendar);
-      var dtEnd = ES.GetTemporalDateTimeFor(timeZone, end, calendar);
+      var dtStart = ES.BuiltinTimeZoneGetPlainDateTimeFor(timeZone, start, calendar);
+      var dtEnd = ES.BuiltinTimeZoneGetPlainDateTimeFor(timeZone, end, calendar);
 
-      var _ES$DifferenceDateTim = ES.DifferenceDateTime(GetSlot(dtStart, ISO_YEAR), GetSlot(dtStart, ISO_MONTH), GetSlot(dtStart, ISO_DAY), GetSlot(dtStart, ISO_HOUR), GetSlot(dtStart, ISO_MINUTE), GetSlot(dtStart, ISO_SECOND), GetSlot(dtStart, ISO_MILLISECOND), GetSlot(dtStart, ISO_MICROSECOND), GetSlot(dtStart, ISO_NANOSECOND), GetSlot(dtEnd, ISO_YEAR), GetSlot(dtEnd, ISO_MONTH), GetSlot(dtEnd, ISO_DAY), GetSlot(dtEnd, ISO_HOUR), GetSlot(dtEnd, ISO_MINUTE), GetSlot(dtEnd, ISO_SECOND), GetSlot(dtEnd, ISO_MILLISECOND), GetSlot(dtEnd, ISO_MICROSECOND), GetSlot(dtEnd, ISO_NANOSECOND), calendar, 'days'),
-          days = _ES$DifferenceDateTim.days;
+      var _ES$DifferenceISODate = ES.DifferenceISODateTime(GetSlot(dtStart, ISO_YEAR), GetSlot(dtStart, ISO_MONTH), GetSlot(dtStart, ISO_DAY), GetSlot(dtStart, ISO_HOUR), GetSlot(dtStart, ISO_MINUTE), GetSlot(dtStart, ISO_SECOND), GetSlot(dtStart, ISO_MILLISECOND), GetSlot(dtStart, ISO_MICROSECOND), GetSlot(dtStart, ISO_NANOSECOND), GetSlot(dtEnd, ISO_YEAR), GetSlot(dtEnd, ISO_MONTH), GetSlot(dtEnd, ISO_DAY), GetSlot(dtEnd, ISO_HOUR), GetSlot(dtEnd, ISO_MINUTE), GetSlot(dtEnd, ISO_SECOND), GetSlot(dtEnd, ISO_MILLISECOND), GetSlot(dtEnd, ISO_MICROSECOND), GetSlot(dtEnd, ISO_NANOSECOND), calendar, 'days'),
+          days = _ES$DifferenceISODate.days;
 
       var intermediateNs = ES.AddZonedDateTime(start, timeZone, calendar, 0, 0, 0, days, 0, 0, 0, 0, 0, 0); // may disambiguate
       // If clock time after addition was in the middle of a skipped period, the
@@ -5865,8 +6187,8 @@
       };
     },
     UnbalanceDurationRelative: function UnbalanceDurationRelative(years, months, weeks, days, largestUnit, relativeTo) {
-      var TemporalDate = GetIntrinsic$1('%Temporal.PlainDate%');
-      var TemporalDuration = GetIntrinsic$1('%Temporal.Duration%');
+      var TemporalDate = GetIntrinsic('%Temporal.PlainDate%');
+      var TemporalDuration = GetIntrinsic('%Temporal.Duration%');
       var sign = ES.DurationSign(years, months, weeks, days, 0, 0, 0, 0, 0, 0);
       var calendar;
 
@@ -5891,8 +6213,8 @@
           if (!calendar) throw new RangeError('a starting point is required for months balancing'); // balance years down to months
 
           while (MathAbs(years) > 0) {
-            var newRelativeTo = calendar.dateAdd(relativeTo, oneYear, {}, TemporalDate);
-            var oneYearMonths = calendar.dateUntil(relativeTo, newRelativeTo, {
+            var newRelativeTo = ES.CalendarDateAdd(calendar, relativeTo, oneYear, {}, TemporalDate);
+            var oneYearMonths = ES.CalendarDateUntil(calendar, relativeTo, newRelativeTo, {
               largestUnit: 'months'
             }).months;
             relativeTo = newRelativeTo;
@@ -5983,8 +6305,8 @@
       };
     },
     BalanceDurationRelative: function BalanceDurationRelative(years, months, weeks, days, largestUnit, relativeTo) {
-      var TemporalDate = GetIntrinsic$1('%Temporal.PlainDate%');
-      var TemporalDuration = GetIntrinsic$1('%Temporal.Duration%');
+      var TemporalDate = GetIntrinsic('%Temporal.PlainDate%');
+      var TemporalDuration = GetIntrinsic('%Temporal.Duration%');
       var sign = ES.DurationSign(years, months, weeks, days, 0, 0, 0, 0, 0, 0);
       if (sign === 0) return {
         years: years,
@@ -6049,8 +6371,8 @@
             } // balance months up to years
 
 
-            newRelativeTo = calendar.dateAdd(relativeTo, oneYear, {}, TemporalDate);
-            var oneYearMonths = calendar.dateUntil(relativeTo, newRelativeTo, {
+            newRelativeTo = ES.CalendarDateAdd(calendar, relativeTo, oneYear, {}, TemporalDate);
+            var oneYearMonths = ES.CalendarDateUntil(calendar, relativeTo, newRelativeTo, {
               largestUnit: 'months'
             }).months;
 
@@ -6058,8 +6380,8 @@
               months -= oneYearMonths;
               years += sign;
               relativeTo = newRelativeTo;
-              newRelativeTo = calendar.dateAdd(relativeTo, oneYear, {}, TemporalDate);
-              oneYearMonths = calendar.dateUntil(relativeTo, newRelativeTo, {
+              newRelativeTo = ES.CalendarDateAdd(calendar, relativeTo, oneYear, {}, TemporalDate);
+              oneYearMonths = ES.CalendarDateUntil(calendar, relativeTo, newRelativeTo, {
                 largestUnit: 'months'
               }).months;
             }
@@ -6132,7 +6454,7 @@
         var calendar = GetSlot(relativeTo, CALENDAR);
         var offsetBefore = ES.GetOffsetNanosecondsFor(timeZone, instant);
         var after = ES.AddZonedDateTime(instant, timeZone, calendar, y, mon, w, d, h, min, s, ms, µs, ns);
-        var TemporalInstant = GetIntrinsic$1('%Temporal.Instant%');
+        var TemporalInstant = GetIntrinsic('%Temporal.Instant%');
         var instantAfter = new TemporalInstant(after);
         var offsetAfter = ES.GetOffsetNanosecondsFor(timeZone, instantAfter);
         return offsetAfter - offsetBefore;
@@ -6143,9 +6465,9 @@
     ConstrainToRange: function ConstrainToRange(value, min, max) {
       return MathMin(max, MathMax(min, value));
     },
-    ConstrainDate: function ConstrainDate(year, month, day) {
+    ConstrainISODate: function ConstrainISODate(year, month, day) {
       month = ES.ConstrainToRange(month, 1, 12);
-      day = ES.ConstrainToRange(day, 1, ES.DaysInMonth(year, month));
+      day = ES.ConstrainToRange(day, 1, ES.ISODaysInMonth(year, month));
       return {
         year: year,
         month: month,
@@ -6168,12 +6490,12 @@
         nanosecond: nanosecond
       };
     },
-    ConstrainDateTime: function ConstrainDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond) {
-      var _ES$ConstrainDate4 = ES.ConstrainDate(year, month, day);
+    ConstrainISODateTime: function ConstrainISODateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond) {
+      var _ES$ConstrainISODate3 = ES.ConstrainISODate(year, month, day);
 
-      year = _ES$ConstrainDate4.year;
-      month = _ES$ConstrainDate4.month;
-      day = _ES$ConstrainDate4.day;
+      year = _ES$ConstrainISODate3.year;
+      month = _ES$ConstrainISODate3.month;
+      day = _ES$ConstrainISODate3.day;
 
       var _ES$ConstrainTime2 = ES.ConstrainTime(hour, minute, second, millisecond, microsecond, nanosecond);
 
@@ -6198,9 +6520,9 @@
     RejectToRange: function RejectToRange(value, min, max) {
       if (value < min || value > max) throw new RangeError("value out of range: ".concat(min, " <= ").concat(value, " <= ").concat(max));
     },
-    RejectDate: function RejectDate(year, month, day) {
+    RejectISODate: function RejectISODate(year, month, day) {
       ES.RejectToRange(month, 1, 12);
-      ES.RejectToRange(day, 1, ES.DaysInMonth(year, month));
+      ES.RejectToRange(day, 1, ES.ISODaysInMonth(year, month));
     },
     RejectDateRange: function RejectDateRange(year, month, day) {
       // Noon avoids trouble at edges of DateTime range (excludes midnight)
@@ -6215,13 +6537,13 @@
       ES.RejectToRange(nanosecond, 0, 999);
     },
     RejectDateTime: function RejectDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond) {
-      ES.RejectDate(year, month, day);
+      ES.RejectISODate(year, month, day);
       ES.RejectTime(hour, minute, second, millisecond, microsecond, nanosecond);
     },
     RejectDateTimeRange: function RejectDateTimeRange(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond) {
       ES.RejectToRange(year, YEAR_MIN, YEAR_MAX); // Reject any DateTime 24 hours or more outside the Instant range
 
-      if (year === YEAR_MIN && null == ES.GetEpochFromParts(year, month, day + 1, hour, minute, second, millisecond, microsecond, nanosecond - 1) || year === YEAR_MAX && null == ES.GetEpochFromParts(year, month, day - 1, hour, minute, second, millisecond, microsecond, nanosecond + 1)) {
+      if (year === YEAR_MIN && null == ES.GetEpochFromISOParts(year, month, day + 1, hour, minute, second, millisecond, microsecond, nanosecond - 1) || year === YEAR_MAX && null == ES.GetEpochFromISOParts(year, month, day - 1, hour, minute, second, millisecond, microsecond, nanosecond + 1)) {
         throw new RangeError('DateTime outside of supported range');
       }
     },
@@ -6258,14 +6580,14 @@
         if (propSign !== 0 && propSign !== sign) throw new RangeError('mixed-sign values not allowed as duration fields');
       }
     },
-    DifferenceDate: function DifferenceDate(y1, m1, d1, y2, m2, d2) {
+    DifferenceISODate: function DifferenceISODate(y1, m1, d1, y2, m2, d2) {
       var largestUnit = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : 'days';
 
       switch (largestUnit) {
         case 'years':
         case 'months':
           {
-            var sign = -ES.CompareTemporalDate(y1, m1, d1, y2, m2, d2);
+            var sign = -ES.CompareISODate(y1, m1, d1, y2, m2, d2);
             if (sign === 0) return {
               years: 0,
               months: 0,
@@ -6283,8 +6605,8 @@
               day: d2
             };
             var years = end.year - start.year;
-            var mid = ES.AddDate(y1, m1, d1, years, 0, 0, 0, 'constrain');
-            var midSign = -ES.CompareTemporalDate(mid.year, mid.month, mid.day, y2, m2, d2);
+            var mid = ES.AddISODate(y1, m1, d1, years, 0, 0, 0, 'constrain');
+            var midSign = -ES.CompareISODate(mid.year, mid.month, mid.day, y2, m2, d2);
 
             if (midSign === 0) {
               return largestUnit === 'years' ? {
@@ -6307,8 +6629,8 @@
               months += sign * 12;
             }
 
-            mid = ES.AddDate(y1, m1, d1, years, months, 0, 0, 'constrain');
-            midSign = -ES.CompareTemporalDate(mid.year, mid.month, mid.day, y2, m2, d2);
+            mid = ES.AddISODate(y1, m1, d1, years, months, 0, 0, 'constrain');
+            midSign = -ES.CompareISODate(mid.year, mid.month, mid.day, y2, m2, d2);
 
             if (midSign === 0) {
               return largestUnit === 'years' ? {
@@ -6334,8 +6656,8 @@
                 months = 11 * sign;
               }
 
-              mid = ES.AddDate(y1, m1, d1, years, months, 0, 0, 'constrain');
-              midSign = -ES.CompareTemporalDate(y1, m1, d1, mid.year, mid.month, mid.day);
+              mid = ES.AddISODate(y1, m1, d1, years, months, 0, 0, 'constrain');
+              midSign = -ES.CompareISODate(y1, m1, d1, mid.year, mid.month, mid.day);
             }
 
             var days = 0; // If we get here, months and years are correct (no overflow), and `mid`
@@ -6351,11 +6673,11 @@
             } else if (sign < 0) {
               // 2) end is previous month from intermediate (negative duration)
               // Example: intermediate: Feb 1, end: Jan 30, DaysInMonth = 31, days = -2
-              days = -mid.day - (ES.DaysInMonth(end.year, end.month) - end.day);
+              days = -mid.day - (ES.ISODaysInMonth(end.year, end.month) - end.day);
             } else {
               // 3) end is next month from intermediate (positive duration)
               // Example: intermediate: Jan 29, end: Feb 1, DaysInMonth = 31, days = 3
-              days = end.day + (ES.DaysInMonth(mid.year, mid.month) - mid.day);
+              days = end.day + (ES.ISODaysInMonth(mid.year, mid.month) - mid.day);
             }
 
             if (largestUnit === 'months') {
@@ -6376,7 +6698,7 @@
           {
             var larger, smaller, _sign;
 
-            if (ES.CompareTemporalDate(y1, m1, d1, y2, m2, d2) < 0) {
+            if (ES.CompareISODate(y1, m1, d1, y2, m2, d2) < 0) {
               smaller = {
                 year: y1,
                 month: m1,
@@ -6491,9 +6813,9 @@
         nanoseconds: nanoseconds
       };
     },
-    DifferenceDateTime: function DifferenceDateTime(y1, mon1, d1, h1, min1, s1, ms1, µs1, ns1, y2, mon2, d2, h2, min2, s2, ms2, µs2, ns2, calendar, largestUnit) {
+    DifferenceISODateTime: function DifferenceISODateTime(y1, mon1, d1, h1, min1, s1, ms1, µs1, ns1, y2, mon2, d2, h2, min2, s2, ms2, µs2, ns2, calendar, largestUnit) {
       var options = arguments.length > 20 && arguments[20] !== undefined ? arguments[20] : {};
-      var TemporalDate = GetIntrinsic$1('%Temporal.PlainDate%');
+      var TemporalDate = GetIntrinsic('%Temporal.PlainDate%');
 
       var _ES$DifferenceTime = ES.DifferenceTime(h1, min1, s1, ms1, µs1, ns1, h2, min2, s2, ms2, µs2, ns2),
           deltaDays = _ES$DifferenceTime.deltaDays,
@@ -6504,11 +6826,11 @@
           microseconds = _ES$DifferenceTime.microseconds,
           nanoseconds = _ES$DifferenceTime.nanoseconds;
 
-      var _ES$BalanceDate2 = ES.BalanceDate(y1, mon1, d1 + deltaDays);
+      var _ES$BalanceISODate2 = ES.BalanceISODate(y1, mon1, d1 + deltaDays);
 
-      y1 = _ES$BalanceDate2.year;
-      mon1 = _ES$BalanceDate2.month;
-      d1 = _ES$BalanceDate2.day;
+      y1 = _ES$BalanceISODate2.year;
+      mon1 = _ES$BalanceISODate2.month;
+      d1 = _ES$BalanceISODate2.day;
       var date1 = new TemporalDate(y1, mon1, d1, calendar);
       var date2 = new TemporalDate(y2, mon2, d2, calendar);
       var dateLargestUnit = ES.LargerOfTwoTemporalDurationUnits('days', largestUnit);
@@ -6517,11 +6839,11 @@
         largestUnit: dateLargestUnit
       });
 
-      var _calendar$dateUntil = calendar.dateUntil(date1, date2, untilOptions),
-          years = _calendar$dateUntil.years,
-          months = _calendar$dateUntil.months,
-          weeks = _calendar$dateUntil.weeks,
-          days = _calendar$dateUntil.days; // Signs of date part and time part may not agree; balance them together
+      var _ES$CalendarDateUntil = ES.CalendarDateUntil(calendar, date1, date2, untilOptions),
+          years = _ES$CalendarDateUntil.years,
+          months = _ES$CalendarDateUntil.months,
+          weeks = _ES$CalendarDateUntil.weeks,
+          days = _ES$CalendarDateUntil.days; // Signs of date part and time part may not agree; balance them together
 
 
       var _ES$BalanceDuration = ES.BalanceDuration(days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds, largestUnit);
@@ -6565,22 +6887,22 @@
       } // Find the difference in dates only.
 
 
-      var TemporalInstant = GetIntrinsic$1('%Temporal.Instant%');
+      var TemporalInstant = GetIntrinsic('%Temporal.Instant%');
       var start = new TemporalInstant(ns1);
       var end = new TemporalInstant(ns2);
-      var dtStart = ES.GetTemporalDateTimeFor(timeZone, start, calendar);
-      var dtEnd = ES.GetTemporalDateTimeFor(timeZone, end, calendar);
+      var dtStart = ES.BuiltinTimeZoneGetPlainDateTimeFor(timeZone, start, calendar);
+      var dtEnd = ES.BuiltinTimeZoneGetPlainDateTimeFor(timeZone, end, calendar);
 
-      var _ES$DifferenceDateTim2 = ES.DifferenceDateTime(GetSlot(dtStart, ISO_YEAR), GetSlot(dtStart, ISO_MONTH), GetSlot(dtStart, ISO_DAY), GetSlot(dtStart, ISO_HOUR), GetSlot(dtStart, ISO_MINUTE), GetSlot(dtStart, ISO_SECOND), GetSlot(dtStart, ISO_MILLISECOND), GetSlot(dtStart, ISO_MICROSECOND), GetSlot(dtStart, ISO_NANOSECOND), GetSlot(dtEnd, ISO_YEAR), GetSlot(dtEnd, ISO_MONTH), GetSlot(dtEnd, ISO_DAY), GetSlot(dtEnd, ISO_HOUR), GetSlot(dtEnd, ISO_MINUTE), GetSlot(dtEnd, ISO_SECOND), GetSlot(dtEnd, ISO_MILLISECOND), GetSlot(dtEnd, ISO_MICROSECOND), GetSlot(dtEnd, ISO_NANOSECOND), calendar, largestUnit, options),
-          years = _ES$DifferenceDateTim2.years,
-          months = _ES$DifferenceDateTim2.months,
-          weeks = _ES$DifferenceDateTim2.weeks,
-          days = _ES$DifferenceDateTim2.days;
+      var _ES$DifferenceISODate2 = ES.DifferenceISODateTime(GetSlot(dtStart, ISO_YEAR), GetSlot(dtStart, ISO_MONTH), GetSlot(dtStart, ISO_DAY), GetSlot(dtStart, ISO_HOUR), GetSlot(dtStart, ISO_MINUTE), GetSlot(dtStart, ISO_SECOND), GetSlot(dtStart, ISO_MILLISECOND), GetSlot(dtStart, ISO_MICROSECOND), GetSlot(dtStart, ISO_NANOSECOND), GetSlot(dtEnd, ISO_YEAR), GetSlot(dtEnd, ISO_MONTH), GetSlot(dtEnd, ISO_DAY), GetSlot(dtEnd, ISO_HOUR), GetSlot(dtEnd, ISO_MINUTE), GetSlot(dtEnd, ISO_SECOND), GetSlot(dtEnd, ISO_MILLISECOND), GetSlot(dtEnd, ISO_MICROSECOND), GetSlot(dtEnd, ISO_NANOSECOND), calendar, largestUnit, options),
+          years = _ES$DifferenceISODate2.years,
+          months = _ES$DifferenceISODate2.months,
+          weeks = _ES$DifferenceISODate2.weeks,
+          days = _ES$DifferenceISODate2.days;
 
       var intermediateNs = ES.AddZonedDateTime(start, timeZone, calendar, years, months, weeks, 0, 0, 0, 0, 0, 0, 0); // may disambiguate
 
       var timeRemainderNs = ns2.subtract(intermediateNs);
-      var TemporalZonedDateTime = GetIntrinsic$1('%Temporal.ZonedDateTime%');
+      var TemporalZonedDateTime = GetIntrinsic('%Temporal.ZonedDateTime%');
       var intermediate = new TemporalZonedDateTime(intermediateNs, timeZone, calendar);
 
       var _ES$NanosecondsToDays2 = ES.NanosecondsToDays(timeRemainderNs, intermediate);
@@ -6610,28 +6932,28 @@
         nanoseconds: nanoseconds
       };
     },
-    AddDate: function AddDate(year, month, day, years, months, weeks, days, overflow) {
+    AddISODate: function AddISODate(year, month, day, years, months, weeks, days, overflow) {
       year += years;
       month += months;
 
-      var _ES$BalanceYearMonth4 = ES.BalanceYearMonth(year, month);
+      var _ES$BalanceISOYearMon4 = ES.BalanceISOYearMonth(year, month);
 
-      year = _ES$BalanceYearMonth4.year;
-      month = _ES$BalanceYearMonth4.month;
+      year = _ES$BalanceISOYearMon4.year;
+      month = _ES$BalanceISOYearMon4.month;
 
-      var _ES$RegulateDate = ES.RegulateDate(year, month, day, overflow);
+      var _ES$RegulateISODate = ES.RegulateISODate(year, month, day, overflow);
 
-      year = _ES$RegulateDate.year;
-      month = _ES$RegulateDate.month;
-      day = _ES$RegulateDate.day;
+      year = _ES$RegulateISODate.year;
+      month = _ES$RegulateISODate.month;
+      day = _ES$RegulateISODate.day;
       days += 7 * weeks;
       day += days;
 
-      var _ES$BalanceDate3 = ES.BalanceDate(year, month, day);
+      var _ES$BalanceISODate3 = ES.BalanceISODate(year, month, day);
 
-      year = _ES$BalanceDate3.year;
-      month = _ES$BalanceDate3.month;
-      day = _ES$BalanceDate3.day;
+      year = _ES$BalanceISODate3.year;
+      month = _ES$BalanceISODate3.month;
+      day = _ES$BalanceISODate3.day;
       return {
         year: year,
         month: month,
@@ -6670,24 +6992,24 @@
       days += 7 * weeks;
       day -= days;
 
-      var _ES$BalanceDate4 = ES.BalanceDate(year, month, day);
+      var _ES$BalanceISODate4 = ES.BalanceISODate(year, month, day);
 
-      year = _ES$BalanceDate4.year;
-      month = _ES$BalanceDate4.month;
-      day = _ES$BalanceDate4.day;
+      year = _ES$BalanceISODate4.year;
+      month = _ES$BalanceISODate4.month;
+      day = _ES$BalanceISODate4.day;
       month -= months;
       year -= years;
 
-      var _ES$BalanceYearMonth5 = ES.BalanceYearMonth(year, month);
+      var _ES$BalanceISOYearMon5 = ES.BalanceISOYearMonth(year, month);
 
-      year = _ES$BalanceYearMonth5.year;
-      month = _ES$BalanceYearMonth5.month;
+      year = _ES$BalanceISOYearMon5.year;
+      month = _ES$BalanceISOYearMon5.month;
 
-      var _ES$RegulateDate2 = ES.RegulateDate(year, month, day, overflow);
+      var _ES$RegulateISODate2 = ES.RegulateISODate(year, month, day, overflow);
 
-      year = _ES$RegulateDate2.year;
-      month = _ES$RegulateDate2.month;
-      day = _ES$RegulateDate2.day;
+      year = _ES$RegulateISODate2.year;
+      month = _ES$RegulateISODate2.month;
+      day = _ES$RegulateISODate2.day;
       return {
         year: year,
         month: month,
@@ -6717,8 +7039,8 @@
         microseconds = _ES$BalanceDuration3.microseconds;
         nanoseconds = _ES$BalanceDuration3.nanoseconds;
       } else if (ES.IsTemporalDateTime(relativeTo)) {
-        var TemporalPlainDate = GetIntrinsic$1('%Temporal.PlainDate%');
-        var TemporalDuration = GetIntrinsic$1('%Temporal.Duration%');
+        var TemporalPlainDate = GetIntrinsic('%Temporal.PlainDate%');
+        var TemporalDuration = GetIntrinsic('%Temporal.Duration%');
         var calendar = GetSlot(relativeTo, CALENDAR);
         var datePart = new TemporalPlainDate(GetSlot(relativeTo, ISO_YEAR), GetSlot(relativeTo, ISO_MONTH), GetSlot(relativeTo, ISO_DAY), calendar);
         var dateDuration1 = new TemporalDuration(y1, mon1, w1, d1, 0, 0, 0, 0, 0, 0);
@@ -6728,14 +7050,14 @@
         var end = ES.Call(dateAdd, calendar, [intermediate, dateDuration2, {}, TemporalPlainDate]);
         var dateLargestUnit = ES.LargerOfTwoTemporalDurationUnits('days', largestUnit);
 
-        var _calendar$dateUntil2 = calendar.dateUntil(datePart, end, {
+        var _ES$CalendarDateUntil2 = ES.CalendarDateUntil(calendar, datePart, end, {
           largestUnit: dateLargestUnit
         });
 
-        years = _calendar$dateUntil2.years;
-        months = _calendar$dateUntil2.months;
-        weeks = _calendar$dateUntil2.weeks;
-        days = _calendar$dateUntil2.days;
+        years = _ES$CalendarDateUntil2.years;
+        months = _ES$CalendarDateUntil2.months;
+        weeks = _ES$CalendarDateUntil2.weeks;
+        days = _ES$CalendarDateUntil2.days;
 
         var _ES$BalanceDuration4 = ES.BalanceDuration(days, h1 + h2, min1 + min2, s1 + s2, ms1 + ms2, µs1 + µs2, ns1 + ns2, largestUnit);
 
@@ -6748,7 +7070,7 @@
         nanoseconds = _ES$BalanceDuration4.nanoseconds;
       } else {
         // relativeTo is a ZonedDateTime
-        var TemporalInstant = GetIntrinsic$1('%Temporal.Instant%');
+        var TemporalInstant = GetIntrinsic('%Temporal.Instant%');
         var timeZone = GetSlot(relativeTo, TIME_ZONE);
 
         var _calendar4 = GetSlot(relativeTo, CALENDAR);
@@ -6835,11 +7157,11 @@
       nanosecond = _ES$AddTime.nanosecond;
       days += deltaDays; // Delegate the date part addition to the calendar
 
-      var TemporalDate = GetIntrinsic$1('%Temporal.PlainDate%');
-      var TemporalDuration = GetIntrinsic$1('%Temporal.Duration%');
+      var TemporalDate = GetIntrinsic('%Temporal.PlainDate%');
+      var TemporalDuration = GetIntrinsic('%Temporal.Duration%');
       var datePart = new TemporalDate(year, month, day, calendar);
       var dateDuration = new TemporalDuration(years, months, weeks, days, 0, 0, 0, 0, 0, 0);
-      var addedDate = calendar.dateAdd(datePart, dateDuration, options, TemporalDate);
+      var addedDate = ES.CalendarDateAdd(calendar, datePart, dateDuration, options, TemporalDate);
       return {
         year: GetSlot(addedDate, ISO_YEAR),
         month: GetSlot(addedDate, ISO_MONTH),
@@ -6861,26 +7183,24 @@
       // not expected and so is avoided below via a fast path for time-only
       // arithmetic.
       // BTW, this behavior is similar in spirit to offset: 'prefer' in `with`.
+      var TemporalDuration = GetIntrinsic('%Temporal.Duration%');
+
       if (ES.DurationSign(years, months, weeks, days, 0, 0, 0, 0, 0, 0) === 0) {
         return ES.AddInstant(GetSlot(instant, EPOCHNANOSECONDS), h, min, s, ms, µs, ns);
       } // RFC 5545 requires the date portion to be added in calendar days and the
       // time portion to be added in exact time.
 
 
-      var dt = ES.GetTemporalDateTimeFor(timeZone, instant, calendar);
-      var TemporalDate = GetIntrinsic$1('%Temporal.PlainDate%');
+      var dt = ES.BuiltinTimeZoneGetPlainDateTimeFor(timeZone, instant, calendar);
+      var TemporalDate = GetIntrinsic('%Temporal.PlainDate%');
       var datePart = new TemporalDate(GetSlot(dt, ISO_YEAR), GetSlot(dt, ISO_MONTH), GetSlot(dt, ISO_DAY), calendar);
-      var addedDate = calendar.dateAdd(datePart, {
-        years: years,
-        months: months,
-        weeks: weeks,
-        days: days
-      }, options, TemporalDate);
-      var TemporalDateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
+      var dateDuration = new TemporalDuration(years, months, weeks, days, 0, 0, 0, 0, 0, 0);
+      var addedDate = ES.CalendarDateAdd(calendar, datePart, dateDuration, options, TemporalDate);
+      var TemporalDateTime = GetIntrinsic('%Temporal.PlainDateTime%');
       var dtIntermediate = new TemporalDateTime(GetSlot(addedDate, ISO_YEAR), GetSlot(addedDate, ISO_MONTH), GetSlot(addedDate, ISO_DAY), GetSlot(dt, ISO_HOUR), GetSlot(dt, ISO_MINUTE), GetSlot(dt, ISO_SECOND), GetSlot(dt, ISO_MILLISECOND), GetSlot(dt, ISO_MICROSECOND), GetSlot(dt, ISO_NANOSECOND), calendar); // Note that 'compatible' is used below because this disambiguation behavior
       // is required by RFC 5545.
 
-      var instantIntermediate = ES.GetTemporalInstantFor(timeZone, dtIntermediate, 'compatible');
+      var instantIntermediate = ES.BuiltinTimeZoneGetInstantFor(timeZone, dtIntermediate, 'compatible');
       return ES.AddInstant(GetSlot(instantIntermediate, EPOCHNANOSECONDS), h, min, s, ms, µs, ns);
     },
     RoundNumberToIncrement: function RoundNumberToIncrement(quantity, increment, mode) {
@@ -6922,7 +7242,7 @@
       var roundedRemainder = ES.RoundNumberToIncrement(remainder, nsPerTimeUnit[unit] * increment, roundingMode);
       return wholeDays.plus(roundedRemainder);
     },
-    RoundDateTime: function RoundDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, increment, unit, roundingMode) {
+    RoundISODateTime: function RoundISODateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, increment, unit, roundingMode) {
       var dayLengthNs = arguments.length > 12 && arguments[12] !== undefined ? arguments[12] : 86400e9;
       var deltaDays = 0;
 
@@ -6936,11 +7256,11 @@
       microsecond = _ES$RoundTime.microsecond;
       nanosecond = _ES$RoundTime.nanosecond;
 
-      var _ES$BalanceDate5 = ES.BalanceDate(year, month, day + deltaDays);
+      var _ES$BalanceISODate5 = ES.BalanceISODate(year, month, day + deltaDays);
 
-      year = _ES$BalanceDate5.year;
-      month = _ES$BalanceDate5.month;
-      day = _ES$BalanceDate5.day;
+      year = _ES$BalanceISODate5.year;
+      month = _ES$BalanceISODate5.month;
+      day = _ES$BalanceISODate5.day;
       return {
         year: year,
         month: month,
@@ -7019,12 +7339,12 @@
       }
     },
     DaysUntil: function DaysUntil(earlier, later) {
-      return ES.DifferenceDate(GetSlot(earlier, ISO_YEAR), GetSlot(earlier, ISO_MONTH), GetSlot(earlier, ISO_DAY), GetSlot(later, ISO_YEAR), GetSlot(later, ISO_MONTH), GetSlot(later, ISO_DAY), 'days').days;
+      return ES.DifferenceISODate(GetSlot(earlier, ISO_YEAR), GetSlot(earlier, ISO_MONTH), GetSlot(earlier, ISO_DAY), GetSlot(later, ISO_YEAR), GetSlot(later, ISO_MONTH), GetSlot(later, ISO_DAY), 'days').days;
     },
     MoveRelativeDate: function MoveRelativeDate(calendar, relativeTo, duration) {
-      var TemporalDate = GetIntrinsic$1('%Temporal.PlainDate%');
-      var PlainDateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
-      var later = calendar.dateAdd(relativeTo, duration, {}, TemporalDate);
+      var TemporalDate = GetIntrinsic('%Temporal.PlainDate%');
+      var PlainDateTime = GetIntrinsic('%Temporal.PlainDateTime%');
+      var later = ES.CalendarDateAdd(calendar, relativeTo, duration, {}, TemporalDate);
       var days = ES.DaysUntil(relativeTo, later);
       relativeTo = new PlainDateTime(GetSlot(later, ISO_YEAR), GetSlot(later, ISO_MONTH), GetSlot(later, ISO_DAY), GetSlot(relativeTo, ISO_HOUR), GetSlot(relativeTo, ISO_MINUTE), GetSlot(relativeTo, ISO_SECOND), GetSlot(relativeTo, ISO_MILLISECOND), GetSlot(relativeTo, ISO_MICROSECOND), GetSlot(relativeTo, ISO_NANOSECOND), GetSlot(relativeTo, CALENDAR));
       return {
@@ -7036,7 +7356,7 @@
       var timeZone = GetSlot(relativeTo, TIME_ZONE);
       var calendar = GetSlot(relativeTo, CALENDAR);
       var intermediateNs = ES.AddZonedDateTime(GetSlot(relativeTo, INSTANT), timeZone, calendar, years, months, weeks, days, 0, 0, 0, 0, 0, 0);
-      var TemporalZonedDateTime = GetIntrinsic$1('%Temporal.ZonedDateTime%');
+      var TemporalZonedDateTime = GetIntrinsic('%Temporal.ZonedDateTime%');
       return new TemporalZonedDateTime(intermediateNs, timeZone, calendar);
     },
     AdjustRoundedDurationDays: function AdjustRoundedDurationDays(years, months, weeks, days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds, increment, unit, roundingMode, relativeTo) {
@@ -7068,7 +7388,7 @@
       var timeZone = GetSlot(relativeTo, TIME_ZONE);
       var calendar = GetSlot(relativeTo, CALENDAR);
       var dayStart = ES.AddZonedDateTime(GetSlot(relativeTo, INSTANT), timeZone, calendar, years, months, weeks, days, 0, 0, 0, 0, 0, 0);
-      var TemporalInstant = GetIntrinsic$1('%Temporal.Instant%');
+      var TemporalInstant = GetIntrinsic('%Temporal.Instant%');
       var dayEnd = ES.AddZonedDateTime(new TemporalInstant(dayStart), timeZone, calendar, 0, 0, 0, direction, 0, 0, 0, 0, 0, 0);
       var dayLengthNs = dayEnd.subtract(dayStart);
 
@@ -7106,14 +7426,14 @@
     },
     RoundDuration: function RoundDuration(years, months, weeks, days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds, increment, unit, roundingMode) {
       var relativeTo = arguments.length > 13 && arguments[13] !== undefined ? arguments[13] : undefined;
-      var TemporalDate = GetIntrinsic$1('%Temporal.PlainDate%');
-      var TemporalDuration = GetIntrinsic$1('%Temporal.Duration%');
+      var TemporalDate = GetIntrinsic('%Temporal.PlainDate%');
+      var TemporalDuration = GetIntrinsic('%Temporal.Duration%');
       var calendar, zdtRelative;
 
       if (relativeTo) {
         if (ES.IsTemporalZonedDateTime(relativeTo)) {
           zdtRelative = relativeTo;
-          relativeTo = ES.GetTemporalDateTimeFor(GetSlot(relativeTo, TIME_ZONE), GetSlot(relativeTo, INSTANT), GetSlot(relativeTo, CALENDAR));
+          relativeTo = ES.BuiltinTimeZoneGetPlainDateTimeFor(GetSlot(relativeTo, TIME_ZONE), GetSlot(relativeTo, INSTANT), GetSlot(relativeTo, CALENDAR));
         } else if (!ES.IsTemporalDateTime(relativeTo)) {
           throw new TypeError('starting point must be PlainDateTime or ZonedDateTime');
         }
@@ -7153,35 +7473,29 @@
             if (!calendar) throw new RangeError('A starting point is required for years rounding'); // convert months and weeks to days by calculating difference(
             // relativeTo + years, relativeTo + { years, months, weeks })
 
-            var yearsLater = calendar.dateAdd(relativeTo, new TemporalDuration(years), {}, TemporalDate);
+            var yearsLater = ES.CalendarDateAdd(calendar, relativeTo, new TemporalDuration(years), {}, TemporalDate);
             var yearsMonthsWeeks = new TemporalDuration(years, months, weeks);
-            var yearsMonthsWeeksLater = calendar.dateAdd(relativeTo, yearsMonthsWeeks, {}, TemporalDate);
+            var yearsMonthsWeeksLater = ES.CalendarDateAdd(calendar, relativeTo, yearsMonthsWeeks, {}, TemporalDate);
             var monthsWeeksInDays = ES.DaysUntil(yearsLater, yearsMonthsWeeksLater);
             relativeTo = yearsLater;
-            days += monthsWeeksInDays; // Years may be different lengths of days depending on the calendar, so
-            // we need to convert days to years in a loop. We get the number of days
-            // in the one-year period after (or preceding, depending on the sign of
-            // the duration) the relativeTo date, and convert that number of days to
-            // one year, repeating until the number of days is less than a year.
-
-            var sign = MathSign(days);
+            days += monthsWeeksInDays;
+            var daysLater = ES.CalendarDateAdd(calendar, relativeTo, {
+              days: days
+            }, {}, TemporalDate);
+            var yearsPassed = ES.CalendarDateUntil(calendar, relativeTo, daysLater, {
+              largestUnit: 'years'
+            }).years;
+            years += yearsPassed;
+            var oldRelativeTo = relativeTo;
+            relativeTo = ES.CalendarDateAdd(calendar, relativeTo, {
+              years: yearsPassed
+            }, {}, TemporalDate);
+            var daysPassed = ES.DaysUntil(oldRelativeTo, relativeTo);
+            days -= daysPassed;
             var oneYear = new TemporalDuration(days < 0 ? -1 : 1);
-            var oneYearDays;
 
-            var _ES$MoveRelativeDate14 = ES.MoveRelativeDate(calendar, relativeTo, oneYear);
-
-            relativeTo = _ES$MoveRelativeDate14.relativeTo;
-            oneYearDays = _ES$MoveRelativeDate14.days;
-
-            while (MathAbs(days) >= MathAbs(oneYearDays)) {
-              years += sign;
-              days -= oneYearDays;
-
-              var _ES$MoveRelativeDate15 = ES.MoveRelativeDate(calendar, relativeTo, oneYear);
-
-              relativeTo = _ES$MoveRelativeDate15.relativeTo;
-              oneYearDays = _ES$MoveRelativeDate15.days;
-            } // Note that `nanoseconds` below (here and in similar code for months,
+            var _ES$MoveRelativeDate14 = ES.MoveRelativeDate(calendar, relativeTo, oneYear),
+                oneYearDays = _ES$MoveRelativeDate14.days; // Note that `nanoseconds` below (here and in similar code for months,
             // weeks, and days further below) isn't actually nanoseconds for the
             // full date range.  Instead, it's a BigInt representation of total
             // days multiplied by the number of nanoseconds in the last day of
@@ -7205,35 +7519,34 @@
             //   { years, months }, relativeTo + { years, months, weeks })
 
             var yearsMonths = new TemporalDuration(years, months);
-            var yearsMonthsLater = calendar.dateAdd(relativeTo, yearsMonths, {}, TemporalDate);
+            var yearsMonthsLater = ES.CalendarDateAdd(calendar, relativeTo, yearsMonths, {}, TemporalDate);
 
             var _yearsMonthsWeeks = new TemporalDuration(years, months, weeks);
 
-            var _yearsMonthsWeeksLater = calendar.dateAdd(relativeTo, _yearsMonthsWeeks, {}, TemporalDate);
+            var _yearsMonthsWeeksLater = ES.CalendarDateAdd(calendar, relativeTo, _yearsMonthsWeeks, {}, TemporalDate);
 
             var weeksInDays = ES.DaysUntil(yearsMonthsLater, _yearsMonthsWeeksLater);
             relativeTo = yearsMonthsLater;
             days += weeksInDays; // Months may be different lengths of days depending on the calendar,
             // convert days to months in a loop as described above under 'years'.
 
-            var _sign2 = MathSign(days);
-
+            var sign = MathSign(days);
             var oneMonth = new TemporalDuration(0, days < 0 ? -1 : 1);
             var oneMonthDays;
 
-            var _ES$MoveRelativeDate16 = ES.MoveRelativeDate(calendar, relativeTo, oneMonth);
+            var _ES$MoveRelativeDate15 = ES.MoveRelativeDate(calendar, relativeTo, oneMonth);
 
-            relativeTo = _ES$MoveRelativeDate16.relativeTo;
-            oneMonthDays = _ES$MoveRelativeDate16.days;
+            relativeTo = _ES$MoveRelativeDate15.relativeTo;
+            oneMonthDays = _ES$MoveRelativeDate15.days;
 
             while (MathAbs(days) >= MathAbs(oneMonthDays)) {
-              months += _sign2;
+              months += sign;
               days -= oneMonthDays;
 
-              var _ES$MoveRelativeDate17 = ES.MoveRelativeDate(calendar, relativeTo, oneMonth);
+              var _ES$MoveRelativeDate16 = ES.MoveRelativeDate(calendar, relativeTo, oneMonth);
 
-              relativeTo = _ES$MoveRelativeDate17.relativeTo;
-              oneMonthDays = _ES$MoveRelativeDate17.days;
+              relativeTo = _ES$MoveRelativeDate16.relativeTo;
+              oneMonthDays = _ES$MoveRelativeDate16.days;
             }
 
             oneMonthDays = MathAbs(oneMonthDays);
@@ -7255,24 +7568,24 @@
             if (!calendar) throw new RangeError('A starting point is required for weeks rounding'); // Weeks may be different lengths of days depending on the calendar,
             // convert days to weeks in a loop as described above under 'years'.
 
-            var _sign3 = MathSign(days);
+            var _sign2 = MathSign(days);
 
             var oneWeek = new TemporalDuration(0, 0, days < 0 ? -1 : 1);
             var oneWeekDays;
 
-            var _ES$MoveRelativeDate18 = ES.MoveRelativeDate(calendar, relativeTo, oneWeek);
+            var _ES$MoveRelativeDate17 = ES.MoveRelativeDate(calendar, relativeTo, oneWeek);
 
-            relativeTo = _ES$MoveRelativeDate18.relativeTo;
-            oneWeekDays = _ES$MoveRelativeDate18.days;
+            relativeTo = _ES$MoveRelativeDate17.relativeTo;
+            oneWeekDays = _ES$MoveRelativeDate17.days;
 
             while (MathAbs(days) >= MathAbs(oneWeekDays)) {
-              weeks += _sign3;
+              weeks += _sign2;
               days -= oneWeekDays;
 
-              var _ES$MoveRelativeDate19 = ES.MoveRelativeDate(calendar, relativeTo, oneWeek);
+              var _ES$MoveRelativeDate18 = ES.MoveRelativeDate(calendar, relativeTo, oneWeek);
 
-              relativeTo = _ES$MoveRelativeDate19.relativeTo;
-              oneWeekDays = _ES$MoveRelativeDate19.days;
+              relativeTo = _ES$MoveRelativeDate18.relativeTo;
+              oneWeekDays = _ES$MoveRelativeDate18.days;
             }
 
             oneWeekDays = MathAbs(oneWeekDays);
@@ -7390,7 +7703,7 @@
         total: total
       };
     },
-    CompareTemporalDate: function CompareTemporalDate(y1, m1, d1, y2, m2, d2) {
+    CompareISODate: function CompareISODate(y1, m1, d1, y2, m2, d2) {
       for (var _i4 = 0, _arr4 = [[y1, y2], [m1, m2], [d1, d2]]; _i4 < _arr4.length; _i4++) {
         var _arr4$_i = _slicedToArray(_arr4[_i4], 2),
             x = _arr4$_i[0],
@@ -7462,8 +7775,8 @@
       };
     }(),
     SystemTimeZone: function SystemTimeZone() {
-      var fmt = new IntlDateTimeFormat('en-us');
-      var TemporalTimeZone = GetIntrinsic$1('%Temporal.TimeZone%');
+      var fmt = new IntlDateTimeFormat$1('en-us');
+      var TemporalTimeZone = GetIntrinsic('%Temporal.TimeZone%');
       return new TemporalTimeZone(ES.TemporalTimeZoneFromString(fmt.resolvedOptions().timeZone));
     },
     ComparisonResult: function ComparisonResult(value) {
@@ -7531,7 +7844,7 @@
           throw new TypeError("item type ".concat(nextType, " is not a valid elementType"));
         }
 
-        ArrayPrototypePush.call(list, next);
+        ArrayPrototypePush$1.call(list, next);
         index += 1;
       }
 
@@ -7564,7 +7877,7 @@
     return right;
   }
 
-  function bigIntIfAvailable(wrapper) {
+  function bigIntIfAvailable$3(wrapper) {
     return typeof BigInt === 'undefined' ? wrapper : wrapper.value;
   }
 
@@ -7616,7 +7929,7 @@
       key: "getOffsetNanosecondsFor",
       value: function getOffsetNanosecondsFor(instant) {
         if (!ES.IsTemporalTimeZone(this)) throw new TypeError('invalid receiver');
-        instant = ES.ToTemporalInstant(instant, GetIntrinsic$1('%Temporal.Instant%'));
+        instant = ES.ToTemporalInstant(instant, GetIntrinsic('%Temporal.Instant%'));
         var id = GetSlot(this, TIMEZONE_ID);
         var offsetNs = ES.ParseOffsetString(id);
         if (offsetNs !== null) return offsetNs;
@@ -7625,131 +7938,37 @@
     }, {
       key: "getOffsetStringFor",
       value: function getOffsetStringFor(instant) {
-        instant = ES.ToTemporalInstant(instant, GetIntrinsic$1('%Temporal.Instant%'));
-        var offsetNs = ES.GetOffsetNanosecondsFor(this, instant);
-        return ES.FormatTimeZoneOffsetString(offsetNs);
+        instant = ES.ToTemporalInstant(instant, GetIntrinsic('%Temporal.Instant%'));
+        return ES.BuiltinTimeZoneGetOffsetStringFor(this, instant);
       }
     }, {
       key: "getPlainDateTimeFor",
       value: function getPlainDateTimeFor(instant) {
         var calendar = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ES.GetISO8601Calendar();
-        instant = ES.ToTemporalInstant(instant, GetIntrinsic$1('%Temporal.Instant%'));
+        instant = ES.ToTemporalInstant(instant, GetIntrinsic('%Temporal.Instant%'));
         calendar = ES.ToTemporalCalendar(calendar);
-        var ns = GetSlot(instant, EPOCHNANOSECONDS);
-        var offsetNs = ES.GetOffsetNanosecondsFor(this, instant);
-
-        var _ES$GetPartsFromEpoch = ES.GetPartsFromEpoch(ns),
-            year = _ES$GetPartsFromEpoch.year,
-            month = _ES$GetPartsFromEpoch.month,
-            day = _ES$GetPartsFromEpoch.day,
-            hour = _ES$GetPartsFromEpoch.hour,
-            minute = _ES$GetPartsFromEpoch.minute,
-            second = _ES$GetPartsFromEpoch.second,
-            millisecond = _ES$GetPartsFromEpoch.millisecond,
-            microsecond = _ES$GetPartsFromEpoch.microsecond,
-            nanosecond = _ES$GetPartsFromEpoch.nanosecond;
-
-        var _ES$BalanceDateTime = ES.BalanceDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond + offsetNs);
-
-        year = _ES$BalanceDateTime.year;
-        month = _ES$BalanceDateTime.month;
-        day = _ES$BalanceDateTime.day;
-        hour = _ES$BalanceDateTime.hour;
-        minute = _ES$BalanceDateTime.minute;
-        second = _ES$BalanceDateTime.second;
-        millisecond = _ES$BalanceDateTime.millisecond;
-        microsecond = _ES$BalanceDateTime.microsecond;
-        nanosecond = _ES$BalanceDateTime.nanosecond;
-        var DateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
-        return new DateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, calendar);
+        return ES.BuiltinTimeZoneGetPlainDateTimeFor(this, instant, calendar);
       }
     }, {
       key: "getInstantFor",
       value: function getInstantFor(dateTime) {
         var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
-        dateTime = ES.ToTemporalDateTime(dateTime, GetIntrinsic$1('%Temporal.PlainDateTime%'));
+        dateTime = ES.ToTemporalDateTime(dateTime, GetIntrinsic('%Temporal.PlainDateTime%'));
         options = ES.NormalizeOptionsObject(options);
         var disambiguation = ES.ToTemporalDisambiguation(options);
-        var Instant = GetIntrinsic$1('%Temporal.Instant%');
-        var possibleInstants = this.getPossibleInstantsFor(dateTime);
-
-        if (!Array.isArray(possibleInstants)) {
-          throw new TypeError('bad return from getPossibleInstantsFor');
-        }
-
-        var numInstants = possibleInstants.length;
-
-        function validateInstant(instant) {
-          if (!ES.IsTemporalInstant(instant)) {
-            throw new TypeError('bad return from getPossibleInstantsFor');
-          }
-
-          return instant;
-        }
-
-        if (numInstants === 1) return validateInstant(possibleInstants[0]);
-
-        if (numInstants) {
-          switch (disambiguation) {
-            case 'compatible': // fall through because 'compatible' means 'earlier' for "fall back" transitions
-
-            case 'earlier':
-              return validateInstant(possibleInstants[0]);
-
-            case 'later':
-              return validateInstant(possibleInstants[numInstants - 1]);
-
-            case 'reject':
-              {
-                throw new RangeError('multiple instants found');
-              }
-          }
-        }
-
-        var utcns = ES.GetEpochFromParts(GetSlot(dateTime, ISO_YEAR), GetSlot(dateTime, ISO_MONTH), GetSlot(dateTime, ISO_DAY), GetSlot(dateTime, ISO_HOUR), GetSlot(dateTime, ISO_MINUTE), GetSlot(dateTime, ISO_SECOND), GetSlot(dateTime, ISO_MILLISECOND), GetSlot(dateTime, ISO_MICROSECOND), GetSlot(dateTime, ISO_NANOSECOND));
-        if (utcns === null) throw new RangeError('DateTime outside of supported range');
-        var dayBefore = new Instant(utcns.minus(86400e9));
-        var dayAfter = new Instant(utcns.plus(86400e9));
-        var offsetBefore = this.getOffsetNanosecondsFor(dayBefore);
-        var offsetAfter = this.getOffsetNanosecondsFor(dayAfter);
-        var nanoseconds = offsetAfter - offsetBefore;
-        var diff = ES.ToTemporalDurationRecord({
-          nanoseconds: nanoseconds
-        }, 'reject');
-
-        switch (disambiguation) {
-          case 'earlier':
-            {
-              var earlier = dateTime.subtract(diff);
-              return this.getPossibleInstantsFor(earlier)[0];
-            }
-
-          case 'compatible': // fall through because 'compatible' means 'later' for "spring forward" transitions
-
-          case 'later':
-            {
-              var later = dateTime.add(diff);
-              var possible = this.getPossibleInstantsFor(later);
-              return possible[possible.length - 1];
-            }
-
-          case 'reject':
-            {
-              throw new RangeError('no such instant found');
-            }
-        }
+        return ES.BuiltinTimeZoneGetInstantFor(this, dateTime, disambiguation);
       }
     }, {
       key: "getPossibleInstantsFor",
       value: function getPossibleInstantsFor(dateTime) {
         if (!ES.IsTemporalTimeZone(this)) throw new TypeError('invalid receiver');
-        dateTime = ES.ToTemporalDateTime(dateTime, GetIntrinsic$1('%Temporal.PlainDateTime%'));
-        var Instant = GetIntrinsic$1('%Temporal.Instant%');
+        dateTime = ES.ToTemporalDateTime(dateTime, GetIntrinsic('%Temporal.PlainDateTime%'));
+        var Instant = GetIntrinsic('%Temporal.Instant%');
         var id = GetSlot(this, TIMEZONE_ID);
         var offsetNs = ES.ParseOffsetString(id);
 
         if (offsetNs !== null) {
-          var epochNs = ES.GetEpochFromParts(GetSlot(dateTime, ISO_YEAR), GetSlot(dateTime, ISO_MONTH), GetSlot(dateTime, ISO_DAY), GetSlot(dateTime, ISO_HOUR), GetSlot(dateTime, ISO_MINUTE), GetSlot(dateTime, ISO_SECOND), GetSlot(dateTime, ISO_MILLISECOND), GetSlot(dateTime, ISO_MICROSECOND), GetSlot(dateTime, ISO_NANOSECOND));
+          var epochNs = ES.GetEpochFromISOParts(GetSlot(dateTime, ISO_YEAR), GetSlot(dateTime, ISO_MONTH), GetSlot(dateTime, ISO_DAY), GetSlot(dateTime, ISO_HOUR), GetSlot(dateTime, ISO_MINUTE), GetSlot(dateTime, ISO_SECOND), GetSlot(dateTime, ISO_MILLISECOND), GetSlot(dateTime, ISO_MICROSECOND), GetSlot(dateTime, ISO_NANOSECOND));
           if (epochNs === null) throw new RangeError('DateTime outside of supported range');
           return [new Instant(epochNs.minus(offsetNs))];
         }
@@ -7763,7 +7982,7 @@
       key: "getNextTransition",
       value: function getNextTransition(startingPoint) {
         if (!ES.IsTemporalTimeZone(this)) throw new TypeError('invalid receiver');
-        startingPoint = ES.ToTemporalInstant(startingPoint, GetIntrinsic$1('%Temporal.Instant%'));
+        startingPoint = ES.ToTemporalInstant(startingPoint, GetIntrinsic('%Temporal.Instant%'));
         var id = GetSlot(this, TIMEZONE_ID); // Offset time zones or UTC have no transitions
 
         if (ES.ParseOffsetString(id) !== null || id === 'UTC') {
@@ -7771,7 +7990,7 @@
         }
 
         var epochNanoseconds = GetSlot(startingPoint, EPOCHNANOSECONDS);
-        var Instant = GetIntrinsic$1('%Temporal.Instant%');
+        var Instant = GetIntrinsic('%Temporal.Instant%');
         epochNanoseconds = ES.GetIANATimeZoneNextTransition(epochNanoseconds, id);
         return epochNanoseconds === null ? null : new Instant(epochNanoseconds);
       }
@@ -7779,7 +7998,7 @@
       key: "getPreviousTransition",
       value: function getPreviousTransition(startingPoint) {
         if (!ES.IsTemporalTimeZone(this)) throw new TypeError('invalid receiver');
-        startingPoint = ES.ToTemporalInstant(startingPoint, GetIntrinsic$1('%Temporal.Instant%'));
+        startingPoint = ES.ToTemporalInstant(startingPoint, GetIntrinsic('%Temporal.Instant%'));
         var id = GetSlot(this, TIMEZONE_ID); // Offset time zones or UTC have no transitions
 
         if (ES.ParseOffsetString(id) !== null || id === 'UTC') {
@@ -7787,7 +8006,7 @@
         }
 
         var epochNanoseconds = GetSlot(startingPoint, EPOCHNANOSECONDS);
-        var Instant = GetIntrinsic$1('%Temporal.Instant%');
+        var Instant = GetIntrinsic('%Temporal.Instant%');
         epochNanoseconds = ES.GetIANATimeZonePreviousTransition(epochNanoseconds, id);
         return epochNanoseconds === null ? null : new Instant(epochNanoseconds);
       }
@@ -7822,10 +8041,7 @@
   }();
   MakeIntrinsicClass(TimeZone, 'Temporal.TimeZone');
   DefineIntrinsic('Temporal.TimeZone.from', TimeZone.from);
-  DefineIntrinsic('Temporal.TimeZone.prototype.getPlainDateTimeFor', TimeZone.prototype.getPlainDateTimeFor);
-  DefineIntrinsic('Temporal.TimeZone.prototype.getInstantFor', TimeZone.prototype.getInstantFor);
   DefineIntrinsic('Temporal.TimeZone.prototype.getOffsetNanosecondsFor', TimeZone.prototype.getOffsetNanosecondsFor);
-  DefineIntrinsic('Temporal.TimeZone.prototype.getOffsetStringFor', TimeZone.prototype.getOffsetStringFor);
 
   var DATE = Symbol('date');
   var YM = Symbol('ym');
@@ -7848,27 +8064,27 @@
     };
   };
 
-  var IntlDateTimeFormat$1 = globalThis.Intl.DateTimeFormat;
-  var ObjectAssign$1 = Object.assign;
+  var IntlDateTimeFormat = globalThis.Intl.DateTimeFormat;
+  var ObjectAssign$4 = Object.assign;
   function DateTimeFormat() {
-    var locale = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : IntlDateTimeFormat$1().resolvedOptions().locale;
+    var locale = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : IntlDateTimeFormat().resolvedOptions().locale;
     var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     if (!(this instanceof DateTimeFormat)) return new DateTimeFormat(locale, options);
     this[TZ_GIVEN] = options.timeZone ? options.timeZone : null;
-    this[ORIGINAL] = new IntlDateTimeFormat$1(locale, options);
+    this[ORIGINAL] = new IntlDateTimeFormat(locale, options);
     this[TZ_RESOLVED] = new TimeZone(this.resolvedOptions().timeZone);
     this[CAL_ID] = this.resolvedOptions().calendar;
-    this[DATE] = new IntlDateTimeFormat$1(locale, dateAmend(options));
-    this[YM] = new IntlDateTimeFormat$1(locale, yearMonthAmend(options));
-    this[MD] = new IntlDateTimeFormat$1(locale, monthDayAmend(options));
-    this[TIME] = new IntlDateTimeFormat$1(locale, timeAmend(options));
-    this[DATETIME] = new IntlDateTimeFormat$1(locale, datetimeAmend(options));
-    this[ZONED] = new IntlDateTimeFormat$1(locale, zonedDateTimeAmend(options));
-    this[INST] = new IntlDateTimeFormat$1(locale, instantAmend(options));
+    this[DATE] = new IntlDateTimeFormat(locale, dateAmend(options));
+    this[YM] = new IntlDateTimeFormat(locale, yearMonthAmend(options));
+    this[MD] = new IntlDateTimeFormat(locale, monthDayAmend(options));
+    this[TIME] = new IntlDateTimeFormat(locale, timeAmend(options));
+    this[DATETIME] = new IntlDateTimeFormat(locale, datetimeAmend(options));
+    this[ZONED] = new IntlDateTimeFormat(locale, zonedDateTimeAmend(options));
+    this[INST] = new IntlDateTimeFormat(locale, instantAmend(options));
   }
 
   DateTimeFormat.supportedLocalesOf = function () {
-    return IntlDateTimeFormat$1.supportedLocalesOf.apply(IntlDateTimeFormat$1, arguments);
+    return IntlDateTimeFormat.supportedLocalesOf.apply(IntlDateTimeFormat, arguments);
   };
 
   var properties = {
@@ -7877,15 +8093,15 @@
     formatRange: descriptor(formatRange)
   };
 
-  if ('formatToParts' in IntlDateTimeFormat$1.prototype) {
+  if ('formatToParts' in IntlDateTimeFormat.prototype) {
     properties.formatToParts = descriptor(formatToParts);
   }
 
-  if ('formatRangeToParts' in IntlDateTimeFormat$1.prototype) {
+  if ('formatRangeToParts' in IntlDateTimeFormat.prototype) {
     properties.formatRangeToParts = descriptor(formatRangeToParts);
   }
 
-  DateTimeFormat.prototype = Object.create(IntlDateTimeFormat$1.prototype, properties);
+  DateTimeFormat.prototype = Object.create(IntlDateTimeFormat.prototype, properties);
 
   function resolvedOptions() {
     return this[ORIGINAL].resolvedOptions();
@@ -7894,7 +8110,7 @@
   function adjustFormatterTimeZone(formatter, timeZone) {
     if (!timeZone) return formatter;
     var options = formatter.resolvedOptions();
-    return new IntlDateTimeFormat$1(options.locale, _objectSpread2(_objectSpread2({}, options), {}, {
+    return new IntlDateTimeFormat(options.locale, _objectSpread2(_objectSpread2({}, options), {}, {
       timeZone: timeZone
     }));
   }
@@ -7955,7 +8171,7 @@
           bformatter = _extractOverrides4.formatter,
           btz = _extractOverrides4.timeZone;
 
-      if (atz && btz && !ES.TimeZoneEquals(atz, btz)) {
+      if (atz && btz && atz !== btz) {
         throw new RangeError('cannot format range between different time zones');
       }
 
@@ -7984,7 +8200,7 @@
           bformatter = _extractOverrides6.formatter,
           btz = _extractOverrides6.timeZone;
 
-      if (atz && btz && !ES.TimeZoneEquals(atz, btz)) {
+      if (atz && btz && atz !== btz) {
         throw new RangeError('cannot format range between different time zones');
       }
 
@@ -8000,7 +8216,7 @@
   function amend() {
     var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
     var amended = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    options = ObjectAssign$1({}, options);
+    options = ObjectAssign$4({}, options);
 
     for (var _i = 0, _arr = ['year', 'month', 'day', 'hour', 'minute', 'second', 'weekday', 'timeZoneName']; _i < _arr.length; _i++) {
       var opt = _arr[_i];
@@ -8021,7 +8237,7 @@
     });
 
     if (!hasTimeOptions(options)) {
-      options = ObjectAssign$1({}, options, {
+      options = ObjectAssign$4({}, options, {
         hour: 'numeric',
         minute: 'numeric',
         second: 'numeric'
@@ -8042,7 +8258,7 @@
     });
 
     if (!('year' in options || 'month' in options)) {
-      options = ObjectAssign$1(options, {
+      options = ObjectAssign$4(options, {
         year: 'numeric',
         month: 'numeric'
       });
@@ -8062,7 +8278,7 @@
     });
 
     if (!('month' in options || 'day' in options)) {
-      options = ObjectAssign$1({}, options, {
+      options = ObjectAssign$4({}, options, {
         month: 'numeric',
         day: 'numeric'
       });
@@ -8080,7 +8296,7 @@
     });
 
     if (!hasDateOptions(options)) {
-      options = ObjectAssign$1({}, options, {
+      options = ObjectAssign$4({}, options, {
         year: 'numeric',
         month: 'numeric',
         day: 'numeric'
@@ -8096,7 +8312,7 @@
     });
 
     if (!hasTimeOptions(options) && !hasDateOptions(options)) {
-      options = ObjectAssign$1({}, options, {
+      options = ObjectAssign$4({}, options, {
         year: 'numeric',
         month: 'numeric',
         day: 'numeric',
@@ -8111,7 +8327,7 @@
 
   function zonedDateTimeAmend(options) {
     if (!hasTimeOptions(options) && !hasDateOptions(options)) {
-      options = ObjectAssign$1({}, options, {
+      options = ObjectAssign$4({}, options, {
         year: 'numeric',
         month: 'numeric',
         day: 'numeric',
@@ -8127,7 +8343,7 @@
 
   function instantAmend(options) {
     if (!hasTimeOptions(options) && !hasDateOptions(options)) {
-      options = ObjectAssign$1({}, options, {
+      options = ObjectAssign$4({}, options, {
         year: 'numeric',
         month: 'numeric',
         day: 'numeric',
@@ -8149,7 +8365,7 @@
   }
 
   function extractOverrides(temporalObj, main) {
-    var DateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
+    var DateTime = GetIntrinsic('%Temporal.PlainDateTime%');
 
     if (ES.IsTemporalTime(temporalObj)) {
       var hour = GetSlot(temporalObj, ISO_HOUR);
@@ -8160,7 +8376,7 @@
       var nanosecond = GetSlot(temporalObj, ISO_NANOSECOND);
       var datetime = new DateTime(1970, 1, 1, hour, minute, second, millisecond, microsecond, nanosecond, main[CAL_ID]);
       return {
-        instant: main[TZ_RESOLVED].getInstantFor(datetime),
+        instant: ES.BuiltinTimeZoneGetInstantFor(main[TZ_RESOLVED], datetime, 'compatible'),
         formatter: main[TIME]
       };
     }
@@ -8178,7 +8394,7 @@
       var _datetime = new DateTime(isoYear, isoMonth, referenceISODay, 12, 0, 0, 0, 0, 0, calendar);
 
       return {
-        instant: main[TZ_RESOLVED].getInstantFor(_datetime),
+        instant: ES.BuiltinTimeZoneGetInstantFor(main[TZ_RESOLVED], _datetime, 'compatible'),
         formatter: main[YM]
       };
     }
@@ -8199,7 +8415,7 @@
       var _datetime2 = new DateTime(referenceISOYear, _isoMonth, isoDay, 12, 0, 0, 0, 0, 0, _calendar);
 
       return {
-        instant: main[TZ_RESOLVED].getInstantFor(_datetime2),
+        instant: ES.BuiltinTimeZoneGetInstantFor(main[TZ_RESOLVED], _datetime2, 'compatible'),
         formatter: main[MD]
       };
     }
@@ -8220,7 +8436,7 @@
       var _datetime3 = new DateTime(_isoYear, _isoMonth2, _isoDay, 12, 0, 0, 0, 0, 0, main[CAL_ID]);
 
       return {
-        instant: main[TZ_RESOLVED].getInstantFor(_datetime3),
+        instant: ES.BuiltinTimeZoneGetInstantFor(main[TZ_RESOLVED], _datetime3, 'compatible'),
         formatter: main[DATE]
       };
     }
@@ -8257,7 +8473,7 @@
       }
 
       return {
-        instant: main[TZ_RESOLVED].getInstantFor(_datetime4),
+        instant: ES.BuiltinTimeZoneGetInstantFor(main[TZ_RESOLVED], _datetime4, 'compatible'),
         formatter: main[DATETIME]
       };
     }
@@ -8279,7 +8495,7 @@
       return {
         instant: GetSlot(temporalObj, INSTANT),
         formatter: main[ZONED],
-        timeZone: timeZone
+        timeZone: objTimeZone
       };
     }
 
@@ -8343,13 +8559,13 @@
       get: function get() {
         if (!ES.IsTemporalInstant(this)) throw new TypeError('invalid receiver');
         var value = GetSlot(this, EPOCHNANOSECONDS);
-        return bigIntIfAvailable$1(value.divide(1e3));
+        return bigIntIfAvailable$2(value.divide(1e3));
       }
     }, {
       key: "epochNanoseconds",
       get: function get() {
         if (!ES.IsTemporalInstant(this)) throw new TypeError('invalid receiver');
-        return bigIntIfAvailable$1(GetSlot(this, EPOCHNANOSECONDS));
+        return bigIntIfAvailable$2(GetSlot(this, EPOCHNANOSECONDS));
       }
     }, {
       key: "add",
@@ -8367,7 +8583,7 @@
         ES.RejectDurationSign(0, 0, 0, 0, hours, minutes, seconds, milliseconds, microseconds, nanoseconds);
         var ns = ES.AddInstant(GetSlot(this, EPOCHNANOSECONDS), hours, minutes, seconds, milliseconds, microseconds, nanoseconds);
         var Construct = ES.SpeciesConstructor(this, Instant);
-        var result = new Construct(bigIntIfAvailable$1(ns));
+        var result = new Construct(bigIntIfAvailable$2(ns));
         if (!ES.IsTemporalInstant(result)) throw new TypeError('invalid result');
         return result;
       }
@@ -8387,7 +8603,7 @@
         ES.RejectDurationSign(0, 0, 0, 0, hours, minutes, seconds, milliseconds, microseconds, nanoseconds);
         var ns = ES.AddInstant(GetSlot(this, EPOCHNANOSECONDS), -hours, -minutes, -seconds, -milliseconds, -microseconds, -nanoseconds);
         var Construct = ES.SpeciesConstructor(this, Instant);
-        var result = new Construct(bigIntIfAvailable$1(ns));
+        var result = new Construct(bigIntIfAvailable$2(ns));
         if (!ES.IsTemporalInstant(result)) throw new TypeError('invalid result');
         return result;
       }
@@ -8432,7 +8648,7 @@
         milliseconds = _ES$BalanceDuration.milliseconds;
         microseconds = _ES$BalanceDuration.microseconds;
         nanoseconds = _ES$BalanceDuration.nanoseconds;
-        var Duration = GetIntrinsic$1('%Temporal.Duration%');
+        var Duration = GetIntrinsic('%Temporal.Duration%');
         return new Duration(0, 0, 0, 0, hours, minutes, seconds, milliseconds, microseconds, nanoseconds);
       }
     }, {
@@ -8476,7 +8692,7 @@
         milliseconds = _ES$BalanceDuration2.milliseconds;
         microseconds = _ES$BalanceDuration2.microseconds;
         nanoseconds = _ES$BalanceDuration2.nanoseconds;
-        var Duration = GetIntrinsic$1('%Temporal.Duration%');
+        var Duration = GetIntrinsic('%Temporal.Duration%');
         return new Duration(0, 0, 0, 0, hours, minutes, seconds, milliseconds, microseconds, nanoseconds);
       }
     }, {
@@ -8499,7 +8715,7 @@
         var ns = GetSlot(this, EPOCHNANOSECONDS);
         var roundedNs = ES.RoundInstant(ns, roundingIncrement, smallestUnit, roundingMode);
         var Construct = ES.SpeciesConstructor(this, Instant);
-        var result = new Construct(bigIntIfAvailable$1(roundedNs));
+        var result = new Construct(bigIntIfAvailable$2(roundedNs));
         if (!ES.IsTemporalInstant(result)) throw new TypeError('invalid result');
         return result;
       }
@@ -8574,7 +8790,7 @@
         }
 
         var timeZone = ES.ToTemporalTimeZone(temporalTimeZoneLike);
-        var TemporalZonedDateTime = GetIntrinsic$1('%Temporal.ZonedDateTime%');
+        var TemporalZonedDateTime = GetIntrinsic('%Temporal.ZonedDateTime%');
         return new TemporalZonedDateTime(GetSlot(this, EPOCHNANOSECONDS), timeZone, calendar);
       }
     }, {
@@ -8592,7 +8808,7 @@
 
         var timeZone = ES.ToTemporalTimeZone(item);
         var calendar = ES.GetISO8601Calendar();
-        var TemporalZonedDateTime = GetIntrinsic$1('%Temporal.ZonedDateTime%');
+        var TemporalZonedDateTime = GetIntrinsic('%Temporal.ZonedDateTime%');
         return new TemporalZonedDateTime(GetSlot(this, EPOCHNANOSECONDS), timeZone, calendar);
       }
     }], [{
@@ -8601,7 +8817,7 @@
         epochSeconds = ES.ToNumber(epochSeconds);
         var epochNanoseconds = BigInteger(epochSeconds).multiply(1e9);
         ES.RejectInstantRange(epochNanoseconds);
-        var result = new this(bigIntIfAvailable$1(epochNanoseconds));
+        var result = new this(bigIntIfAvailable$2(epochNanoseconds));
         if (!ES.IsTemporalInstant(result)) throw new TypeError('invalid result');
         return result;
       }
@@ -8611,7 +8827,7 @@
         epochMilliseconds = ES.ToNumber(epochMilliseconds);
         var epochNanoseconds = BigInteger(epochMilliseconds).multiply(1e6);
         ES.RejectInstantRange(epochNanoseconds);
-        var result = new this(bigIntIfAvailable$1(epochNanoseconds));
+        var result = new this(bigIntIfAvailable$2(epochNanoseconds));
         if (!ES.IsTemporalInstant(result)) throw new TypeError('invalid result');
         return result;
       }
@@ -8621,7 +8837,7 @@
         epochMicroseconds = ES.ToBigInt(epochMicroseconds);
         var epochNanoseconds = epochMicroseconds.multiply(1e3);
         ES.RejectInstantRange(epochNanoseconds);
-        var result = new this(bigIntIfAvailable$1(epochNanoseconds));
+        var result = new this(bigIntIfAvailable$2(epochNanoseconds));
         if (!ES.IsTemporalInstant(result)) throw new TypeError('invalid result');
         return result;
       }
@@ -8630,7 +8846,7 @@
       value: function fromEpochNanoseconds(epochNanoseconds) {
         epochNanoseconds = ES.ToBigInt(epochNanoseconds);
         ES.RejectInstantRange(epochNanoseconds);
-        var result = new this(bigIntIfAvailable$1(epochNanoseconds));
+        var result = new this(bigIntIfAvailable$2(epochNanoseconds));
         if (!ES.IsTemporalInstant(result)) throw new TypeError('invalid result');
         return result;
       }
@@ -8638,7 +8854,7 @@
       key: "from",
       value: function from(item) {
         if (ES.IsTemporalInstant(item)) {
-          var result = new this(bigIntIfAvailable$1(GetSlot(item, EPOCHNANOSECONDS)));
+          var result = new this(bigIntIfAvailable$2(GetSlot(item, EPOCHNANOSECONDS)));
           if (!ES.IsTemporalInstant(result)) throw new TypeError('invalid result');
           return result;
         }
@@ -8662,12 +8878,12 @@
   }();
   MakeIntrinsicClass(Instant, 'Temporal.Instant');
 
-  function bigIntIfAvailable$1(wrapper) {
+  function bigIntIfAvailable$2(wrapper) {
     return typeof BigInt === 'undefined' ? wrapper : wrapper.value;
   }
 
   var ArrayIncludes = Array.prototype.includes;
-  var ObjectAssign$2 = Object.assign;
+  var ObjectAssign$3 = Object.assign;
   var impl = {};
   var Calendar = /*#__PURE__*/function () {
     function Calendar(id) {
@@ -8743,8 +8959,8 @@
       key: "dateAdd",
       value: function dateAdd(date, duration, options, constructor) {
         if (!ES.IsTemporalCalendar(this)) throw new TypeError('invalid receiver');
-        date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
-        duration = ES.ToTemporalDuration(duration, GetIntrinsic$1('%Temporal.Duration%'));
+        date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
+        duration = ES.ToTemporalDuration(duration, GetIntrinsic('%Temporal.Duration%'));
         options = ES.NormalizeOptionsObject(options);
         var overflow = ES.ToTemporalOverflow(options);
         return impl[GetSlot(this, CALENDAR_ID)].dateAdd(date, duration, overflow, constructor, this);
@@ -8753,8 +8969,8 @@
       key: "dateUntil",
       value: function dateUntil(one, two, options) {
         if (!ES.IsTemporalCalendar(this)) throw new TypeError('invalid receiver');
-        one = ES.ToTemporalDate(one, GetIntrinsic$1('%Temporal.PlainDate%'));
-        two = ES.ToTemporalDate(two, GetIntrinsic$1('%Temporal.PlainDate%'));
+        one = ES.ToTemporalDate(one, GetIntrinsic('%Temporal.PlainDate%'));
+        two = ES.ToTemporalDate(two, GetIntrinsic('%Temporal.PlainDate%'));
         options = ES.NormalizeOptionsObject(options);
         var largestUnit = ES.ToLargestTemporalUnit(options, 'days', ['hours', 'minutes', 'seconds', 'milliseconds', 'microseconds', 'nanoseconds']);
 
@@ -8764,7 +8980,7 @@
             weeks = _impl$GetSlot$dateUnt.weeks,
             days = _impl$GetSlot$dateUnt.days;
 
-        var Duration = GetIntrinsic$1('%Temporal.Duration%');
+        var Duration = GetIntrinsic('%Temporal.Duration%');
         return new Duration(years, months, weeks, days, 0, 0, 0, 0, 0, 0);
       }
     }, {
@@ -8903,11 +9119,11 @@
           month = _fields2.month,
           day = _fields2.day;
 
-      var _ES$RegulateDate = ES.RegulateDate(year, month, day, overflow);
+      var _ES$RegulateISODate = ES.RegulateISODate(year, month, day, overflow);
 
-      year = _ES$RegulateDate.year;
-      month = _ES$RegulateDate.month;
-      day = _ES$RegulateDate.day;
+      year = _ES$RegulateISODate.year;
+      month = _ES$RegulateISODate.month;
+      day = _ES$RegulateISODate.day;
       return new constructor(year, month, day, calendar);
     },
     yearMonthFromFields: function yearMonthFromFields(fields, overflow, constructor, calendar) {
@@ -8917,10 +9133,10 @@
           year = _fields3.year,
           month = _fields3.month;
 
-      var _ES$RegulateYearMonth = ES.RegulateYearMonth(year, month, overflow);
+      var _ES$RegulateISOYearMo = ES.RegulateISOYearMonth(year, month, overflow);
 
-      year = _ES$RegulateYearMonth.year;
-      month = _ES$RegulateYearMonth.month;
+      year = _ES$RegulateISOYearMo.year;
+      month = _ES$RegulateISOYearMo.month;
       return new constructor(year, month, calendar,
       /* referenceISODay */
       1);
@@ -8932,18 +9148,19 @@
         throw new TypeError('either year or monthCode required with month');
       }
 
+      var useYear = fields.monthCode === undefined;
+      var referenceISOYear = 1972;
       fields = resolveNonLunisolarMonth(fields);
       var _fields4 = fields,
           month = _fields4.month,
-          day = _fields4.day;
+          day = _fields4.day,
+          year = _fields4.year;
 
-      var _ES$RegulateMonthDay = ES.RegulateMonthDay(month, day, overflow);
+      var _ES$RegulateISODate2 = ES.RegulateISODate(useYear ? year : referenceISOYear, month, day, overflow);
 
-      month = _ES$RegulateMonthDay.month;
-      day = _ES$RegulateMonthDay.day;
-      return new constructor(month, day, calendar,
-      /* referenceISOYear */
-      1972);
+      month = _ES$RegulateISODate2.month;
+      day = _ES$RegulateISODate2.day;
+      return new constructor(month, day, calendar, referenceISOYear);
     },
     fields: function fields(_fields5) {
       return _fields5;
@@ -8972,74 +9189,74 @@
       var month = GetSlot(date, ISO_MONTH);
       var day = GetSlot(date, ISO_DAY);
 
-      var _ES$AddDate = ES.AddDate(year, month, day, years, months, weeks, days, overflow);
+      var _ES$AddISODate = ES.AddISODate(year, month, day, years, months, weeks, days, overflow);
 
-      year = _ES$AddDate.year;
-      month = _ES$AddDate.month;
-      day = _ES$AddDate.day;
+      year = _ES$AddISODate.year;
+      month = _ES$AddISODate.month;
+      day = _ES$AddISODate.day;
       return new constructor(year, month, day, calendar);
     },
     dateUntil: function dateUntil(one, two, largestUnit) {
-      return ES.DifferenceDate(GetSlot(one, ISO_YEAR), GetSlot(one, ISO_MONTH), GetSlot(one, ISO_DAY), GetSlot(two, ISO_YEAR), GetSlot(two, ISO_MONTH), GetSlot(two, ISO_DAY), largestUnit);
+      return ES.DifferenceISODate(GetSlot(one, ISO_YEAR), GetSlot(one, ISO_MONTH), GetSlot(one, ISO_DAY), GetSlot(two, ISO_YEAR), GetSlot(two, ISO_MONTH), GetSlot(two, ISO_DAY), largestUnit);
     },
     year: function year(date) {
-      if (!HasSlot(date, ISO_YEAR)) date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+      if (!HasSlot(date, ISO_YEAR)) date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       return GetSlot(date, ISO_YEAR);
     },
     era: function era(date) {
-      if (!HasSlot(date, ISO_YEAR)) date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+      if (!HasSlot(date, ISO_YEAR)) date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       return undefined;
     },
     eraYear: function eraYear(date) {
-      if (!HasSlot(date, ISO_YEAR)) date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+      if (!HasSlot(date, ISO_YEAR)) date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       return undefined;
     },
     month: function month(date) {
       if (ES.IsTemporalMonthDay(date)) throw new TypeError('use monthCode on PlainMonthDay instead');
-      if (!HasSlot(date, ISO_MONTH)) date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+      if (!HasSlot(date, ISO_MONTH)) date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       return GetSlot(date, ISO_MONTH);
     },
     monthCode: function monthCode(date) {
-      if (!HasSlot(date, ISO_MONTH)) date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
-      return "M".concat(ES.ToString(GetSlot(date, ISO_MONTH)));
+      if (!HasSlot(date, ISO_MONTH)) date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
+      return buildMonthCode(GetSlot(date, ISO_MONTH));
     },
     day: function day(date) {
-      if (!HasSlot(date, ISO_DAY)) date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+      if (!HasSlot(date, ISO_DAY)) date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       return GetSlot(date, ISO_DAY);
     },
     dayOfWeek: function dayOfWeek(date) {
-      date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+      date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       return ES.DayOfWeek(GetSlot(date, ISO_YEAR), GetSlot(date, ISO_MONTH), GetSlot(date, ISO_DAY));
     },
     dayOfYear: function dayOfYear(date) {
-      date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+      date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       return ES.DayOfYear(GetSlot(date, ISO_YEAR), GetSlot(date, ISO_MONTH), GetSlot(date, ISO_DAY));
     },
     weekOfYear: function weekOfYear(date) {
-      date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+      date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       return ES.WeekOfYear(GetSlot(date, ISO_YEAR), GetSlot(date, ISO_MONTH), GetSlot(date, ISO_DAY));
     },
     daysInWeek: function daysInWeek(date) {
-      ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+      ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       return 7;
     },
     daysInMonth: function daysInMonth(date) {
       if (!HasSlot(date, ISO_YEAR) || !HasSlot(date, ISO_MONTH)) {
-        date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+        date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       }
 
-      return ES.DaysInMonth(GetSlot(date, ISO_YEAR), GetSlot(date, ISO_MONTH));
+      return ES.ISODaysInMonth(GetSlot(date, ISO_YEAR), GetSlot(date, ISO_MONTH));
     },
     daysInYear: function daysInYear(date) {
-      if (!HasSlot(date, ISO_YEAR)) date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+      if (!HasSlot(date, ISO_YEAR)) date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       return ES.LeapYear(GetSlot(date, ISO_YEAR)) ? 366 : 365;
     },
     monthsInYear: function monthsInYear(date) {
-      if (!HasSlot(date, ISO_YEAR)) ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+      if (!HasSlot(date, ISO_YEAR)) ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       return 12;
     },
     inLeapYear: function inLeapYear(date) {
-      if (!HasSlot(date, ISO_YEAR)) date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+      if (!HasSlot(date, ISO_YEAR)) date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       return ES.LeapYear(GetSlot(date, ISO_YEAR));
     }
   }; // Note: other built-in calendars than iso8601 are not part of the Temporal
@@ -9054,6 +9271,11 @@
     var month = +monthCode.slice(1);
     if (isNaN(month)) throw new RangeError("Invalid month code: ".concat(monthCode));
     return month;
+  }
+
+  function buildMonthCode(month) {
+    var leap = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+    return "M".concat(month.toString().padStart(2, '0')).concat(leap ? 'L' : '');
   }
   /**
    * Safely merge a month, monthCode pair into an integer month.
@@ -9075,7 +9297,7 @@
 
       if (overflow === 'reject') ES.RejectToRange(month, 1, monthsPerYear);
       if (overflow === 'constrain') month = ES.ConstrainToRange(month, 1, monthsPerYear);
-      monthCode = "M".concat(month);
+      monthCode = buildMonthCode(month);
     } else {
       var numberPart = monthCodeNumberPart(monthCode);
 
@@ -9083,7 +9305,7 @@
         throw new RangeError("monthCode ".concat(monthCode, " and month ").concat(month, " must match if both are present"));
       }
 
-      if (monthCode !== "M".concat(numberPart)) {
+      if (monthCode !== buildMonthCode(numberPart)) {
         throw new RangeError("Invalid month code: ".concat(monthCode));
       }
 
@@ -9377,7 +9599,7 @@
           throw new RangeError("monthCode must be a string, not ".concat(ES.Type(monthCode).toLowerCase()));
         }
 
-        if (!/^M(1?\d)(L?)$/.test(monthCode)) throw new RangeError("Invalid monthCode: ".concat(monthCode));
+        if (!/^M([01]?\d)(L?)$/.test(monthCode)) throw new RangeError("Invalid monthCode: ".concat(monthCode));
       }
 
       if (this.constantEra) {
@@ -9651,7 +9873,7 @@
       return this.isoToCalendarDate(isoDate, cache);
     },
     addDaysIso: function addDaysIso(isoDate, days) {
-      var added = ES.AddDate(isoDate.year, isoDate.month, isoDate.day, 0, 0, 0, days, 'constrain');
+      var added = ES.AddISODate(isoDate.year, isoDate.month, isoDate.day, 0, 0, 0, days, 'constrain');
       return added;
     },
     addDaysCalendar: function addDaysCalendar(calendarDate, days, cache) {
@@ -9842,7 +10064,7 @@
       return this.isoDaysUntil(oneIso, twoIso);
     },
     isoDaysUntil: function isoDaysUntil(oneIso, twoIso) {
-      var duration = ES.DifferenceDate(oneIso.year, oneIso.month, oneIso.day, twoIso.year, twoIso.month, twoIso.day, 'days');
+      var duration = ES.DifferenceISODate(oneIso.year, oneIso.month, oneIso.day, twoIso.year, twoIso.month, twoIso.day, 'days');
       return duration.days;
     },
     // The short era format works for all calendars except Japanese, which will
@@ -9922,7 +10144,7 @@
       throw new RangeError("No recent ".concat(this.id, " year with monthCode ").concat(monthCode, " and day ").concat(day));
     }
   };
-  var helperHebrew = ObjectAssign$2({}, nonIsoHelperBase, {
+  var helperHebrew = ObjectAssign$3({}, nonIsoHelperBase, {
     id: 'hebrew',
     calendarType: 'lunisolar',
     inLeapYear: function inLeapYear(calendarDate
@@ -9970,13 +10192,13 @@
       Tishri: {
         leap: 1,
         regular: 1,
-        monthCode: 'M1',
+        monthCode: 'M01',
         days: 30
       },
       Heshvan: {
         leap: 2,
         regular: 2,
-        monthCode: 'M2',
+        monthCode: 'M02',
         days: {
           min: 29,
           max: 30
@@ -9985,7 +10207,7 @@
       Kislev: {
         leap: 3,
         regular: 3,
-        monthCode: 'M3',
+        monthCode: 'M03',
         days: {
           min: 29,
           max: 30
@@ -9994,49 +10216,49 @@
       Tevet: {
         leap: 4,
         regular: 4,
-        monthCode: 'M4',
+        monthCode: 'M04',
         days: 29
       },
       Shevat: {
         leap: 5,
         regular: 5,
-        monthCode: 'M5',
+        monthCode: 'M05',
         days: 30
       },
       Adar: {
         leap: undefined,
         regular: 6,
-        monthCode: 'M6',
+        monthCode: 'M06',
         days: 29
       },
       'Adar I': {
         leap: 6,
         regular: undefined,
-        monthCode: 'M5L',
+        monthCode: 'M05L',
         days: 30
       },
       'Adar II': {
         leap: 7,
         regular: undefined,
-        monthCode: 'M6',
+        monthCode: 'M06',
         days: 29
       },
       Nisan: {
         leap: 8,
         regular: 7,
-        monthCode: 'M7',
+        monthCode: 'M07',
         days: 30
       },
       Iyar: {
         leap: 9,
         regular: 8,
-        monthCode: 'M8',
+        monthCode: 'M08',
         days: 29
       },
       Sivan: {
         leap: 10,
         regular: 9,
-        monthCode: 'M9',
+        monthCode: 'M09',
         days: 30
       },
       Tamuz: {
@@ -10062,9 +10284,9 @@
       if (this.inLeapYear({
         year: year
       })) {
-        return month === 6 ? 'M5L' : "M".concat(month < 6 ? month : month - 1);
+        return month === 6 ? buildMonthCode(5, true) : buildMonthCode(month < 6 ? month : month - 1);
       } else {
-        return "M".concat(month);
+        return buildMonthCode(month);
       }
     },
     adjustCalendarDate: function adjustCalendarDate(calendarDate, cache) {
@@ -10112,19 +10334,22 @@
 
         if (month === undefined) {
           if (monthCode.endsWith('L')) {
-            if (monthCode !== 'M5L') throw new RangeError("Hebrew leap month must have monthCode M5L, not ".concat(monthCode));
+            if (monthCode !== 'M05L') {
+              throw new RangeError("Hebrew leap month must have monthCode M05L, not ".concat(monthCode));
+            }
+
             month = 6;
 
             if (!this.inLeapYear({
               year: year
             })) {
               if (overflow === 'reject') {
-                throw new RangeError("Hebrew monthCode M5L is invalid in year ".concat(year, " which is not a leap year"));
+                throw new RangeError("Hebrew monthCode M05L is invalid in year ".concat(year, " which is not a leap year"));
               } else {
                 // constrain to last day of previous month (Av)
                 month = 5;
                 day = 30;
-                monthCode = 'M5';
+                monthCode = 'M05';
               }
             }
           } else {
@@ -10181,7 +10406,7 @@
    * same 12 months in the same order.
    */
 
-  var helperIslamic = ObjectAssign$2({}, nonIsoHelperBase, {
+  var helperIslamic = ObjectAssign$3({}, nonIsoHelperBase, {
     id: 'islamic',
     calendarType: 'lunar',
     inLeapYear: function inLeapYear(calendarDate, cache) {
@@ -10224,7 +10449,7 @@
       };
     }
   });
-  var helperPersian = ObjectAssign$2({}, nonIsoHelperBase, {
+  var helperPersian = ObjectAssign$3({}, nonIsoHelperBase, {
     id: 'persian',
     calendarType: 'solar',
     inLeapYear: function inLeapYear(calendarDate, cache) {
@@ -10259,7 +10484,7 @@
       };
     }
   });
-  var helperIndian = ObjectAssign$2({}, nonIsoHelperBase, {
+  var helperIndian = ObjectAssign$3({}, nonIsoHelperBase, {
     id: 'indian',
     calendarType: 'solar',
     inLeapYear: function inLeapYear(calendarDate
@@ -10371,7 +10596,7 @@
       var isoYear = calendarDate.year + 78 + (monthInfo.nextYear ? 1 : 0);
       var isoMonth = monthInfo.month;
       var isoDay = monthInfo.day;
-      var isoDate = ES.AddDate(isoYear, isoMonth, isoDay, 0, 0, 0, calendarDate.day - 1, 'constrain');
+      var isoDate = ES.AddISODate(isoYear, isoMonth, isoDay, 0, 0, 0, calendarDate.day - 1, 'constrain');
       return isoDate;
     },
     // https://bugs.chromium.org/p/v8/issues/detail?id=10529 causes Intl's Indian
@@ -10525,7 +10750,7 @@
         eras = _adjustEras.eras,
         anchorEra = _adjustEras.anchorEra;
 
-    return ObjectAssign$2({}, nonIsoHelperBase, {
+    return ObjectAssign$3({}, nonIsoHelperBase, {
       id: id,
       eras: eras,
       anchorEra: anchorEra,
@@ -10673,7 +10898,7 @@
             day = _calendarDate4.day;
         var anchorEra = this.anchorEra;
         var isoYearEstimate = year + anchorEra.isoEpoch.year - (anchorEra.hasYearZero ? 0 : 1);
-        return ES.RegulateDate(isoYearEstimate, month, day, 'constrain');
+        return ES.RegulateISODate(isoYearEstimate, month, day, 'constrain');
       },
       // Several calendars based on the Gregorian calendar use Julian dates (not
       // proleptic Gregorian dates) before the Julian switchover in Oct 1582. See
@@ -10684,7 +10909,7 @@
       calendarIsVulnerableToJulianBug: false,
       checkIcuBugs: function checkIcuBugs(calendarDate, isoDate) {
         if (this.calendarIsVulnerableToJulianBug && this.v8IsVulnerableToJulianBug) {
-          var beforeJulianSwitch = ES.CompareTemporalDate(isoDate.year, isoDate.month, isoDate.day, 1582, 10, 15) < 0;
+          var beforeJulianSwitch = ES.CompareISODate(isoDate.year, isoDate.month, isoDate.day, 1582, 10, 15) < 0;
 
           if (beforeJulianSwitch) {
             throw new RangeError("calendar '".concat(this.id, "' is broken for ISO dates before 1582-10-15") + ' (see https://bugs.chromium.org/p/chromium/issues/detail?id=1173158)');
@@ -10696,7 +10921,7 @@
 
   var makeHelperOrthodox = function makeHelperOrthodox(id, originalEras) {
     var base = makeHelperGregorian(id, originalEras);
-    return ObjectAssign$2(base, {
+    return ObjectAssign$3(base, {
       inLeapYear: function inLeapYear(calendarDate
       /*, cache */
       ) {
@@ -10774,7 +10999,7 @@
       year: 5501
     }
   }]);
-  var helperRoc = ObjectAssign$2({}, makeHelperGregorian('roc', [{
+  var helperRoc = ObjectAssign$3({}, makeHelperGregorian('roc', [{
     name: 'minguo',
     isoEpoch: {
       year: 1912,
@@ -10787,7 +11012,7 @@
   }]), {
     calendarIsVulnerableToJulianBug: true
   });
-  var helperBuddhist = ObjectAssign$2({}, makeHelperGregorian('buddhist', [{
+  var helperBuddhist = ObjectAssign$3({}, makeHelperGregorian('buddhist', [{
     name: 'be',
     hasYearZero: true,
     isoEpoch: {
@@ -10798,7 +11023,7 @@
   }]), {
     calendarIsVulnerableToJulianBug: true
   });
-  var helperGregory = ObjectAssign$2({}, makeHelperGregorian('gregory', [{
+  var helperGregory = ObjectAssign$3({}, makeHelperGregorian('gregory', [{
     name: 'ce',
     isoEpoch: {
       year: 1,
@@ -10822,7 +11047,7 @@
       };
     }
   });
-  var helperJapanese = ObjectAssign$2({}, // NOTE: Only the 5 modern eras (Meiji and later) are included. For dates
+  var helperJapanese = ObjectAssign$3({}, // NOTE: Only the 5 modern eras (Meiji and later) are included. For dates
   // before Meiji 1, the `ce` and `bce` eras are used. Challenges with pre-Meiji
   // eras include:
   // - Start/end dates of older eras are not precisely defined, which is
@@ -10947,7 +11172,7 @@
       };
     }
   });
-  var helperChinese = ObjectAssign$2({}, nonIsoHelperBase, {
+  var helperChinese = ObjectAssign$3({}, nonIsoHelperBase, {
     id: 'chinese',
     calendarType: 'lunisolar',
     inLeapYear: function inLeapYear(calendarDate, cache) {
@@ -11112,7 +11337,7 @@
         year = eraYear;
         if (monthExtra && monthExtra !== 'bis') throw new RangeError("Unexpected leap month suffix: ".concat(monthExtra));
 
-        var _monthCode = monthExtra === undefined ? "M".concat(month) : "M".concat(month, "L");
+        var _monthCode = buildMonthCode(month, monthExtra !== undefined);
 
         var monthString = "".concat(month).concat(monthExtra || '');
         var months = this.getMonthList(year, cache);
@@ -11137,19 +11362,21 @@
         if (month === undefined) {
           var _months = this.getMonthList(year, cache);
 
-          var _monthInfo = _months[monthCode.replace('L', 'bis').slice(1)];
-
+          var numberPart = monthCode.replace('L', 'bis').slice(1);
+          if (numberPart[0] === '0') numberPart = numberPart.slice(1);
+          var _monthInfo = _months[numberPart];
           month = _monthInfo && _monthInfo.monthIndex; // If this leap month isn't present in this year, constrain down to the last day of the previous month.
 
-          if (month === undefined && monthCode.endsWith('L') && !['M1L', 'M12L', 'M13L'].includes(monthCode) && overflow === 'constrain') {
+          if (month === undefined && monthCode.endsWith('L') && !['M01L', 'M12L', 'M13L'].includes(monthCode) && overflow === 'constrain') {
             var withoutML = monthCode.slice(1, -1);
+            if (withoutML[0] === '0') withoutML = withoutML.slice(1);
             _monthInfo = _months[withoutML];
 
             if (_monthInfo) {
               var _monthInfo2 = _monthInfo;
               day = _monthInfo2.daysInMonth;
               month = _monthInfo2.monthIndex;
-              monthCode = "M".concat(withoutML);
+              monthCode = buildMonthCode(withoutML);
             }
           }
 
@@ -11181,13 +11408,15 @@
             throw new RangeError("Invalid month ".concat(month, " in Chinese year ").concat(year));
           }
 
-          monthCode = "M".concat(matchingMonthEntry[0].replace('bis', 'L'));
+          monthCode = buildMonthCode(matchingMonthEntry[0].replace('bis', ''), matchingMonthEntry[0].indexOf('bis') !== -1);
         } else {
           // Both month and monthCode are present. Make sure they don't conflict.
           var _months3 = this.getMonthList(year, cache);
 
-          var _monthInfo3 = _months3[monthCode.replace('L', 'bis').slice(1)];
+          var _numberPart = monthCode.replace('L', 'bis').slice(1);
 
+          if (_numberPart[0] === '0') _numberPart = _numberPart.slice(1);
+          var _monthInfo3 = _months3[_numberPart];
           if (!_monthInfo3) throw new RangeError("Unmatched monthCode ".concat(monthCode, " in Chinese year ").concat(year));
 
           if (month !== _monthInfo3.monthIndex) {
@@ -11208,7 +11437,7 @@
     hasEra: false
   }); // Dangi (Korean) calendar has same implementation as Chinese
 
-  var helperDangi = ObjectAssign$2({}, _objectSpread2(_objectSpread2({}, helperChinese), {}, {
+  var helperDangi = ObjectAssign$3({}, _objectSpread2(_objectSpread2({}, helperChinese), {}, {
     id: 'dangi'
   }));
   /**
@@ -11335,7 +11564,7 @@
     },
     year: function year(date) {
       if (!HasSlot(date, ISO_YEAR) || !HasSlot(date, ISO_MONTH) || !HasSlot(date, ISO_DAY)) {
-        date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+        date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       }
 
       var cache = OneObjectCache.getCacheForObject(date);
@@ -11344,7 +11573,7 @@
     },
     month: function month(date) {
       if (!HasSlot(date, ISO_YEAR) || !HasSlot(date, ISO_MONTH) || !HasSlot(date, ISO_DAY)) {
-        date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+        date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       }
 
       var cache = OneObjectCache.getCacheForObject(date);
@@ -11353,7 +11582,7 @@
     },
     day: function day(date) {
       if (!HasSlot(date, ISO_YEAR) || !HasSlot(date, ISO_MONTH) || !HasSlot(date, ISO_DAY)) {
-        date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+        date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       }
 
       var cache = OneObjectCache.getCacheForObject(date);
@@ -11361,21 +11590,21 @@
       return calendarDate.day;
     },
     era: function era(date) {
-      if (!HasSlot(date, ISO_YEAR)) date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+      if (!HasSlot(date, ISO_YEAR)) date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       if (!this.helper.hasEra) return undefined;
       var cache = OneObjectCache.getCacheForObject(date);
       var calendarDate = this.helper.temporalToCalendarDate(date, cache);
       return calendarDate.era;
     },
     eraYear: function eraYear(date) {
-      if (!HasSlot(date, ISO_YEAR)) date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+      if (!HasSlot(date, ISO_YEAR)) date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       if (!this.helper.hasEra) return undefined;
       var cache = OneObjectCache.getCacheForObject(date);
       var calendarDate = this.helper.temporalToCalendarDate(date, cache);
       return calendarDate.eraYear;
     },
     monthCode: function monthCode(date) {
-      if (!HasSlot(date, ISO_MONTH)) date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+      if (!HasSlot(date, ISO_MONTH)) date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       var cache = OneObjectCache.getCacheForObject(date);
       var calendarDate = this.helper.temporalToCalendarDate(date, cache);
       return calendarDate.monthCode;
@@ -11385,7 +11614,7 @@
     },
     dayOfYear: function dayOfYear(date) {
       var cache = OneObjectCache.getCacheForObject(date);
-      date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+      date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       var calendarDate = this.helper.isoToCalendarDate(date, cache);
       var startOfYear = this.helper.startOfCalendarYear(calendarDate);
       var diffDays = this.helper.calendarDaysUntil(startOfYear, calendarDate, cache);
@@ -11399,7 +11628,7 @@
     },
     daysInMonth: function daysInMonth(date) {
       if (!HasSlot(date, ISO_YEAR) || !HasSlot(date, ISO_MONTH)) {
-        date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+        date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       }
 
       var cache = OneObjectCache.getCacheForObject(date);
@@ -11417,7 +11646,7 @@
       return result;
     },
     daysInYear: function daysInYear(date) {
-      if (!HasSlot(date, ISO_YEAR)) date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+      if (!HasSlot(date, ISO_YEAR)) date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       var cache = OneObjectCache.getCacheForObject(date);
       var calendarDate = this.helper.temporalToCalendarDate(date, cache);
       var startOfYearCalendar = this.helper.startOfCalendarYear(calendarDate);
@@ -11428,64 +11657,64 @@
       return result;
     },
     monthsInYear: function monthsInYear(date) {
-      if (!HasSlot(date, ISO_YEAR)) ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+      if (!HasSlot(date, ISO_YEAR)) ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       var cache = OneObjectCache.getCacheForObject(date);
       var calendarDate = this.helper.temporalToCalendarDate(date, cache);
       var result = this.helper.monthsInYear(calendarDate, cache);
       return result;
     },
     inLeapYear: function inLeapYear(date) {
-      if (!HasSlot(date, ISO_YEAR)) date = ES.ToTemporalDate(date, GetIntrinsic$1('%Temporal.PlainDate%'));
+      if (!HasSlot(date, ISO_YEAR)) date = ES.ToTemporalDate(date, GetIntrinsic('%Temporal.PlainDate%'));
       var cache = OneObjectCache.getCacheForObject(date);
       var calendarDate = this.helper.temporalToCalendarDate(date, cache);
       var result = this.helper.inLeapYear(calendarDate, cache);
       return result;
     }
   };
-  impl['hebrew'] = ObjectAssign$2({}, nonIsoGeneralImpl, {
+  impl['hebrew'] = ObjectAssign$3({}, nonIsoGeneralImpl, {
     helper: helperHebrew
   });
-  impl['islamic'] = ObjectAssign$2({}, nonIsoGeneralImpl, {
+  impl['islamic'] = ObjectAssign$3({}, nonIsoGeneralImpl, {
     helper: helperIslamic
   });
   ['islamic-umalqura', 'islamic-tbla', 'islamic-civil', 'islamic-rgsa', 'islamicc'].forEach(function (id) {
-    impl[id] = ObjectAssign$2({}, nonIsoGeneralImpl, {
+    impl[id] = ObjectAssign$3({}, nonIsoGeneralImpl, {
       helper: _objectSpread2(_objectSpread2({}, helperIslamic), {}, {
         id: id
       })
     });
   });
-  impl['persian'] = ObjectAssign$2({}, nonIsoGeneralImpl, {
+  impl['persian'] = ObjectAssign$3({}, nonIsoGeneralImpl, {
     helper: helperPersian
   });
-  impl['ethiopic'] = ObjectAssign$2({}, nonIsoGeneralImpl, {
+  impl['ethiopic'] = ObjectAssign$3({}, nonIsoGeneralImpl, {
     helper: helperEthiopic
   });
-  impl['ethioaa'] = ObjectAssign$2({}, nonIsoGeneralImpl, {
+  impl['ethioaa'] = ObjectAssign$3({}, nonIsoGeneralImpl, {
     helper: helperEthioaa
   });
-  impl['coptic'] = ObjectAssign$2({}, nonIsoGeneralImpl, {
+  impl['coptic'] = ObjectAssign$3({}, nonIsoGeneralImpl, {
     helper: helperCoptic
   });
-  impl['chinese'] = ObjectAssign$2({}, nonIsoGeneralImpl, {
+  impl['chinese'] = ObjectAssign$3({}, nonIsoGeneralImpl, {
     helper: helperChinese
   });
-  impl['dangi'] = ObjectAssign$2({}, nonIsoGeneralImpl, {
+  impl['dangi'] = ObjectAssign$3({}, nonIsoGeneralImpl, {
     helper: helperDangi
   });
-  impl['roc'] = ObjectAssign$2({}, nonIsoGeneralImpl, {
+  impl['roc'] = ObjectAssign$3({}, nonIsoGeneralImpl, {
     helper: helperRoc
   });
-  impl['indian'] = ObjectAssign$2({}, nonIsoGeneralImpl, {
+  impl['indian'] = ObjectAssign$3({}, nonIsoGeneralImpl, {
     helper: helperIndian
   });
-  impl['buddhist'] = ObjectAssign$2({}, nonIsoGeneralImpl, {
+  impl['buddhist'] = ObjectAssign$3({}, nonIsoGeneralImpl, {
     helper: helperBuddhist
   });
-  impl['japanese'] = ObjectAssign$2({}, nonIsoGeneralImpl, {
+  impl['japanese'] = ObjectAssign$3({}, nonIsoGeneralImpl, {
     helper: helperJapanese
   });
-  impl['gregory'] = ObjectAssign$2({}, nonIsoGeneralImpl, {
+  impl['gregory'] = ObjectAssign$3({}, nonIsoGeneralImpl, {
     helper: helperGregory
   });
   var BUILTIN_CALENDAR_IDS = Object.keys(impl);
@@ -11520,7 +11749,7 @@
         throw new RangeError('missing argument: isoYear, isoMonth and isoDay are required');
       }
 
-      ES.RejectDate(isoYear, isoMonth, isoDay);
+      ES.RejectISODate(isoYear, isoMonth, isoDay);
       ES.RejectDateRange(isoYear, isoMonth, isoDay);
       CreateSlots(this);
       SetSlot(this, ISO_YEAR, isoYear);
@@ -11549,121 +11778,85 @@
       key: "era",
       get: function get() {
         if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).era(this);
-
-        if (result !== undefined) {
-          result = ES.ToString(result);
-        }
-
-        return result;
+        return ES.CalendarEra(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "eraYear",
       get: function get() {
         if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).eraYear(this);
-
-        if (result !== undefined) {
-          result = ES.ToInteger(result);
-        }
-
-        return result;
+        return ES.CalendarEraYear(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "year",
       get: function get() {
         if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).year(this);
-
-        if (result === undefined) {
-          throw new RangeError('calendar year result must be an integer');
-        }
-
-        return ES.ToInteger(result);
+        return ES.CalendarYear(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "month",
       get: function get() {
         if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).month(this);
-
-        if (result === undefined) {
-          throw new RangeError('calendar month result must be a positive integer');
-        }
-
-        return ES.ToPositiveInteger(result);
+        return ES.CalendarMonth(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "monthCode",
       get: function get() {
         if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).monthCode(this);
-
-        if (result === undefined) {
-          throw new RangeError('calendar monthCode result must be a string');
-        }
-
-        return ES.ToString(result);
+        return ES.CalendarMonthCode(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "day",
       get: function get() {
         if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).day(this);
-
-        if (result === undefined) {
-          throw new RangeError('calendar day result must be a positive integer');
-        }
-
-        return ES.ToPositiveInteger(result);
+        return ES.CalendarDay(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "dayOfWeek",
       get: function get() {
         if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).dayOfWeek(this);
+        return ES.CalendarDayOfWeek(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "dayOfYear",
       get: function get() {
         if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).dayOfYear(this);
+        return ES.CalendarDayOfYear(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "weekOfYear",
       get: function get() {
         if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).weekOfYear(this);
+        return ES.CalendarWeekOfYear(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "daysInWeek",
       get: function get() {
         if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).daysInWeek(this);
+        return ES.CalendarDaysInWeek(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "daysInMonth",
       get: function get() {
         if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).daysInMonth(this);
+        return ES.CalendarDaysInMonth(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "daysInYear",
       get: function get() {
         if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).daysInYear(this);
+        return ES.CalendarDaysInYear(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "monthsInYear",
       get: function get() {
         if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).monthsInYear(this);
+        return ES.CalendarMonthsInYear(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "inLeapYear",
       get: function get() {
         if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).inLeapYear(this);
+        return ES.CalendarInLeapYear(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "with",
@@ -11737,9 +11930,7 @@
           days: days
         };
         var Construct = ES.SpeciesConstructor(this, PlainDate);
-        var result = GetSlot(this, CALENDAR).dateAdd(this, duration, options, Construct);
-        if (!ES.IsTemporalDate(result)) throw new TypeError('invalid result');
-        return result;
+        return ES.CalendarDateAdd(GetSlot(this, CALENDAR), this, duration, options, Construct);
       }
     }, {
       key: "subtract",
@@ -11771,9 +11962,7 @@
           days: -days
         };
         var Construct = ES.SpeciesConstructor(this, PlainDate);
-        var result = GetSlot(this, CALENDAR).dateAdd(this, duration, options, Construct);
-        if (!ES.IsTemporalDate(result)) throw new TypeError('invalid result');
-        return result;
+        return ES.CalendarDateAdd(GetSlot(this, CALENDAR), this, duration, options, Construct);
       }
     }, {
       key: "until",
@@ -11798,13 +11987,13 @@
         ES.ValidateTemporalUnitRange(largestUnit, smallestUnit);
         var roundingMode = ES.ToTemporalRoundingMode(options, 'trunc');
         var roundingIncrement = ES.ToTemporalRoundingIncrement(options, undefined, false);
-        var result = calendar.dateUntil(this, other, options);
+        var result = ES.CalendarDateUntil(calendar, this, other, options);
         if (smallestUnit === 'days' && roundingIncrement === 1) return result;
         var years = result.years,
             months = result.months,
             weeks = result.weeks,
             days = result.days;
-        var TemporalDateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
+        var TemporalDateTime = GetIntrinsic('%Temporal.PlainDateTime%');
         var relativeTo = new TemporalDateTime(GetSlot(this, ISO_YEAR), GetSlot(this, ISO_MONTH), GetSlot(this, ISO_DAY), 0, 0, 0, 0, 0, 0, GetSlot(this, CALENDAR));
 
         var _ES$RoundDuration = ES.RoundDuration(years, months, weeks, days, 0, 0, 0, 0, 0, 0, roundingIncrement, smallestUnit, roundingMode, relativeTo);
@@ -11813,7 +12002,7 @@
         months = _ES$RoundDuration.months;
         weeks = _ES$RoundDuration.weeks;
         days = _ES$RoundDuration.days;
-        var Duration = GetIntrinsic$1('%Temporal.Duration%');
+        var Duration = GetIntrinsic('%Temporal.Duration%');
         return new Duration(years, months, weeks, days, 0, 0, 0, 0, 0, 0);
       }
     }, {
@@ -11840,19 +12029,19 @@
         var roundingMode = ES.ToTemporalRoundingMode(options, 'trunc');
         var roundingIncrement = ES.ToTemporalRoundingIncrement(options, undefined, false);
 
-        var _calendar$dateUntil = calendar.dateUntil(this, other, options),
-            years = _calendar$dateUntil.years,
-            months = _calendar$dateUntil.months,
-            weeks = _calendar$dateUntil.weeks,
-            days = _calendar$dateUntil.days;
+        var _ES$CalendarDateUntil = ES.CalendarDateUntil(calendar, this, other, options),
+            years = _ES$CalendarDateUntil.years,
+            months = _ES$CalendarDateUntil.months,
+            weeks = _ES$CalendarDateUntil.weeks,
+            days = _ES$CalendarDateUntil.days;
 
-        var Duration = GetIntrinsic$1('%Temporal.Duration%');
+        var Duration = GetIntrinsic('%Temporal.Duration%');
 
         if (smallestUnit === 'days' && roundingIncrement === 1) {
           return new Duration(-years, -months, -weeks, -days, 0, 0, 0, 0, 0, 0);
         }
 
-        var TemporalDateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
+        var TemporalDateTime = GetIntrinsic('%Temporal.PlainDateTime%');
         var relativeTo = new TemporalDateTime(GetSlot(this, ISO_YEAR), GetSlot(this, ISO_MONTH), GetSlot(this, ISO_DAY), 0, 0, 0, 0, 0, 0, GetSlot(this, CALENDAR));
 
         var _ES$RoundDuration2 = ES.RoundDuration(years, months, weeks, days, 0, 0, 0, 0, 0, 0, roundingIncrement, smallestUnit, ES.NegateTemporalRoundingMode(roundingMode), relativeTo);
@@ -11915,9 +12104,9 @@
         var month = GetSlot(this, ISO_MONTH);
         var day = GetSlot(this, ISO_DAY);
         var calendar = GetSlot(this, CALENDAR);
-        var DateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
+        var DateTime = GetIntrinsic('%Temporal.PlainDateTime%');
         if (temporalTime === undefined) return new DateTime(year, month, day, 0, 0, 0, 0, 0, 0, calendar);
-        temporalTime = ES.ToTemporalTime(temporalTime, GetIntrinsic$1('%Temporal.PlainTime%'));
+        temporalTime = ES.ToTemporalTime(temporalTime, GetIntrinsic('%Temporal.PlainTime%'));
         var hour = GetSlot(temporalTime, ISO_HOUR);
         var minute = GetSlot(temporalTime, ISO_MINUTE);
         var second = GetSlot(temporalTime, ISO_SECOND);
@@ -11957,7 +12146,7 @@
             nanosecond = 0;
 
         if (temporalTime !== undefined) {
-          temporalTime = ES.ToTemporalTime(temporalTime, GetIntrinsic$1('%Temporal.PlainTime%'));
+          temporalTime = ES.ToTemporalTime(temporalTime, GetIntrinsic('%Temporal.PlainTime%'));
           hour = GetSlot(temporalTime, ISO_HOUR);
           minute = GetSlot(temporalTime, ISO_MINUTE);
           second = GetSlot(temporalTime, ISO_SECOND);
@@ -11966,17 +12155,17 @@
           nanosecond = GetSlot(temporalTime, ISO_NANOSECOND);
         }
 
-        var PlainDateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
+        var PlainDateTime = GetIntrinsic('%Temporal.PlainDateTime%');
         var dt = new PlainDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, calendar);
-        var instant = ES.GetTemporalInstantFor(timeZone, dt, 'compatible');
-        var ZonedDateTime = GetIntrinsic$1('%Temporal.ZonedDateTime%');
+        var instant = ES.BuiltinTimeZoneGetInstantFor(timeZone, dt, 'compatible');
+        var ZonedDateTime = GetIntrinsic('%Temporal.ZonedDateTime%');
         return new ZonedDateTime(GetSlot(instant, EPOCHNANOSECONDS), timeZone, calendar);
       }
     }, {
       key: "toPlainYearMonth",
       value: function toPlainYearMonth() {
         if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
-        var YearMonth = GetIntrinsic$1('%Temporal.PlainYearMonth%');
+        var YearMonth = GetIntrinsic('%Temporal.PlainYearMonth%');
         var calendar = GetSlot(this, CALENDAR);
         var fieldNames = ES.CalendarFields(calendar, ['monthCode', 'year']);
         var fields = ES.ToTemporalYearMonthFields(this, fieldNames);
@@ -11986,7 +12175,7 @@
       key: "toPlainMonthDay",
       value: function toPlainMonthDay() {
         if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
-        var MonthDay = GetIntrinsic$1('%Temporal.PlainMonthDay%');
+        var MonthDay = GetIntrinsic('%Temporal.PlainMonthDay%');
         var calendar = GetSlot(this, CALENDAR);
         var fieldNames = ES.CalendarFields(calendar, ['day', 'monthCode']);
         var fields = ES.ToTemporalMonthDayFields(this, fieldNames);
@@ -12028,7 +12217,7 @@
       value: function compare(one, two) {
         one = ES.ToTemporalDate(one, PlainDate);
         two = ES.ToTemporalDate(two, PlainDate);
-        var result = ES.CompareTemporalDate(GetSlot(one, ISO_YEAR), GetSlot(one, ISO_MONTH), GetSlot(one, ISO_DAY), GetSlot(two, ISO_YEAR), GetSlot(two, ISO_MONTH), GetSlot(two, ISO_DAY));
+        var result = ES.CompareISODate(GetSlot(one, ISO_YEAR), GetSlot(one, ISO_MONTH), GetSlot(one, ISO_DAY), GetSlot(two, ISO_YEAR), GetSlot(two, ISO_MONTH), GetSlot(two, ISO_DAY));
         if (result !== 0) return result;
         return ES.CalendarCompare(GetSlot(one, CALENDAR), GetSlot(two, CALENDAR));
       }
@@ -12056,17 +12245,17 @@
           increment = options.increment,
           roundingMode = options.roundingMode;
 
-      var _ES$RoundDateTime = ES.RoundDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, increment, unit, roundingMode);
+      var _ES$RoundISODateTime = ES.RoundISODateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, increment, unit, roundingMode);
 
-      year = _ES$RoundDateTime.year;
-      month = _ES$RoundDateTime.month;
-      day = _ES$RoundDateTime.day;
-      hour = _ES$RoundDateTime.hour;
-      minute = _ES$RoundDateTime.minute;
-      second = _ES$RoundDateTime.second;
-      millisecond = _ES$RoundDateTime.millisecond;
-      microsecond = _ES$RoundDateTime.microsecond;
-      nanosecond = _ES$RoundDateTime.nanosecond;
+      year = _ES$RoundISODateTime.year;
+      month = _ES$RoundISODateTime.month;
+      day = _ES$RoundISODateTime.day;
+      hour = _ES$RoundISODateTime.hour;
+      minute = _ES$RoundISODateTime.minute;
+      second = _ES$RoundISODateTime.second;
+      millisecond = _ES$RoundISODateTime.millisecond;
+      microsecond = _ES$RoundISODateTime.microsecond;
+      nanosecond = _ES$RoundISODateTime.nanosecond;
     }
 
     year = ES.ISOYearString(year);
@@ -12143,45 +12332,25 @@
       key: "year",
       get: function get() {
         if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).year(this);
-
-        if (result === undefined) {
-          throw new RangeError('calendar year result must be an integer');
-        }
-
-        return ES.ToInteger(result);
+        return ES.CalendarYear(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "month",
       get: function get() {
         if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).month(this);
-
-        if (result === undefined) {
-          throw new RangeError('calendar month result must be a positive integer');
-        }
-
-        return ES.ToPositiveInteger(result);
+        return ES.CalendarMonth(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "monthCode",
       get: function get() {
         if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).monthCode(this);
-        if (result !== undefined) result = ES.ToString(result);
-        return result;
+        return ES.CalendarMonthCode(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "day",
       get: function get() {
         if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).day(this);
-
-        if (result === undefined) {
-          throw new RangeError('calendar day result must be a positive integer');
-        }
-
-        return ES.ToPositiveInteger(result);
+        return ES.CalendarDay(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "hour",
@@ -12223,73 +12392,61 @@
       key: "era",
       get: function get() {
         if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).era(this);
-
-        if (result !== undefined) {
-          result = ES.ToString(result);
-        }
-
-        return result;
+        return ES.CalendarEra(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "eraYear",
       get: function get() {
         if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).eraYear(this);
-
-        if (result !== undefined) {
-          result = ES.ToInteger(result);
-        }
-
-        return result;
+        return ES.CalendarEraYear(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "dayOfWeek",
       get: function get() {
         if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).dayOfWeek(this);
+        return ES.CalendarDayOfWeek(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "dayOfYear",
       get: function get() {
         if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).dayOfYear(this);
+        return ES.CalendarDayOfYear(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "weekOfYear",
       get: function get() {
         if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).weekOfYear(this);
+        return ES.CalendarWeekOfYear(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "daysInWeek",
       get: function get() {
         if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).daysInWeek(this);
+        return ES.CalendarDaysInWeek(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "daysInYear",
       get: function get() {
         if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).daysInYear(this);
+        return ES.CalendarDaysInYear(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "daysInMonth",
       get: function get() {
         if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).daysInMonth(this);
+        return ES.CalendarDaysInMonth(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "monthsInYear",
       get: function get() {
         if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).monthsInYear(this);
+        return ES.CalendarMonthsInYear(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "inLeapYear",
       get: function get() {
         if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).inLeapYear(this);
+        return ES.CalendarInLeapYear(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "with",
@@ -12348,7 +12505,7 @@
         var calendar = GetSlot(this, CALENDAR);
         var Construct = ES.SpeciesConstructor(this, PlainDateTime);
         if (temporalTime === undefined) return new Construct(year, month, day, 0, 0, 0, 0, 0, 0, calendar);
-        temporalTime = ES.ToTemporalTime(temporalTime, GetIntrinsic$1('%Temporal.PlainTime%'));
+        temporalTime = ES.ToTemporalTime(temporalTime, GetIntrinsic('%Temporal.PlainTime%'));
         var hour = GetSlot(temporalTime, ISO_HOUR);
         var minute = GetSlot(temporalTime, ISO_MINUTE);
         var second = GetSlot(temporalTime, ISO_SECOND);
@@ -12361,7 +12518,7 @@
       key: "withPlainDate",
       value: function withPlainDate(temporalDate) {
         if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
-        temporalDate = ES.ToTemporalDate(temporalDate, GetIntrinsic$1('%Temporal.PlainDate%'));
+        temporalDate = ES.ToTemporalDate(temporalDate, GetIntrinsic('%Temporal.PlainDate%'));
         var year = GetSlot(temporalDate, ISO_YEAR);
         var month = GetSlot(temporalDate, ISO_MONTH);
         var day = GetSlot(temporalDate, ISO_DAY);
@@ -12481,17 +12638,17 @@
         var roundingMode = ES.ToTemporalRoundingMode(options, 'trunc');
         var roundingIncrement = ES.ToTemporalDateTimeRoundingIncrement(options, smallestUnit);
 
-        var _ES$DifferenceDateTim = ES.DifferenceDateTime(GetSlot(this, ISO_YEAR), GetSlot(this, ISO_MONTH), GetSlot(this, ISO_DAY), GetSlot(this, ISO_HOUR), GetSlot(this, ISO_MINUTE), GetSlot(this, ISO_SECOND), GetSlot(this, ISO_MILLISECOND), GetSlot(this, ISO_MICROSECOND), GetSlot(this, ISO_NANOSECOND), GetSlot(other, ISO_YEAR), GetSlot(other, ISO_MONTH), GetSlot(other, ISO_DAY), GetSlot(other, ISO_HOUR), GetSlot(other, ISO_MINUTE), GetSlot(other, ISO_SECOND), GetSlot(other, ISO_MILLISECOND), GetSlot(other, ISO_MICROSECOND), GetSlot(other, ISO_NANOSECOND), calendar, largestUnit, options),
-            years = _ES$DifferenceDateTim.years,
-            months = _ES$DifferenceDateTim.months,
-            weeks = _ES$DifferenceDateTim.weeks,
-            days = _ES$DifferenceDateTim.days,
-            hours = _ES$DifferenceDateTim.hours,
-            minutes = _ES$DifferenceDateTim.minutes,
-            seconds = _ES$DifferenceDateTim.seconds,
-            milliseconds = _ES$DifferenceDateTim.milliseconds,
-            microseconds = _ES$DifferenceDateTim.microseconds,
-            nanoseconds = _ES$DifferenceDateTim.nanoseconds;
+        var _ES$DifferenceISODate = ES.DifferenceISODateTime(GetSlot(this, ISO_YEAR), GetSlot(this, ISO_MONTH), GetSlot(this, ISO_DAY), GetSlot(this, ISO_HOUR), GetSlot(this, ISO_MINUTE), GetSlot(this, ISO_SECOND), GetSlot(this, ISO_MILLISECOND), GetSlot(this, ISO_MICROSECOND), GetSlot(this, ISO_NANOSECOND), GetSlot(other, ISO_YEAR), GetSlot(other, ISO_MONTH), GetSlot(other, ISO_DAY), GetSlot(other, ISO_HOUR), GetSlot(other, ISO_MINUTE), GetSlot(other, ISO_SECOND), GetSlot(other, ISO_MILLISECOND), GetSlot(other, ISO_MICROSECOND), GetSlot(other, ISO_NANOSECOND), calendar, largestUnit, options),
+            years = _ES$DifferenceISODate.years,
+            months = _ES$DifferenceISODate.months,
+            weeks = _ES$DifferenceISODate.weeks,
+            days = _ES$DifferenceISODate.days,
+            hours = _ES$DifferenceISODate.hours,
+            minutes = _ES$DifferenceISODate.minutes,
+            seconds = _ES$DifferenceISODate.seconds,
+            milliseconds = _ES$DifferenceISODate.milliseconds,
+            microseconds = _ES$DifferenceISODate.microseconds,
+            nanoseconds = _ES$DifferenceISODate.nanoseconds;
 
         var _ES$RoundDuration = ES.RoundDuration(years, months, weeks, days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds, roundingIncrement, smallestUnit, roundingMode, this);
 
@@ -12515,7 +12672,7 @@
         milliseconds = _ES$BalanceDuration.milliseconds;
         microseconds = _ES$BalanceDuration.microseconds;
         nanoseconds = _ES$BalanceDuration.nanoseconds;
-        var Duration = GetIntrinsic$1('%Temporal.Duration%');
+        var Duration = GetIntrinsic('%Temporal.Duration%');
         return new Duration(years, months, weeks, days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds);
       }
     }, {
@@ -12541,17 +12698,17 @@
         var roundingMode = ES.ToTemporalRoundingMode(options, 'trunc');
         var roundingIncrement = ES.ToTemporalDateTimeRoundingIncrement(options, smallestUnit);
 
-        var _ES$DifferenceDateTim2 = ES.DifferenceDateTime(GetSlot(this, ISO_YEAR), GetSlot(this, ISO_MONTH), GetSlot(this, ISO_DAY), GetSlot(this, ISO_HOUR), GetSlot(this, ISO_MINUTE), GetSlot(this, ISO_SECOND), GetSlot(this, ISO_MILLISECOND), GetSlot(this, ISO_MICROSECOND), GetSlot(this, ISO_NANOSECOND), GetSlot(other, ISO_YEAR), GetSlot(other, ISO_MONTH), GetSlot(other, ISO_DAY), GetSlot(other, ISO_HOUR), GetSlot(other, ISO_MINUTE), GetSlot(other, ISO_SECOND), GetSlot(other, ISO_MILLISECOND), GetSlot(other, ISO_MICROSECOND), GetSlot(other, ISO_NANOSECOND), calendar, largestUnit, options),
-            years = _ES$DifferenceDateTim2.years,
-            months = _ES$DifferenceDateTim2.months,
-            weeks = _ES$DifferenceDateTim2.weeks,
-            days = _ES$DifferenceDateTim2.days,
-            hours = _ES$DifferenceDateTim2.hours,
-            minutes = _ES$DifferenceDateTim2.minutes,
-            seconds = _ES$DifferenceDateTim2.seconds,
-            milliseconds = _ES$DifferenceDateTim2.milliseconds,
-            microseconds = _ES$DifferenceDateTim2.microseconds,
-            nanoseconds = _ES$DifferenceDateTim2.nanoseconds;
+        var _ES$DifferenceISODate2 = ES.DifferenceISODateTime(GetSlot(this, ISO_YEAR), GetSlot(this, ISO_MONTH), GetSlot(this, ISO_DAY), GetSlot(this, ISO_HOUR), GetSlot(this, ISO_MINUTE), GetSlot(this, ISO_SECOND), GetSlot(this, ISO_MILLISECOND), GetSlot(this, ISO_MICROSECOND), GetSlot(this, ISO_NANOSECOND), GetSlot(other, ISO_YEAR), GetSlot(other, ISO_MONTH), GetSlot(other, ISO_DAY), GetSlot(other, ISO_HOUR), GetSlot(other, ISO_MINUTE), GetSlot(other, ISO_SECOND), GetSlot(other, ISO_MILLISECOND), GetSlot(other, ISO_MICROSECOND), GetSlot(other, ISO_NANOSECOND), calendar, largestUnit, options),
+            years = _ES$DifferenceISODate2.years,
+            months = _ES$DifferenceISODate2.months,
+            weeks = _ES$DifferenceISODate2.weeks,
+            days = _ES$DifferenceISODate2.days,
+            hours = _ES$DifferenceISODate2.hours,
+            minutes = _ES$DifferenceISODate2.minutes,
+            seconds = _ES$DifferenceISODate2.seconds,
+            milliseconds = _ES$DifferenceISODate2.milliseconds,
+            microseconds = _ES$DifferenceISODate2.microseconds,
+            nanoseconds = _ES$DifferenceISODate2.nanoseconds;
 
         var _ES$RoundDuration2 = ES.RoundDuration(years, months, weeks, days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds, roundingIncrement, smallestUnit, ES.NegateTemporalRoundingMode(roundingMode), this);
 
@@ -12575,7 +12732,7 @@
         milliseconds = _ES$BalanceDuration2.milliseconds;
         microseconds = _ES$BalanceDuration2.microseconds;
         nanoseconds = _ES$BalanceDuration2.nanoseconds;
-        var Duration = GetIntrinsic$1('%Temporal.Duration%');
+        var Duration = GetIntrinsic('%Temporal.Duration%');
         return new Duration(-years, -months, -weeks, -days, -hours, -minutes, -seconds, -milliseconds, -microseconds, -nanoseconds);
       }
     }, {
@@ -12606,17 +12763,17 @@
         var microsecond = GetSlot(this, ISO_MICROSECOND);
         var nanosecond = GetSlot(this, ISO_NANOSECOND);
 
-        var _ES$RoundDateTime2 = ES.RoundDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, roundingIncrement, smallestUnit, roundingMode);
+        var _ES$RoundISODateTime2 = ES.RoundISODateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, roundingIncrement, smallestUnit, roundingMode);
 
-        year = _ES$RoundDateTime2.year;
-        month = _ES$RoundDateTime2.month;
-        day = _ES$RoundDateTime2.day;
-        hour = _ES$RoundDateTime2.hour;
-        minute = _ES$RoundDateTime2.minute;
-        second = _ES$RoundDateTime2.second;
-        millisecond = _ES$RoundDateTime2.millisecond;
-        microsecond = _ES$RoundDateTime2.microsecond;
-        nanosecond = _ES$RoundDateTime2.nanosecond;
+        year = _ES$RoundISODateTime2.year;
+        month = _ES$RoundISODateTime2.month;
+        day = _ES$RoundISODateTime2.day;
+        hour = _ES$RoundISODateTime2.hour;
+        minute = _ES$RoundISODateTime2.minute;
+        second = _ES$RoundISODateTime2.second;
+        millisecond = _ES$RoundISODateTime2.millisecond;
+        microsecond = _ES$RoundISODateTime2.microsecond;
+        nanosecond = _ES$RoundISODateTime2.nanosecond;
         var Construct = ES.SpeciesConstructor(this, PlainDateTime);
         var result = new Construct(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, GetSlot(this, CALENDAR));
         if (!ES.IsTemporalDateTime(result)) throw new TypeError('invalid result');
@@ -12684,8 +12841,8 @@
         var timeZone = ES.ToTemporalTimeZone(temporalTimeZoneLike);
         options = ES.NormalizeOptionsObject(options);
         var disambiguation = ES.ToTemporalDisambiguation(options);
-        var instant = ES.GetTemporalInstantFor(timeZone, this, disambiguation);
-        var ZonedDateTime = GetIntrinsic$1('%Temporal.ZonedDateTime%');
+        var instant = ES.BuiltinTimeZoneGetInstantFor(timeZone, this, disambiguation);
+        var ZonedDateTime = GetIntrinsic('%Temporal.ZonedDateTime%');
         return new ZonedDateTime(GetSlot(instant, EPOCHNANOSECONDS), timeZone, GetSlot(this, CALENDAR));
       }
     }, {
@@ -12698,7 +12855,7 @@
       key: "toPlainYearMonth",
       value: function toPlainYearMonth() {
         if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
-        var YearMonth = GetIntrinsic$1('%Temporal.PlainYearMonth%');
+        var YearMonth = GetIntrinsic('%Temporal.PlainYearMonth%');
         var calendar = GetSlot(this, CALENDAR);
         var fieldNames = ES.CalendarFields(calendar, ['monthCode', 'year']);
         var fields = ES.ToTemporalYearMonthFields(this, fieldNames);
@@ -12708,7 +12865,7 @@
       key: "toPlainMonthDay",
       value: function toPlainMonthDay() {
         if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
-        var MonthDay = GetIntrinsic$1('%Temporal.PlainMonthDay%');
+        var MonthDay = GetIntrinsic('%Temporal.PlainMonthDay%');
         var calendar = GetSlot(this, CALENDAR);
         var fieldNames = ES.CalendarFields(calendar, ['day', 'monthCode']);
         var fields = ES.ToTemporalMonthDayFields(this, fieldNames);
@@ -13067,13 +13224,15 @@
         }
 
         defaultLargestUnit = ES.LargerOfTwoTemporalDurationUnits(defaultLargestUnit, smallestUnit);
-        var largestUnit = ES.ToLargestTemporalUnit(options, undefined);
+        var largestUnit = ES.ToLargestTemporalDurationUnit(options);
         var largestUnitPresent = true;
 
         if (!largestUnit) {
           largestUnitPresent = false;
           largestUnit = defaultLargestUnit;
         }
+
+        if (largestUnit === 'auto') largestUnit = defaultLargestUnit;
 
         if (!smallestUnitPresent && !largestUnitPresent) {
           throw new RangeError('at least one of smallestUnit or largestUnit is required');
@@ -13318,7 +13477,7 @@
   }();
   MakeIntrinsicClass(Duration, 'Temporal.Duration');
 
-  var ObjectAssign$3 = Object.assign;
+  var ObjectAssign$2 = Object.assign;
 
   function MonthDayToString(monthDay) {
     var showCalendar = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'auto';
@@ -13355,7 +13514,7 @@
         throw new RangeError('missing argument: isoMonth and isoDay are required');
       }
 
-      ES.RejectDate(referenceISOYear, isoMonth, isoDay);
+      ES.RejectISODate(referenceISOYear, isoMonth, isoDay);
       ES.RejectDateRange(referenceISOYear, isoMonth, isoDay);
       CreateSlots(this);
       SetSlot(this, ISO_MONTH, isoMonth);
@@ -13378,25 +13537,13 @@
       key: "monthCode",
       get: function get() {
         if (!ES.IsTemporalMonthDay(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).monthCode(this);
-
-        if (result === undefined) {
-          throw new RangeError('calendar monthCode result must be a string');
-        }
-
-        return ES.ToString(result);
+        return ES.CalendarMonthCode(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "day",
       get: function get() {
         if (!ES.IsTemporalMonthDay(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).day(this);
-
-        if (result === undefined) {
-          throw new RangeError('calendar day result must be a positive integer');
-        }
-
-        return ES.ToPositiveInteger(result);
+        return ES.CalendarDay(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "calendar",
@@ -13501,8 +13648,8 @@
             entries.push([fieldName, undefined]);
           }
         });
-        ObjectAssign$3(fields, ES.PrepareTemporalFields(item, entries));
-        var Date = GetIntrinsic$1('%Temporal.PlainDate%');
+        ObjectAssign$2(fields, ES.PrepareTemporalFields(item, entries));
+        var Date = GetIntrinsic('%Temporal.PlainDate%');
         return ES.DateFromFields(calendar, fields, Date);
       }
     }, {
@@ -13543,7 +13690,7 @@
   MakeIntrinsicClass(PlainMonthDay, 'Temporal.PlainMonthDay');
 
   var now = {
-    instant: instant$1,
+    instant: instant,
     plainDateTime: plainDateTime,
     plainDateTimeISO: plainDateTimeISO,
     plainDate: plainDate,
@@ -13554,8 +13701,8 @@
     zonedDateTimeISO: zonedDateTimeISO
   };
 
-  function instant$1() {
-    var Instant = GetIntrinsic$1('%Temporal.Instant%');
+  function instant() {
+    var Instant = GetIntrinsic('%Temporal.Instant%');
     return new Instant(ES.SystemUTCEpochNanoSeconds());
   }
 
@@ -13564,8 +13711,8 @@
     return function () {
       var timeZone = ES.ToTemporalTimeZone(temporalTimeZoneLike);
       var calendar = ES.ToTemporalCalendar(calendarLike);
-      var inst = instant$1();
-      return ES.GetTemporalDateTimeFor(timeZone, inst, calendar);
+      var inst = instant();
+      return ES.BuiltinTimeZoneGetPlainDateTimeFor(timeZone, inst, calendar);
     }();
   }
 
@@ -13574,8 +13721,8 @@
     return function () {
       var timeZone = ES.ToTemporalTimeZone(temporalTimeZoneLike);
       var calendar = ES.GetISO8601Calendar();
-      var inst = instant$1();
-      return ES.GetTemporalDateTimeFor(timeZone, inst, calendar);
+      var inst = instant();
+      return ES.BuiltinTimeZoneGetPlainDateTimeFor(timeZone, inst, calendar);
     }();
   }
 
@@ -13584,7 +13731,7 @@
     return function () {
       var timeZone = ES.ToTemporalTimeZone(temporalTimeZoneLike);
       var calendar = ES.ToTemporalCalendar(calendarLike);
-      var ZonedDateTime = GetIntrinsic$1('%Temporal.ZonedDateTime%');
+      var ZonedDateTime = GetIntrinsic('%Temporal.ZonedDateTime%');
       return new ZonedDateTime(ES.SystemUTCEpochNanoSeconds(), timeZone, calendar);
     }();
   }
@@ -13594,7 +13741,7 @@
     return function () {
       var timeZone = ES.ToTemporalTimeZone(temporalTimeZoneLike);
       var calendar = ES.GetISO8601Calendar();
-      var ZonedDateTime = GetIntrinsic$1('%Temporal.ZonedDateTime%');
+      var ZonedDateTime = GetIntrinsic('%Temporal.ZonedDateTime%');
       return new ZonedDateTime(ES.SystemUTCEpochNanoSeconds(), timeZone, calendar);
     }();
   }
@@ -13618,7 +13765,7 @@
     return ES.SystemTimeZone();
   }
 
-  var ObjectAssign$4 = Object.assign;
+  var ObjectAssign$1 = Object.assign;
 
   function TemporalTimeToString(time, precision) {
     var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : undefined;
@@ -13757,7 +13904,7 @@
 
         var fields = ES.ToTemporalTimeRecord(this);
 
-        var _ObjectAssign = ObjectAssign$4(fields, props),
+        var _ObjectAssign = ObjectAssign$1(fields, props),
             hour = _ObjectAssign.hour,
             minute = _ObjectAssign.minute,
             second = _ObjectAssign.second,
@@ -13914,7 +14061,7 @@
         milliseconds = _ES$BalanceDuration.milliseconds;
         microseconds = _ES$BalanceDuration.microseconds;
         nanoseconds = _ES$BalanceDuration.nanoseconds;
-        var Duration = GetIntrinsic$1('%Temporal.Duration%');
+        var Duration = GetIntrinsic('%Temporal.Duration%');
         return new Duration(0, 0, 0, 0, hours, minutes, seconds, milliseconds, microseconds, nanoseconds);
       }
     }, {
@@ -13969,7 +14116,7 @@
         milliseconds = _ES$BalanceDuration2.milliseconds;
         microseconds = _ES$BalanceDuration2.microseconds;
         nanoseconds = _ES$BalanceDuration2.nanoseconds;
-        var Duration = GetIntrinsic$1('%Temporal.Duration%');
+        var Duration = GetIntrinsic('%Temporal.Duration%');
         return new Duration(0, 0, 0, 0, hours, minutes, seconds, milliseconds, microseconds, nanoseconds);
       }
     }, {
@@ -14066,7 +14213,7 @@
       key: "toPlainDateTime",
       value: function toPlainDateTime(temporalDate) {
         if (!ES.IsTemporalTime(this)) throw new TypeError('invalid receiver');
-        temporalDate = ES.ToTemporalDate(temporalDate, GetIntrinsic$1('%Temporal.PlainDate%'));
+        temporalDate = ES.ToTemporalDate(temporalDate, GetIntrinsic('%Temporal.PlainDate%'));
         var year = GetSlot(temporalDate, ISO_YEAR);
         var month = GetSlot(temporalDate, ISO_MONTH);
         var day = GetSlot(temporalDate, ISO_DAY);
@@ -14077,7 +14224,7 @@
         var millisecond = GetSlot(this, ISO_MILLISECOND);
         var microsecond = GetSlot(this, ISO_MICROSECOND);
         var nanosecond = GetSlot(this, ISO_NANOSECOND);
-        var DateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
+        var DateTime = GetIntrinsic('%Temporal.PlainDateTime%');
         return new DateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, calendar);
       }
     }, {
@@ -14095,7 +14242,7 @@
           throw new TypeError('missing date property');
         }
 
-        var temporalDate = ES.ToTemporalDate(dateLike, GetIntrinsic$1('%Temporal.PlainDate%'));
+        var temporalDate = ES.ToTemporalDate(dateLike, GetIntrinsic('%Temporal.PlainDate%'));
         var timeZoneLike = item.timeZone;
 
         if (timeZoneLike === undefined) {
@@ -14113,10 +14260,10 @@
         var millisecond = GetSlot(this, ISO_MILLISECOND);
         var microsecond = GetSlot(this, ISO_MICROSECOND);
         var nanosecond = GetSlot(this, ISO_NANOSECOND);
-        var PlainDateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
+        var PlainDateTime = GetIntrinsic('%Temporal.PlainDateTime%');
         var dt = new PlainDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, calendar);
-        var instant = ES.GetTemporalInstantFor(timeZone, dt, 'compatible');
-        var ZonedDateTime = GetIntrinsic$1('%Temporal.ZonedDateTime%');
+        var instant = ES.BuiltinTimeZoneGetInstantFor(timeZone, dt, 'compatible');
+        var ZonedDateTime = GetIntrinsic('%Temporal.ZonedDateTime%');
         return new ZonedDateTime(GetSlot(instant, EPOCHNANOSECONDS), timeZone, calendar);
       }
     }, {
@@ -14175,7 +14322,7 @@
   }();
   MakeIntrinsicClass(PlainTime, 'Temporal.PlainTime');
 
-  var ObjectAssign$5 = Object.assign;
+  var ObjectAssign = Object.assign;
 
   function YearMonthToString(yearMonth) {
     var showCalendar = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'auto';
@@ -14212,7 +14359,7 @@
         throw new RangeError('missing argument: isoYear and isoMonth are required');
       }
 
-      ES.RejectDate(isoYear, isoMonth, referenceISODay);
+      ES.RejectISODate(isoYear, isoMonth, referenceISODay);
       ES.RejectYearMonthRange(isoYear, isoMonth);
       CreateSlots(this);
       SetSlot(this, ISO_YEAR, isoYear);
@@ -14235,33 +14382,19 @@
       key: "year",
       get: function get() {
         if (!ES.IsTemporalYearMonth(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).year(this);
-
-        if (result === undefined) {
-          throw new RangeError('calendar year result must be an integer');
-        }
-
-        return ES.ToInteger(result);
+        return ES.CalendarYear(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "month",
       get: function get() {
         if (!ES.IsTemporalYearMonth(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).month(this);
-
-        if (result === undefined) {
-          throw new RangeError('calendar month result must be a positive integer');
-        }
-
-        return ES.ToPositiveInteger(result);
+        return ES.CalendarMonth(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "monthCode",
       get: function get() {
         if (!ES.IsTemporalYearMonth(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).monthCode(this);
-        if (result !== undefined) result = ES.ToString(result);
-        return result;
+        return ES.CalendarMonthCode(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "calendar",
@@ -14273,49 +14406,37 @@
       key: "era",
       get: function get() {
         if (!ES.IsTemporalYearMonth(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).era(this);
-
-        if (result !== undefined) {
-          result = ES.ToString(result);
-        }
-
-        return result;
+        return ES.CalendarEra(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "eraYear",
       get: function get() {
         if (!ES.IsTemporalYearMonth(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).eraYear(this);
-
-        if (result !== undefined) {
-          result = ES.ToInteger(result);
-        }
-
-        return result;
+        return ES.CalendarEraYear(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "daysInMonth",
       get: function get() {
         if (!ES.IsTemporalYearMonth(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).daysInMonth(this);
+        return ES.CalendarDaysInMonth(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "daysInYear",
       get: function get() {
         if (!ES.IsTemporalYearMonth(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).daysInYear(this);
+        return ES.CalendarDaysInYear(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "monthsInYear",
       get: function get() {
         if (!ES.IsTemporalYearMonth(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).monthsInYear(this);
+        return ES.CalendarMonthsInYear(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "inLeapYear",
       get: function get() {
         if (!ES.IsTemporalYearMonth(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).inLeapYear(this);
+        return ES.CalendarInLeapYear(GetSlot(this, CALENDAR), this);
       }
     }, {
       key: "with",
@@ -14371,16 +14492,16 @@
 
         days = _ES$BalanceDuration.days;
         options = ES.NormalizeOptionsObject(options);
-        var TemporalDate = GetIntrinsic$1('%Temporal.PlainDate%');
+        var TemporalDate = GetIntrinsic('%Temporal.PlainDate%');
         var calendar = GetSlot(this, CALENDAR);
         var fieldNames = ES.CalendarFields(calendar, ['monthCode', 'year']);
         var fields = ES.ToTemporalYearMonthFields(this, fieldNames);
         var sign = ES.DurationSign(years, months, weeks, days, 0, 0, 0, 0, 0, 0);
-        var day = sign < 0 ? calendar.daysInMonth(this) : 1;
+        var day = sign < 0 ? ES.CalendarDaysInMonth(calendar, this) : 1;
         var startDate = ES.DateFromFields(calendar, _objectSpread2(_objectSpread2({}, fields), {}, {
           day: day
         }), TemporalDate);
-        var addedDate = calendar.dateAdd(startDate, _objectSpread2(_objectSpread2({}, duration), {}, {
+        var addedDate = ES.CalendarDateAdd(calendar, startDate, _objectSpread2(_objectSpread2({}, duration), {}, {
           days: days
         }), options, TemporalDate);
         var addedDateFields = ES.ToTemporalYearMonthFields(addedDate, fieldNames);
@@ -14422,16 +14543,16 @@
 
         days = _ES$BalanceDuration2.days;
         options = ES.NormalizeOptionsObject(options);
-        var TemporalDate = GetIntrinsic$1('%Temporal.PlainDate%');
+        var TemporalDate = GetIntrinsic('%Temporal.PlainDate%');
         var calendar = GetSlot(this, CALENDAR);
         var fieldNames = ES.CalendarFields(calendar, ['monthCode', 'year']);
         var fields = ES.ToTemporalYearMonthFields(this, fieldNames);
         var sign = ES.DurationSign(years, months, weeks, days, 0, 0, 0, 0, 0, 0);
-        var day = sign < 0 ? calendar.daysInMonth(this) : 1;
+        var day = sign < 0 ? ES.CalendarDaysInMonth(calendar, this) : 1;
         var startDate = ES.DateFromFields(calendar, _objectSpread2(_objectSpread2({}, fields), {}, {
           day: day
         }), TemporalDate);
-        var addedDate = calendar.dateAdd(startDate, _objectSpread2(_objectSpread2({}, duration), {}, {
+        var addedDate = ES.CalendarDateAdd(calendar, startDate, _objectSpread2(_objectSpread2({}, duration), {}, {
           days: days
         }), options, TemporalDate);
         var addedDateFields = ES.ToTemporalYearMonthFields(addedDate, fieldNames);
@@ -14463,7 +14584,7 @@
         var fieldNames = ES.CalendarFields(calendar, ['monthCode', 'year']);
         var otherFields = ES.ToTemporalYearMonthFields(other, fieldNames);
         var thisFields = ES.ToTemporalYearMonthFields(this, fieldNames);
-        var TemporalDate = GetIntrinsic$1('%Temporal.PlainDate%');
+        var TemporalDate = GetIntrinsic('%Temporal.PlainDate%');
         var otherDate = ES.DateFromFields(calendar, _objectSpread2(_objectSpread2({}, otherFields), {}, {
           day: 1
         }), TemporalDate);
@@ -14475,18 +14596,18 @@
           largestUnit: largestUnit
         });
 
-        var result = calendar.dateUntil(thisDate, otherDate, untilOptions);
+        var result = ES.CalendarDateUntil(calendar, thisDate, otherDate, untilOptions);
         if (smallestUnit === 'months' && roundingIncrement === 1) return result;
         var years = result.years,
             months = result.months;
-        var TemporalDateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
+        var TemporalDateTime = GetIntrinsic('%Temporal.PlainDateTime%');
         var relativeTo = new TemporalDateTime(GetSlot(thisDate, ISO_YEAR), GetSlot(thisDate, ISO_MONTH), GetSlot(thisDate, ISO_DAY), 0, 0, 0, 0, 0, 0, calendar);
 
         var _ES$RoundDuration = ES.RoundDuration(years, months, 0, 0, 0, 0, 0, 0, 0, 0, roundingIncrement, smallestUnit, roundingMode, relativeTo);
 
         years = _ES$RoundDuration.years;
         months = _ES$RoundDuration.months;
-        var Duration = GetIntrinsic$1('%Temporal.Duration%');
+        var Duration = GetIntrinsic('%Temporal.Duration%');
         return new Duration(years, months, 0, 0, 0, 0, 0, 0, 0, 0);
       }
     }, {
@@ -14514,7 +14635,7 @@
         var fieldNames = ES.CalendarFields(calendar, ['monthCode', 'year']);
         var otherFields = ES.ToTemporalYearMonthFields(other, fieldNames);
         var thisFields = ES.ToTemporalYearMonthFields(this, fieldNames);
-        var TemporalDate = GetIntrinsic$1('%Temporal.PlainDate%');
+        var TemporalDate = GetIntrinsic('%Temporal.PlainDate%');
         var otherDate = ES.DateFromFields(calendar, _objectSpread2(_objectSpread2({}, otherFields), {}, {
           day: 1
         }), TemporalDate);
@@ -14526,17 +14647,17 @@
           largestUnit: largestUnit
         });
 
-        var _calendar$dateUntil = calendar.dateUntil(thisDate, otherDate, untilOptions),
-            years = _calendar$dateUntil.years,
-            months = _calendar$dateUntil.months;
+        var _ES$CalendarDateUntil = ES.CalendarDateUntil(calendar, thisDate, otherDate, untilOptions),
+            years = _ES$CalendarDateUntil.years,
+            months = _ES$CalendarDateUntil.months;
 
-        var Duration = GetIntrinsic$1('%Temporal.Duration%');
+        var Duration = GetIntrinsic('%Temporal.Duration%');
 
         if (smallestUnit === 'months' && roundingIncrement === 1) {
           return new Duration(-years, -months, 0, 0, 0, 0, 0, 0, 0, 0);
         }
 
-        var TemporalDateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
+        var TemporalDateTime = GetIntrinsic('%Temporal.PlainDateTime%');
         var relativeTo = new TemporalDateTime(GetSlot(thisDate, ISO_YEAR), GetSlot(thisDate, ISO_MONTH), GetSlot(thisDate, ISO_DAY), 0, 0, 0, 0, 0, 0, calendar);
 
         var _ES$RoundDuration2 = ES.RoundDuration(years, months, 0, 0, 0, 0, 0, 0, 0, 0, roundingIncrement, smallestUnit, ES.NegateTemporalRoundingMode(roundingMode), relativeTo);
@@ -14608,8 +14729,8 @@
             entries.push([fieldName, undefined]);
           }
         });
-        ObjectAssign$5(fields, ES.PrepareTemporalFields(item, entries));
-        var Date = GetIntrinsic$1('%Temporal.PlainDate%');
+        ObjectAssign(fields, ES.PrepareTemporalFields(item, entries));
+        var Date = GetIntrinsic('%Temporal.PlainDate%');
         return ES.DateFromFields(calendar, fields, Date, {
           overflow: 'reject'
         });
@@ -14666,7 +14787,7 @@
   }();
   MakeIntrinsicClass(PlainYearMonth, 'Temporal.PlainYearMonth');
 
-  var ArrayPrototypePush$1 = Array.prototype.push;
+  var ArrayPrototypePush = Array.prototype.push;
   var ZonedDateTime = /*#__PURE__*/function () {
     function ZonedDateTime(epochNanoseconds, timeZone) {
       var calendar = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : ES.GetISO8601Calendar();
@@ -14689,7 +14810,7 @@
       SetSlot(this, EPOCHNANOSECONDS, epochNanoseconds);
       SetSlot(this, TIME_ZONE, timeZone);
       SetSlot(this, CALENDAR, calendar);
-      var TemporalInstant = GetIntrinsic$1('%Temporal.Instant%');
+      var TemporalInstant = GetIntrinsic('%Temporal.Instant%');
       var instant = new TemporalInstant(GetSlot(this, EPOCHNANOSECONDS));
       SetSlot(this, INSTANT, instant);
 
@@ -14719,49 +14840,25 @@
       key: "year",
       get: function get() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).year(dateTime(this));
-
-        if (result === undefined) {
-          throw new RangeError('calendar year result must be an integer');
-        }
-
-        return ES.ToInteger(result);
+        return ES.CalendarYear(GetSlot(this, CALENDAR), dateTime(this));
       }
     }, {
       key: "month",
       get: function get() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).month(dateTime(this));
-
-        if (result === undefined) {
-          throw new RangeError('calendar month result must be a positive integer');
-        }
-
-        return ES.ToPositiveInteger(result);
+        return ES.CalendarMonth(GetSlot(this, CALENDAR), dateTime(this));
       }
     }, {
       key: "monthCode",
       get: function get() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).monthCode(dateTime(this));
-
-        if (result === undefined) {
-          throw new RangeError('calendar monthCode result must be a string');
-        }
-
-        return ES.ToString(result);
+        return ES.CalendarMonthCode(GetSlot(this, CALENDAR), dateTime(this));
       }
     }, {
       key: "day",
       get: function get() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).day(dateTime(this));
-
-        if (result === undefined) {
-          throw new RangeError('calendar day result must be a positive integer');
-        }
-
-        return ES.ToPositiveInteger(result);
+        return ES.CalendarDay(GetSlot(this, CALENDAR), dateTime(this));
       }
     }, {
       key: "hour",
@@ -14803,25 +14900,13 @@
       key: "era",
       get: function get() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).era(dateTime(this));
-
-        if (result !== undefined) {
-          result = ES.ToString(result);
-        }
-
-        return result;
+        return ES.CalendarEra(GetSlot(this, CALENDAR), dateTime(this));
       }
     }, {
       key: "eraYear",
       get: function get() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        var result = GetSlot(this, CALENDAR).eraYear(dateTime(this));
-
-        if (result !== undefined) {
-          result = ES.ToInteger(result);
-        }
-
-        return result;
+        return ES.CalendarEraYear(GetSlot(this, CALENDAR), dateTime(this));
       }
     }, {
       key: "epochSeconds",
@@ -14842,84 +14927,84 @@
       get: function get() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
         var value = GetSlot(this, EPOCHNANOSECONDS);
-        return bigIntIfAvailable$2(value.divide(1e3));
+        return bigIntIfAvailable$1(value.divide(1e3));
       }
     }, {
       key: "epochNanoseconds",
       get: function get() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        return bigIntIfAvailable$2(GetSlot(this, EPOCHNANOSECONDS));
+        return bigIntIfAvailable$1(GetSlot(this, EPOCHNANOSECONDS));
       }
     }, {
       key: "dayOfWeek",
       get: function get() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).dayOfWeek(dateTime(this));
+        return ES.CalendarDayOfWeek(GetSlot(this, CALENDAR), dateTime(this));
       }
     }, {
       key: "dayOfYear",
       get: function get() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).dayOfYear(dateTime(this));
+        return ES.CalendarDayOfYear(GetSlot(this, CALENDAR), dateTime(this));
       }
     }, {
       key: "weekOfYear",
       get: function get() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).weekOfYear(dateTime(this));
+        return ES.CalendarWeekOfYear(GetSlot(this, CALENDAR), dateTime(this));
       }
     }, {
       key: "hoursInDay",
       get: function get() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
         var dt = dateTime(this);
-        var DateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
+        var DateTime = GetIntrinsic('%Temporal.PlainDateTime%');
         var year = GetSlot(dt, ISO_YEAR);
         var month = GetSlot(dt, ISO_MONTH);
         var day = GetSlot(dt, ISO_DAY);
         var today = new DateTime(year, month, day, 0, 0, 0, 0, 0, 0);
-        var tomorrowFields = ES.AddDate(year, month, day, 0, 0, 0, 1, 'reject');
+        var tomorrowFields = ES.AddISODate(year, month, day, 0, 0, 0, 1, 'reject');
         var tomorrow = new DateTime(tomorrowFields.year, tomorrowFields.month, tomorrowFields.day, 0, 0, 0, 0, 0, 0);
         var timeZone = GetSlot(this, TIME_ZONE);
-        var todayNs = GetSlot(ES.GetTemporalInstantFor(timeZone, today, 'compatible'), EPOCHNANOSECONDS);
-        var tomorrowNs = GetSlot(ES.GetTemporalInstantFor(timeZone, tomorrow, 'compatible'), EPOCHNANOSECONDS);
+        var todayNs = GetSlot(ES.BuiltinTimeZoneGetInstantFor(timeZone, today, 'compatible'), EPOCHNANOSECONDS);
+        var tomorrowNs = GetSlot(ES.BuiltinTimeZoneGetInstantFor(timeZone, tomorrow, 'compatible'), EPOCHNANOSECONDS);
         return tomorrowNs.subtract(todayNs).toJSNumber() / 3.6e12;
       }
     }, {
       key: "daysInWeek",
       get: function get() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).daysInWeek(dateTime(this));
+        return ES.CalendarDaysInWeek(GetSlot(this, CALENDAR), dateTime(this));
       }
     }, {
       key: "daysInMonth",
       get: function get() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).daysInMonth(dateTime(this));
+        return ES.CalendarDaysInMonth(GetSlot(this, CALENDAR), dateTime(this));
       }
     }, {
       key: "daysInYear",
       get: function get() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).daysInYear(dateTime(this));
+        return ES.CalendarDaysInYear(GetSlot(this, CALENDAR), dateTime(this));
       }
     }, {
       key: "monthsInYear",
       get: function get() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).monthsInYear(dateTime(this));
+        return ES.CalendarMonthsInYear(GetSlot(this, CALENDAR), dateTime(this));
       }
     }, {
       key: "inLeapYear",
       get: function get() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        return GetSlot(this, CALENDAR).inLeapYear(dateTime(this));
+        return ES.CalendarInLeapYear(GetSlot(this, CALENDAR), dateTime(this));
       }
     }, {
       key: "offset",
       get: function get() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        return ES.GetOffsetStringFor(GetSlot(this, TIME_ZONE), GetSlot(this, INSTANT));
+        return ES.BuiltinTimeZoneGetOffsetStringFor(GetSlot(this, TIME_ZONE), GetSlot(this, INSTANT));
       }
     }, {
       key: "offsetNanoseconds",
@@ -14951,7 +15036,7 @@
         var timeZone = GetSlot(this, TIME_ZONE);
         var calendar = GetSlot(this, CALENDAR);
         var fieldNames = ES.CalendarFields(calendar, ['day', 'hour', 'microsecond', 'millisecond', 'minute', 'month', 'monthCode', 'nanosecond', 'second', 'year']);
-        ArrayPrototypePush$1.call(fieldNames, 'offset');
+        ArrayPrototypePush.call(fieldNames, 'offset');
         var props = ES.ToPartialRecord(temporalZonedDateTimeLike, fieldNames);
 
         if (!props) {
@@ -14973,7 +15058,7 @@
             nanosecond = _ES$InterpretTemporal.nanosecond;
 
         var offsetNs = ES.ParseOffsetString(fields.offset);
-        var epochNanoseconds = ES.InterpretTemporalZonedDateTimeOffset(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, offsetNs, timeZone, disambiguation, offset);
+        var epochNanoseconds = ES.InterpretISODateTimeOffset(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, offsetNs, timeZone, disambiguation, offset);
         var Construct = ES.SpeciesConstructor(this, ZonedDateTime);
         var result = new Construct(epochNanoseconds, GetSlot(this, TIME_ZONE), calendar);
         if (!ES.IsTemporalZonedDateTime(result)) throw new TypeError('invalid result');
@@ -14983,7 +15068,7 @@
       key: "withPlainDate",
       value: function withPlainDate(temporalDate) {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        temporalDate = ES.ToTemporalDate(temporalDate, GetIntrinsic$1('%Temporal.PlainDate%'));
+        temporalDate = ES.ToTemporalDate(temporalDate, GetIntrinsic('%Temporal.PlainDate%'));
         var year = GetSlot(temporalDate, ISO_YEAR);
         var month = GetSlot(temporalDate, ISO_MONTH);
         var day = GetSlot(temporalDate, ISO_DAY);
@@ -14997,9 +15082,9 @@
         var nanosecond = GetSlot(thisDt, ISO_NANOSECOND);
         calendar = ES.ConsolidateCalendars(GetSlot(this, CALENDAR), calendar);
         var timeZone = GetSlot(this, TIME_ZONE);
-        var PlainDateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
+        var PlainDateTime = GetIntrinsic('%Temporal.PlainDateTime%');
         var dt = new PlainDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, calendar);
-        var instant = ES.GetTemporalInstantFor(timeZone, dt, 'compatible');
+        var instant = ES.BuiltinTimeZoneGetInstantFor(timeZone, dt, 'compatible');
         var Construct = ES.SpeciesConstructor(this, ZonedDateTime);
         return new Construct(GetSlot(instant, EPOCHNANOSECONDS), timeZone, calendar);
       }
@@ -15008,7 +15093,7 @@
       value: function withPlainTime() {
         var temporalTime = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : undefined;
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        var PlainTime = GetIntrinsic$1('%Temporal.PlainTime%');
+        var PlainTime = GetIntrinsic('%Temporal.PlainTime%');
         temporalTime = temporalTime == undefined ? new PlainTime() : ES.ToTemporalTime(temporalTime, PlainTime);
         var thisDt = dateTime(this);
         var year = GetSlot(thisDt, ISO_YEAR);
@@ -15022,9 +15107,9 @@
         var microsecond = GetSlot(temporalTime, ISO_MICROSECOND);
         var nanosecond = GetSlot(temporalTime, ISO_NANOSECOND);
         var timeZone = GetSlot(this, TIME_ZONE);
-        var PlainDateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
+        var PlainDateTime = GetIntrinsic('%Temporal.PlainDateTime%');
         var dt = new PlainDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, calendar);
-        var instant = ES.GetTemporalInstantFor(timeZone, dt, 'compatible');
+        var instant = ES.BuiltinTimeZoneGetInstantFor(timeZone, dt, 'compatible');
         var Construct = ES.SpeciesConstructor(this, ZonedDateTime);
         return new Construct(GetSlot(instant, EPOCHNANOSECONDS), timeZone, calendar);
       }
@@ -15199,7 +15284,7 @@
           nanoseconds = _ES$AdjustRoundedDura.nanoseconds;
         }
 
-        var Duration = GetIntrinsic$1('%Temporal.Duration%');
+        var Duration = GetIntrinsic('%Temporal.Duration%');
         return new Duration(years, months, weeks, days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds);
       }
     }, {
@@ -15302,7 +15387,7 @@
           nanoseconds = _ES$AdjustRoundedDura2.nanoseconds;
         }
 
-        var Duration = GetIntrinsic$1('%Temporal.Duration%');
+        var Duration = GetIntrinsic('%Temporal.Duration%');
         return new Duration(-years, -months, -weeks, -days, -hours, -minutes, -seconds, -milliseconds, -microseconds, -nanoseconds);
       }
     }, {
@@ -15334,32 +15419,32 @@
         var millisecond = GetSlot(dt, ISO_MILLISECOND);
         var microsecond = GetSlot(dt, ISO_MICROSECOND);
         var nanosecond = GetSlot(dt, ISO_NANOSECOND);
-        var DateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
+        var DateTime = GetIntrinsic('%Temporal.PlainDateTime%');
         var timeZone = GetSlot(this, TIME_ZONE);
         var calendar = GetSlot(this, CALENDAR);
         var dtStart = new DateTime(GetSlot(dt, ISO_YEAR), GetSlot(dt, ISO_MONTH), GetSlot(dt, ISO_DAY), 0, 0, 0, 0, 0, 0);
-        var instantStart = ES.GetTemporalInstantFor(timeZone, dtStart, 'compatible');
+        var instantStart = ES.BuiltinTimeZoneGetInstantFor(timeZone, dtStart, 'compatible');
         var endNs = ES.AddZonedDateTime(instantStart, timeZone, calendar, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0);
         var dayLengthNs = endNs.subtract(GetSlot(instantStart, EPOCHNANOSECONDS));
 
-        var _ES$RoundDateTime = ES.RoundDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, roundingIncrement, smallestUnit, roundingMode, dayLengthNs);
+        var _ES$RoundISODateTime = ES.RoundISODateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, roundingIncrement, smallestUnit, roundingMode, dayLengthNs);
 
-        year = _ES$RoundDateTime.year;
-        month = _ES$RoundDateTime.month;
-        day = _ES$RoundDateTime.day;
-        hour = _ES$RoundDateTime.hour;
-        minute = _ES$RoundDateTime.minute;
-        second = _ES$RoundDateTime.second;
-        millisecond = _ES$RoundDateTime.millisecond;
-        microsecond = _ES$RoundDateTime.microsecond;
-        nanosecond = _ES$RoundDateTime.nanosecond;
+        year = _ES$RoundISODateTime.year;
+        month = _ES$RoundISODateTime.month;
+        day = _ES$RoundISODateTime.day;
+        hour = _ES$RoundISODateTime.hour;
+        minute = _ES$RoundISODateTime.minute;
+        second = _ES$RoundISODateTime.second;
+        millisecond = _ES$RoundISODateTime.millisecond;
+        microsecond = _ES$RoundISODateTime.microsecond;
+        nanosecond = _ES$RoundISODateTime.nanosecond;
         // Now reset all DateTime fields but leave the TimeZone. The offset will
         // also be retained if the new date/time values are still OK with the old
         // offset. Otherwise the offset will be changed to be compatible with the
         // new date/time values. If DST disambiguation is required, the `compatible`
         // disambiguation algorithm will be used.
         var offsetNs = ES.GetOffsetNanosecondsFor(timeZone, GetSlot(this, INSTANT));
-        var epochNanoseconds = ES.InterpretTemporalZonedDateTimeOffset(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, offsetNs, timeZone, 'compatible', 'prefer');
+        var epochNanoseconds = ES.InterpretISODateTimeOffset(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, offsetNs, timeZone, 'compatible', 'prefer');
         var Construct = ES.SpeciesConstructor(this, ZonedDateTime);
         var result = new Construct(epochNanoseconds, timeZone, GetSlot(this, CALENDAR));
         if (!ES.IsTemporalZonedDateTime(result)) throw new TypeError('invalid result');
@@ -15422,10 +15507,10 @@
       value: function startOfDay() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
         var dt = dateTime(this);
-        var DateTime = GetIntrinsic$1('%Temporal.PlainDateTime%');
+        var DateTime = GetIntrinsic('%Temporal.PlainDateTime%');
         var dtStart = new DateTime(GetSlot(dt, ISO_YEAR), GetSlot(dt, ISO_MONTH), GetSlot(dt, ISO_DAY), 0, 0, 0, 0, 0, 0);
         var timeZone = GetSlot(this, TIME_ZONE);
-        var instant = ES.GetTemporalInstantFor(timeZone, dtStart, 'compatible');
+        var instant = ES.BuiltinTimeZoneGetInstantFor(timeZone, dtStart, 'compatible');
         var Construct = ES.SpeciesConstructor(this, ZonedDateTime);
         var result = new Construct(GetSlot(instant, EPOCHNANOSECONDS), timeZone, GetSlot(this, CALENDAR));
         if (!ES.IsTemporalZonedDateTime(result)) throw new TypeError('invalid result');
@@ -15435,7 +15520,7 @@
       key: "toInstant",
       value: function toInstant() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        var TemporalInstant = GetIntrinsic$1('%Temporal.Instant%');
+        var TemporalInstant = GetIntrinsic('%Temporal.Instant%');
         return new TemporalInstant(GetSlot(this, EPOCHNANOSECONDS));
       }
     }, {
@@ -15460,7 +15545,7 @@
       key: "toPlainYearMonth",
       value: function toPlainYearMonth() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        var YearMonth = GetIntrinsic$1('%Temporal.PlainYearMonth%');
+        var YearMonth = GetIntrinsic('%Temporal.PlainYearMonth%');
         var calendar = GetSlot(this, CALENDAR);
         var fieldNames = ES.CalendarFields(calendar, ['monthCode', 'year']);
         var fields = ES.ToTemporalYearMonthFields(this, fieldNames);
@@ -15470,7 +15555,7 @@
       key: "toPlainMonthDay",
       value: function toPlainMonthDay() {
         if (!ES.IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
-        var MonthDay = GetIntrinsic$1('%Temporal.PlainMonthDay%');
+        var MonthDay = GetIntrinsic('%Temporal.PlainMonthDay%');
         var calendar = GetSlot(this, CALENDAR);
         var fieldNames = ES.CalendarFields(calendar, ['day', 'monthCode']);
         var fields = ES.ToTemporalMonthDayFields(this, fieldNames);
@@ -15493,7 +15578,7 @@
           isoNanosecond: GetSlot(dt, ISO_NANOSECOND),
           isoSecond: GetSlot(dt, ISO_SECOND),
           isoYear: GetSlot(dt, ISO_YEAR),
-          offset: ES.GetOffsetStringFor(tz, GetSlot(this, INSTANT)),
+          offset: ES.BuiltinTimeZoneGetOffsetStringFor(tz, GetSlot(this, INSTANT)),
           timeZone: tz
         };
       }
@@ -15508,7 +15593,9 @@
 
           ES.ToTemporalDisambiguation(options);
           ES.ToTemporalOffset(options, 'reject');
-          return new ZonedDateTime(GetSlot(item, EPOCHNANOSECONDS), GetSlot(item, TIME_ZONE), GetSlot(item, CALENDAR));
+          var result = new this(GetSlot(item, EPOCHNANOSECONDS), GetSlot(item, TIME_ZONE), GetSlot(item, CALENDAR));
+          if (!ES.IsTemporalZonedDateTime(result)) throw new TypeError('invalid result');
+          return result;
         }
 
         return ES.ToTemporalZonedDateTime(item, this, options);
@@ -15532,12 +15619,12 @@
   }();
   MakeIntrinsicClass(ZonedDateTime, 'Temporal.ZonedDateTime');
 
-  function bigIntIfAvailable$2(wrapper) {
+  function bigIntIfAvailable$1(wrapper) {
     return typeof BigInt === 'undefined' ? wrapper : wrapper.value;
   }
 
   function dateTime(zdt) {
-    return ES.GetTemporalDateTimeFor(GetSlot(zdt, TIME_ZONE), GetSlot(zdt, INSTANT), GetSlot(zdt, CALENDAR));
+    return ES.BuiltinTimeZoneGetPlainDateTimeFor(GetSlot(zdt, TIME_ZONE), GetSlot(zdt, INSTANT), GetSlot(zdt, CALENDAR));
   }
 
   function zonedDateTimeToString(zdt, precision) {
@@ -15552,12 +15639,13 @@
           increment = options.increment,
           roundingMode = options.roundingMode;
       var ns = ES.RoundInstant(GetSlot(zdt, EPOCHNANOSECONDS), increment, unit, roundingMode);
-      var TemporalInstant = GetIntrinsic$1('%Temporal.Instant%');
+      var TemporalInstant = GetIntrinsic('%Temporal.Instant%');
       instant = new TemporalInstant(ns);
     }
 
     var tz = GetSlot(zdt, TIME_ZONE);
-    var dateTime = ES.GetTemporalDateTimeFor(tz, instant, 'iso8601');
+    var iso = ES.GetISO8601Calendar();
+    var dateTime = ES.BuiltinTimeZoneGetPlainDateTimeFor(tz, instant, iso);
     var year = ES.ISOYearString(GetSlot(dateTime, ISO_YEAR));
     var month = ES.ISODateTimePartString(GetSlot(dateTime, ISO_MONTH));
     var day = ES.ISODateTimePartString(GetSlot(dateTime, ISO_DAY));
@@ -15565,7 +15653,7 @@
     var minute = ES.ISODateTimePartString(GetSlot(dateTime, ISO_MINUTE));
     var seconds = ES.FormatSecondsStringPart(GetSlot(dateTime, ISO_SECOND), GetSlot(dateTime, ISO_MILLISECOND), GetSlot(dateTime, ISO_MICROSECOND), GetSlot(dateTime, ISO_NANOSECOND), precision);
     var result = "".concat(year, "-").concat(month, "-").concat(day, "T").concat(hour, ":").concat(minute).concat(seconds);
-    if (showOffset !== 'never') result += ES.GetOffsetStringFor(tz, instant);
+    if (showOffset !== 'never') result += ES.BuiltinTimeZoneGetOffsetStringFor(tz, instant);
     if (showTimeZone !== 'never') result += "[".concat(tz, "]");
     var calendarID = ES.ToString(GetSlot(zdt, CALENDAR));
     result += ES.FormatCalendarAnnotation(calendarID, showCalendar);
@@ -15590,10 +15678,10 @@
   function toTemporalInstant() {
     // Observable access to valueOf is not correct here, but unavoidable
     var epochNanoseconds = BigInteger(+this).multiply(1e6);
-    return new Instant(bigIntIfAvailable$3(epochNanoseconds));
+    return new Instant(bigIntIfAvailable(epochNanoseconds));
   }
 
-  function bigIntIfAvailable$3(wrapper) {
+  function bigIntIfAvailable(wrapper) {
     return typeof BigInt === 'undefined' ? wrapper : wrapper.value;
   }
 
