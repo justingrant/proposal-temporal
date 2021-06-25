@@ -152,7 +152,7 @@
   }
 
   function _iterableToArrayLimit(arr, i) {
-    var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]);
+    var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"];
 
     if (_i == null) return;
     var _arr = [];
@@ -5845,7 +5845,6 @@
   var NumberIsNaN = Number.isNaN;
   var NumberIsFinite = Number.isFinite;
   var NumberMaxSafeInteger = Number.MAX_SAFE_INTEGER;
-  var NumberIsInteger = Number.isInteger;
   var ObjectAssign$2 = Object.assign;
   var ObjectCreate$2 = Object.create;
   var ObjectDefineProperty = Object.defineProperty;
@@ -5888,6 +5887,15 @@
   };
   var ES = ObjectAssign$2({}, ES2020, {
     ToPositiveInteger: ToPositiveInteger,
+    ToFiniteInteger: function ToFiniteInteger(value) {
+      var integer = ES.ToInteger(value);
+
+      if (!NumberIsFinite(integer)) {
+        throw new RangeError('infinity is out of range');
+      }
+
+      return integer;
+    },
     IsTemporalInstant: function IsTemporalInstant(item) {
       return HasSlot(item, EPOCHNANOSECONDS) && !HasSlot(item, TIME_ZONE, CALENDAR);
     },
@@ -6578,12 +6586,17 @@
       }
 
       var digits = options.fractionalSecondDigits;
-      if (digits === undefined || digits === 'auto') return {
-        precision: 'auto',
-        unit: 'nanosecond',
-        increment: 1
-      };
-      digits = ES.ToNumber(digits);
+      if (digits === undefined) digits = 'auto';
+
+      if (ES.Type(digits) !== 'Number') {
+        digits = ES.ToString(digits);
+        if (digits === 'auto') return {
+          precision: 'auto',
+          unit: 'nanosecond',
+          increment: 1
+        };
+        throw new RangeError("fractionalSecondDigits must be 'auto' or 0 through 9, not ".concat(digits));
+      }
 
       if (NumberIsNaN(digits) || digits < 0 || digits > 9) {
         throw new RangeError("fractionalSecondDigits must be 'auto' or 0 through 9, not ".concat(digits));
@@ -7785,7 +7798,7 @@
         throw new TypeError('bad return from getOffsetNanosecondsFor');
       }
 
-      if (!NumberIsInteger(offsetNs) || MathAbs(offsetNs) > 86400e9) {
+      if (!ES.IsInteger(offsetNs) || MathAbs(offsetNs) > 86400e9) {
         throw new RangeError('out-of-range return from getOffsetNanosecondsFor');
       }
 
@@ -10543,6 +10556,7 @@
     }, {
       key: "getOffsetStringFor",
       value: function getOffsetStringFor(instant) {
+        if (!ES.IsTemporalTimeZone(this)) throw new TypeError('invalid receiver');
         instant = ES.ToTemporalInstant(instant);
         return ES.BuiltinTimeZoneGetOffsetStringFor(this, instant);
       }
@@ -10558,6 +10572,7 @@
       key: "getInstantFor",
       value: function getInstantFor(dateTime) {
         var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
+        if (!ES.IsTemporalTimeZone(this)) throw new TypeError('invalid receiver');
         dateTime = ES.ToTemporalDateTime(dateTime);
         options = ES.GetOptionsObject(options);
         var disambiguation = ES.ToTemporalDisambiguation(options);
@@ -11469,9 +11484,9 @@
 
       _classCallCheck(this, PlainDate);
 
-      isoYear = ES.ToInteger(isoYear);
-      isoMonth = ES.ToInteger(isoMonth);
-      isoDay = ES.ToInteger(isoDay);
+      isoYear = ES.ToFiniteInteger(isoYear);
+      isoMonth = ES.ToFiniteInteger(isoMonth);
+      isoDay = ES.ToFiniteInteger(isoDay);
       calendar = ES.ToTemporalCalendar(calendar); // Note: if the arguments are not passed, ToInteger(undefined) will have returned 0, which will
       //       be rejected by RejectISODate in CreateTemporalDateSlots. This check
       //       exists only to improve the error message.
@@ -11942,15 +11957,15 @@
 
       _classCallCheck(this, PlainDateTime);
 
-      isoYear = ES.ToInteger(isoYear);
-      isoMonth = ES.ToInteger(isoMonth);
-      isoDay = ES.ToInteger(isoDay);
-      hour = ES.ToInteger(hour);
-      minute = ES.ToInteger(minute);
-      second = ES.ToInteger(second);
-      millisecond = ES.ToInteger(millisecond);
-      microsecond = ES.ToInteger(microsecond);
-      nanosecond = ES.ToInteger(nanosecond);
+      isoYear = ES.ToFiniteInteger(isoYear);
+      isoMonth = ES.ToFiniteInteger(isoMonth);
+      isoDay = ES.ToFiniteInteger(isoDay);
+      hour = ES.ToFiniteInteger(hour);
+      minute = ES.ToFiniteInteger(minute);
+      second = ES.ToFiniteInteger(second);
+      millisecond = ES.ToFiniteInteger(millisecond);
+      microsecond = ES.ToFiniteInteger(microsecond);
+      nanosecond = ES.ToFiniteInteger(nanosecond);
       calendar = ES.ToTemporalCalendar(calendar); // Note: if the arguments are not passed, ToInteger(undefined) will have returned 0, which will
       //       be rejected by RejectDateTime in CreateTemporalDateTimeSlots. This
       //       check exists only to improve the error message.
@@ -13055,10 +13070,10 @@
 
       _classCallCheck(this, PlainMonthDay);
 
-      isoMonth = ES.ToInteger(isoMonth);
-      isoDay = ES.ToInteger(isoDay);
+      isoMonth = ES.ToFiniteInteger(isoMonth);
+      isoDay = ES.ToFiniteInteger(isoDay);
       calendar = ES.ToTemporalCalendar(calendar);
-      referenceISOYear = ES.ToInteger(referenceISOYear); // Note: if the arguments are not passed, ToInteger(undefined) will have returned 0, which will
+      referenceISOYear = ES.ToFiniteInteger(referenceISOYear); // Note: if the arguments are not passed, ToInteger(undefined) will have returned 0, which will
       //       be rejected by RejectISODate in CreateTemporalMonthDaySlots. This
       //       check exists only to improve the error message.
 
@@ -13359,12 +13374,12 @@
 
       _classCallCheck(this, PlainTime);
 
-      isoHour = ES.ToInteger(isoHour);
-      isoMinute = ES.ToInteger(isoMinute);
-      isoSecond = ES.ToInteger(isoSecond);
-      isoMillisecond = ES.ToInteger(isoMillisecond);
-      isoMicrosecond = ES.ToInteger(isoMicrosecond);
-      isoNanosecond = ES.ToInteger(isoNanosecond);
+      isoHour = ES.ToFiniteInteger(isoHour);
+      isoMinute = ES.ToFiniteInteger(isoMinute);
+      isoSecond = ES.ToFiniteInteger(isoSecond);
+      isoMillisecond = ES.ToFiniteInteger(isoMillisecond);
+      isoMicrosecond = ES.ToFiniteInteger(isoMicrosecond);
+      isoNanosecond = ES.ToFiniteInteger(isoNanosecond);
       ES.RejectTime(isoHour, isoMinute, isoSecond, isoMillisecond, isoMicrosecond, isoNanosecond);
       CreateSlots(this);
       SetSlot(this, ISO_HOUR, isoHour);
@@ -13831,10 +13846,10 @@
 
       _classCallCheck(this, PlainYearMonth);
 
-      isoYear = ES.ToInteger(isoYear);
-      isoMonth = ES.ToInteger(isoMonth);
+      isoYear = ES.ToFiniteInteger(isoYear);
+      isoMonth = ES.ToFiniteInteger(isoMonth);
       calendar = ES.ToTemporalCalendar(calendar);
-      referenceISODay = ES.ToInteger(referenceISODay); // Note: if the arguments are not passed, ToInteger(undefined) will have returned 0, which will
+      referenceISODay = ES.ToFiniteInteger(referenceISODay); // Note: if the arguments are not passed, ToInteger(undefined) will have returned 0, which will
       //       be rejected by RejectISODate in CreateTemporalYearMonthSlots. This
       //       check exists only to improve the error message.
 
