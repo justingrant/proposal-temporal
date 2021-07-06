@@ -8633,7 +8633,7 @@
         return {
           days: _days,
           nanoseconds: nanoseconds,
-          dayLengthNs: sign * dayLengthNs
+          dayLengthNs: dayLengthNs
         };
       }
 
@@ -8688,7 +8688,7 @@
       return {
         days: days,
         nanoseconds: nanoseconds,
-        dayLengthNs: dayLengthNs
+        dayLengthNs: MathAbs(dayLengthNs)
       };
     },
     BalanceDuration: function BalanceDuration(days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds, largestUnit) {
@@ -9362,13 +9362,10 @@
               _sign = -1;
             }
 
-            var _years = larger.year - smaller.year;
-
             var _days2 = ES.DayOfYear(larger.year, larger.month, larger.day) - ES.DayOfYear(smaller.year, smaller.month, smaller.day);
 
-            while (_years > 0) {
-              _days2 += ES.LeapYear(smaller.year + _years - 1) ? 366 : 365;
-              _years -= 1;
+            for (var year = smaller.year; year < larger.year; ++year) {
+              _days2 += ES.LeapYear(year) ? 366 : 365;
             }
 
             var weeks = 0;
@@ -9831,7 +9828,8 @@
         nanosecond: nanosecond
       };
     },
-    AddZonedDateTime: function AddZonedDateTime(instant, timeZone, calendar, years, months, weeks, days, h, min, s, ms, µs, ns, options) {
+    AddZonedDateTime: function AddZonedDateTime(instant, timeZone, calendar, years, months, weeks, days, h, min, s, ms, µs, ns) {
+      var options = arguments.length > 13 && arguments[13] !== undefined ? arguments[13] : ObjectCreate$2(null);
       // If only time is to be added, then use Instant math. It's not OK to fall
       // through to the date/time code below because compatible disambiguation in
       // the PlainDateTime=>Instant conversion will change the offset of any
@@ -10112,7 +10110,6 @@
         deltaDays = _ES$NanosecondsToDays3.days;
         nanoseconds = _ES$NanosecondsToDays3.nanoseconds;
         dayLengthNs = _ES$NanosecondsToDays3.dayLengthNs;
-        dayLengthNs = MathAbs(dayLengthNs);
         days += deltaDays;
         hours = minutes = seconds = milliseconds = microseconds = 0;
       }
@@ -10828,7 +10825,7 @@
     var amended = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     options = ObjectAssign$1({}, options);
 
-    for (var _i = 0, _arr = ['year', 'month', 'day', 'hour', 'minute', 'second', 'weekday', 'timeZoneName']; _i < _arr.length; _i++) {
+    for (var _i = 0, _arr = ['year', 'month', 'day', 'hour', 'minute', 'second', 'weekday', 'dayPeriod', 'timeZoneName', 'dateStyle', 'timeStyle']; _i < _arr.length; _i++) {
       var opt = _arr[_i];
       options[opt] = opt in amended ? amended[opt] : options[opt];
       if (options[opt] === false || options[opt] === undefined) delete options[opt];
@@ -10843,7 +10840,8 @@
       month: false,
       day: false,
       weekday: false,
-      timeZoneName: false
+      timeZoneName: false,
+      dateStyle: false
     });
 
     if (!hasTimeOptions(options)) {
@@ -10864,7 +10862,10 @@
       minute: false,
       second: false,
       weekday: false,
-      timeZoneName: false
+      dayPeriod: false,
+      timeZoneName: false,
+      dateStyle: false,
+      timeStyle: false
     });
 
     if (!('year' in options || 'month' in options)) {
@@ -10884,7 +10885,10 @@
       minute: false,
       second: false,
       weekday: false,
-      timeZoneName: false
+      dayPeriod: false,
+      timeZoneName: false,
+      dateStyle: false,
+      timeStyle: false
     });
 
     if (!('month' in options || 'day' in options)) {
@@ -10902,7 +10906,9 @@
       hour: false,
       minute: false,
       second: false,
-      timeZoneName: false
+      dayPeriod: false,
+      timeZoneName: false,
+      timeStyle: false
     });
 
     if (!hasDateOptions(options)) {
@@ -10967,11 +10973,11 @@
   }
 
   function hasDateOptions(options) {
-    return 'year' in options || 'month' in options || 'day' in options || 'weekday' in options;
+    return 'year' in options || 'month' in options || 'day' in options || 'weekday' in options || 'dateStyle' in options;
   }
 
   function hasTimeOptions(options) {
-    return 'hour' in options || 'minute' in options || 'second' in options;
+    return 'hour' in options || 'minute' in options || 'second' in options || 'timeStyle' in options || 'dayPeriod' in options;
   }
 
   function isTemporalObject(obj) {
@@ -11628,6 +11634,7 @@
       key: "withCalendar",
       value: function withCalendar(calendar) {
         if (!ES.IsTemporalDate(this)) throw new TypeError('invalid receiver');
+        calendar = ES.ToTemporalCalendar(calendar);
         return new PlainDate(GetSlot(this, ISO_YEAR), GetSlot(this, ISO_MONTH), GetSlot(this, ISO_DAY), calendar);
       }
     }, {
@@ -12192,6 +12199,7 @@
       key: "withCalendar",
       value: function withCalendar(calendar) {
         if (!ES.IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
+        calendar = ES.ToTemporalCalendar(calendar);
         return new PlainDateTime(GetSlot(this, ISO_YEAR), GetSlot(this, ISO_MONTH), GetSlot(this, ISO_DAY), GetSlot(this, ISO_HOUR), GetSlot(this, ISO_MINUTE), GetSlot(this, ISO_SECOND), GetSlot(this, ISO_MILLISECOND), GetSlot(this, ISO_MICROSECOND), GetSlot(this, ISO_NANOSECOND), calendar);
       }
     }, {
@@ -13252,6 +13260,64 @@
   }();
   MakeIntrinsicClass(PlainMonthDay, 'Temporal.PlainMonthDay');
 
+  var instant = function instant() {
+    var Instant = GetIntrinsic('%Temporal.Instant%');
+    return new Instant(ES.SystemUTCEpochNanoSeconds());
+  };
+
+  var plainDateTime = function plainDateTime(calendarLike) {
+    var temporalTimeZoneLike = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : timeZone();
+    return function () {
+      var timeZone = ES.ToTemporalTimeZone(temporalTimeZoneLike);
+      var calendar = ES.ToTemporalCalendar(calendarLike);
+      var inst = instant();
+      return ES.BuiltinTimeZoneGetPlainDateTimeFor(timeZone, inst, calendar);
+    }();
+  };
+
+  var plainDateTimeISO = function plainDateTimeISO() {
+    var temporalTimeZoneLike = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : timeZone();
+    return function () {
+      var timeZone = ES.ToTemporalTimeZone(temporalTimeZoneLike);
+      var calendar = ES.GetISO8601Calendar();
+      var inst = instant();
+      return ES.BuiltinTimeZoneGetPlainDateTimeFor(timeZone, inst, calendar);
+    }();
+  };
+
+  var zonedDateTime = function zonedDateTime(calendarLike) {
+    var temporalTimeZoneLike = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : timeZone();
+    return function () {
+      var timeZone = ES.ToTemporalTimeZone(temporalTimeZoneLike);
+      var calendar = ES.ToTemporalCalendar(calendarLike);
+      return ES.CreateTemporalZonedDateTime(ES.SystemUTCEpochNanoSeconds(), timeZone, calendar);
+    }();
+  };
+
+  var zonedDateTimeISO = function zonedDateTimeISO() {
+    var temporalTimeZoneLike = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : timeZone();
+    return zonedDateTime(ES.GetISO8601Calendar(), temporalTimeZoneLike);
+  };
+
+  var plainDate = function plainDate(calendarLike) {
+    var temporalTimeZoneLike = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : timeZone();
+    return ES.TemporalDateTimeToDate(plainDateTime(calendarLike, temporalTimeZoneLike));
+  };
+
+  var plainDateISO = function plainDateISO() {
+    var temporalTimeZoneLike = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : timeZone();
+    return ES.TemporalDateTimeToDate(plainDateTimeISO(temporalTimeZoneLike));
+  };
+
+  var plainTimeISO = function plainTimeISO() {
+    var temporalTimeZoneLike = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : timeZone();
+    return ES.TemporalDateTimeToTime(plainDateTimeISO(temporalTimeZoneLike));
+  };
+
+  var timeZone = function timeZone() {
+    return ES.SystemTimeZone();
+  };
+
   var now = {
     instant: instant,
     plainDateTime: plainDateTime,
@@ -13263,64 +13329,6 @@
     zonedDateTime: zonedDateTime,
     zonedDateTimeISO: zonedDateTimeISO
   };
-
-  function instant() {
-    var Instant = GetIntrinsic('%Temporal.Instant%');
-    return new Instant(ES.SystemUTCEpochNanoSeconds());
-  }
-
-  function plainDateTime(calendarLike) {
-    var temporalTimeZoneLike = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : timeZone();
-    return function () {
-      var timeZone = ES.ToTemporalTimeZone(temporalTimeZoneLike);
-      var calendar = ES.ToTemporalCalendar(calendarLike);
-      var inst = instant();
-      return ES.BuiltinTimeZoneGetPlainDateTimeFor(timeZone, inst, calendar);
-    }();
-  }
-
-  function plainDateTimeISO() {
-    var temporalTimeZoneLike = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : timeZone();
-    return function () {
-      var timeZone = ES.ToTemporalTimeZone(temporalTimeZoneLike);
-      var calendar = ES.GetISO8601Calendar();
-      var inst = instant();
-      return ES.BuiltinTimeZoneGetPlainDateTimeFor(timeZone, inst, calendar);
-    }();
-  }
-
-  function zonedDateTime(calendarLike) {
-    var temporalTimeZoneLike = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : timeZone();
-    return function () {
-      var timeZone = ES.ToTemporalTimeZone(temporalTimeZoneLike);
-      var calendar = ES.ToTemporalCalendar(calendarLike);
-      return ES.CreateTemporalZonedDateTime(ES.SystemUTCEpochNanoSeconds(), timeZone, calendar);
-    }();
-  }
-
-  function zonedDateTimeISO() {
-    var temporalTimeZoneLike = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : timeZone();
-    return zonedDateTime(ES.GetISO8601Calendar(), temporalTimeZoneLike);
-  }
-
-  function plainDate(calendarLike) {
-    var temporalTimeZoneLike = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : timeZone();
-    return ES.TemporalDateTimeToDate(plainDateTime(calendarLike, temporalTimeZoneLike));
-  }
-
-  function plainDateISO() {
-    var temporalTimeZoneLike = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : timeZone();
-    return ES.TemporalDateTimeToDate(plainDateTimeISO(temporalTimeZoneLike));
-  }
-
-  function plainTimeISO() {
-    var temporalTimeZoneLike = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : timeZone();
-    return ES.TemporalDateTimeToTime(plainDateTimeISO(temporalTimeZoneLike));
-  }
-
-  function timeZone() {
-    return ES.SystemTimeZone();
-  }
 
   var ObjectAssign = Object.assign;
   var DISALLOWED_UNITS$1 = ['year', 'month', 'week', 'day'];
@@ -14873,6 +14881,10 @@
         var endNs = ES.AddZonedDateTime(instantStart, timeZone, calendar, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0);
         var dayLengthNs = endNs.subtract(GetSlot(instantStart, EPOCHNANOSECONDS));
 
+        if (dayLengthNs.isZero()) {
+          throw new RangeError('can not round a ZonedDateTime in a calendar with zero-length days');
+        }
+
         var _ES$RoundISODateTime = ES.RoundISODateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, roundingIncrement, smallestUnit, roundingMode, dayLengthNs);
 
         year = _ES$RoundISODateTime.year;
@@ -15093,6 +15105,7 @@
     configurable: true
   });
   copy(globalThis.Temporal, Temporal);
+  copy(globalThis.Temporal.now, now);
   copy(globalThis.Intl, Intl$1);
   Object.defineProperty(globalThis.Date.prototype, 'toTemporalInstant', {
     value: toTemporalInstant,
