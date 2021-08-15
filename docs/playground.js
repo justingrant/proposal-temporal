@@ -1716,7 +1716,7 @@
   var bigInt = BigInteger.exports;
 
   /* eslint complexity: [2, 18], max-statements: [2, 33] */
-  var shams = function hasSymbols() {
+  var shams$1 = function hasSymbols() {
   	if (typeof Symbol !== 'function' || typeof Object.getOwnPropertySymbols !== 'function') { return false; }
   	if (typeof Symbol.iterator === 'symbol') { return true; }
 
@@ -1757,9 +1757,9 @@
   };
 
   var origSymbol = typeof Symbol !== 'undefined' && Symbol;
-  var hasSymbolSham = shams;
+  var hasSymbolSham = shams$1;
 
-  var hasSymbols$3 = function hasNativeSymbols() {
+  var hasSymbols$4 = function hasNativeSymbols() {
   	if (typeof origSymbol !== 'function') { return false; }
   	if (typeof Symbol !== 'function') { return false; }
   	if (typeof origSymbol('foo') !== 'symbol') { return false; }
@@ -1831,7 +1831,7 @@
 
   var $SyntaxError = SyntaxError;
   var $Function = Function;
-  var $TypeError$6 = TypeError;
+  var $TypeError$7 = TypeError;
 
   // eslint-disable-next-line consistent-return
   var getEvalledConstructor = function (expressionSyntax) {
@@ -1850,7 +1850,7 @@
   }
 
   var throwTypeError = function () {
-  	throw new $TypeError$6();
+  	throw new $TypeError$7();
   };
   var ThrowTypeError = $gOPD
   	? (function () {
@@ -1869,7 +1869,7 @@
   	}())
   	: throwTypeError;
 
-  var hasSymbols$2 = hasSymbols$3();
+  var hasSymbols$3 = hasSymbols$4();
 
   var getProto = Object.getPrototypeOf || function (x) { return x.__proto__; }; // eslint-disable-line no-proto
 
@@ -1881,7 +1881,7 @@
   	'%AggregateError%': typeof AggregateError === 'undefined' ? undefined$1 : AggregateError,
   	'%Array%': Array,
   	'%ArrayBuffer%': typeof ArrayBuffer === 'undefined' ? undefined$1 : ArrayBuffer,
-  	'%ArrayIteratorPrototype%': hasSymbols$2 ? getProto([][Symbol.iterator]()) : undefined$1,
+  	'%ArrayIteratorPrototype%': hasSymbols$3 ? getProto([][Symbol.iterator]()) : undefined$1,
   	'%AsyncFromSyncIteratorPrototype%': undefined$1,
   	'%AsyncFunction%': needsEval,
   	'%AsyncGenerator%': needsEval,
@@ -1909,10 +1909,10 @@
   	'%Int32Array%': typeof Int32Array === 'undefined' ? undefined$1 : Int32Array,
   	'%isFinite%': isFinite,
   	'%isNaN%': isNaN,
-  	'%IteratorPrototype%': hasSymbols$2 ? getProto(getProto([][Symbol.iterator]())) : undefined$1,
+  	'%IteratorPrototype%': hasSymbols$3 ? getProto(getProto([][Symbol.iterator]())) : undefined$1,
   	'%JSON%': typeof JSON === 'object' ? JSON : undefined$1,
   	'%Map%': typeof Map === 'undefined' ? undefined$1 : Map,
-  	'%MapIteratorPrototype%': typeof Map === 'undefined' || !hasSymbols$2 ? undefined$1 : getProto(new Map()[Symbol.iterator]()),
+  	'%MapIteratorPrototype%': typeof Map === 'undefined' || !hasSymbols$3 ? undefined$1 : getProto(new Map()[Symbol.iterator]()),
   	'%Math%': Math,
   	'%Number%': Number,
   	'%Object%': Object,
@@ -1925,15 +1925,15 @@
   	'%Reflect%': typeof Reflect === 'undefined' ? undefined$1 : Reflect,
   	'%RegExp%': RegExp,
   	'%Set%': typeof Set === 'undefined' ? undefined$1 : Set,
-  	'%SetIteratorPrototype%': typeof Set === 'undefined' || !hasSymbols$2 ? undefined$1 : getProto(new Set()[Symbol.iterator]()),
+  	'%SetIteratorPrototype%': typeof Set === 'undefined' || !hasSymbols$3 ? undefined$1 : getProto(new Set()[Symbol.iterator]()),
   	'%SharedArrayBuffer%': typeof SharedArrayBuffer === 'undefined' ? undefined$1 : SharedArrayBuffer,
   	'%String%': String,
-  	'%StringIteratorPrototype%': hasSymbols$2 ? getProto(''[Symbol.iterator]()) : undefined$1,
-  	'%Symbol%': hasSymbols$2 ? Symbol : undefined$1,
+  	'%StringIteratorPrototype%': hasSymbols$3 ? getProto(''[Symbol.iterator]()) : undefined$1,
+  	'%Symbol%': hasSymbols$3 ? Symbol : undefined$1,
   	'%SyntaxError%': $SyntaxError,
   	'%ThrowTypeError%': ThrowTypeError,
   	'%TypedArray%': TypedArray,
-  	'%TypeError%': $TypeError$6,
+  	'%TypeError%': $TypeError$7,
   	'%Uint8Array%': typeof Uint8Array === 'undefined' ? undefined$1 : Uint8Array,
   	'%Uint8ClampedArray%': typeof Uint8ClampedArray === 'undefined' ? undefined$1 : Uint8ClampedArray,
   	'%Uint16Array%': typeof Uint16Array === 'undefined' ? undefined$1 : Uint16Array,
@@ -2063,7 +2063,7 @@
   			value = doEval(intrinsicName);
   		}
   		if (typeof value === 'undefined' && !allowMissing) {
-  			throw new $TypeError$6('intrinsic ' + name + ' exists, but is not available. Please file an issue!');
+  			throw new $TypeError$7('intrinsic ' + name + ' exists, but is not available. Please file an issue!');
   		}
 
   		return {
@@ -2078,10 +2078,10 @@
 
   var getIntrinsic = function GetIntrinsic(name, allowMissing) {
   	if (typeof name !== 'string' || name.length === 0) {
-  		throw new $TypeError$6('intrinsic name must be a non-empty string');
+  		throw new $TypeError$7('intrinsic name must be a non-empty string');
   	}
   	if (arguments.length > 1 && typeof allowMissing !== 'boolean') {
-  		throw new $TypeError$6('"allowMissing" argument must be a boolean');
+  		throw new $TypeError$7('"allowMissing" argument must be a boolean');
   	}
 
   	var parts = stringToPath(name);
@@ -2123,7 +2123,7 @@
   		} else if (value != null) {
   			if (!(part in value)) {
   				if (!allowMissing) {
-  					throw new $TypeError$6('base intrinsic for ' + name + ' exists, but the property is not available.');
+  					throw new $TypeError$7('base intrinsic for ' + name + ' exists, but the property is not available.');
   				}
   				return void undefined$1;
   			}
@@ -2207,23 +2207,23 @@
   }
   }(callBind$2));
 
-  var GetIntrinsic$e = getIntrinsic;
+  var GetIntrinsic$f = getIntrinsic;
 
   var callBind$1 = callBind$2.exports;
 
-  var $indexOf = callBind$1(GetIntrinsic$e('String.prototype.indexOf'));
+  var $indexOf = callBind$1(GetIntrinsic$f('String.prototype.indexOf'));
 
   var callBound$2 = function callBoundIntrinsic(name, allowMissing) {
-  	var intrinsic = GetIntrinsic$e(name, !!allowMissing);
+  	var intrinsic = GetIntrinsic$f(name, !!allowMissing);
   	if (typeof intrinsic === 'function' && $indexOf(name, '.prototype.') > -1) {
   		return callBind$1(intrinsic);
   	}
   	return intrinsic;
   };
 
-  var GetIntrinsic$d = getIntrinsic;
+  var GetIntrinsic$e = getIntrinsic;
 
-  var $Array = GetIntrinsic$d('%Array%');
+  var $Array = GetIntrinsic$e('%Array%');
 
   // eslint-disable-next-line global-require
   var toStr$4 = !$Array.isArray && callBound$2('Object.prototype.toString');
@@ -2234,49 +2234,51 @@
   	return toStr$4(argument) === '[object Array]';
   };
 
-  var GetIntrinsic$c = getIntrinsic;
+  var GetIntrinsic$d = getIntrinsic;
   var callBound$1 = callBound$2;
 
-  var $TypeError$5 = GetIntrinsic$c('%TypeError%');
+  var $TypeError$6 = GetIntrinsic$d('%TypeError%');
 
   var IsArray = IsArray$1;
 
-  var $apply = GetIntrinsic$c('%Reflect.apply%', true) || callBound$1('%Function.prototype.apply%');
+  var $apply = GetIntrinsic$d('%Reflect.apply%', true) || callBound$1('%Function.prototype.apply%');
 
   // https://ecma-international.org/ecma-262/6.0/#sec-call
 
   var Call = function Call(F, V) {
   	var argumentsList = arguments.length > 2 ? arguments[2] : [];
   	if (!IsArray(argumentsList)) {
-  		throw new $TypeError$5('Assertion failed: optional `argumentsList`, if provided, must be a List');
+  		throw new $TypeError$6('Assertion failed: optional `argumentsList`, if provided, must be a List');
   	}
   	return $apply(F, V, argumentsList);
   };
 
+  var Call$1 = Call;
+
   // https://ecma-international.org/ecma-262/6.0/#sec-ispropertykey
 
-  var IsPropertyKey$2 = function IsPropertyKey(argument) {
+  var IsPropertyKey$3 = function IsPropertyKey(argument) {
   	return typeof argument === 'string' || typeof argument === 'symbol';
   };
 
-  var GetIntrinsic$b = getIntrinsic;
+  var GetIntrinsic$c = getIntrinsic;
 
-  var $TypeError$4 = GetIntrinsic$b('%TypeError%');
+  var $TypeError$5 = GetIntrinsic$c('%TypeError%');
 
   // http://262.ecma-international.org/5.1/#sec-9.10
 
   var CheckObjectCoercible = function CheckObjectCoercible(value, optMessage) {
   	if (value == null) {
-  		throw new $TypeError$4(optMessage || ('Cannot call method on ' + value));
+  		throw new $TypeError$5(optMessage || ('Cannot call method on ' + value));
   	}
   	return value;
   };
 
   var RequireObjectCoercible$1 = CheckObjectCoercible;
 
-  var GetIntrinsic$a = getIntrinsic;
+  var GetIntrinsic$b = getIntrinsic;
 
-  var $Object = GetIntrinsic$a('%Object%');
+  var $Object = GetIntrinsic$b('%Object%');
 
   var RequireObjectCoercible = RequireObjectCoercible$1;
 
@@ -2287,11 +2289,11 @@
   	return $Object(value);
   };
 
-  var GetIntrinsic$9 = getIntrinsic;
+  var GetIntrinsic$a = getIntrinsic;
 
-  var $TypeError$3 = GetIntrinsic$9('%TypeError%');
+  var $TypeError$4 = GetIntrinsic$a('%TypeError%');
 
-  var IsPropertyKey$1 = IsPropertyKey$2;
+  var IsPropertyKey$2 = IsPropertyKey$3;
   var ToObject = ToObject$1;
 
   /**
@@ -2304,8 +2306,8 @@
 
   var GetV$1 = function GetV(V, P) {
   	// 7.3.2.1
-  	if (!IsPropertyKey$1(P)) {
-  		throw new $TypeError$3('Assertion failed: IsPropertyKey(P) is not true');
+  	if (!IsPropertyKey$2(P)) {
+  		throw new $TypeError$4('Assertion failed: IsPropertyKey(P) is not true');
   	}
 
   	// 7.3.2.2-3
@@ -2360,7 +2362,7 @@
   var toStr$3 = Object.prototype.toString;
   var fnClass = '[object Function]';
   var genClass = '[object GeneratorFunction]';
-  var hasToStringTag$1 = typeof Symbol === 'function' && typeof Symbol.toStringTag === 'symbol';
+  var hasToStringTag$1 = typeof Symbol === 'function' && !!Symbol.toStringTag; // better: use `has-tostringtag`
   /* globals document: false */
   var documentDotAll = typeof document === 'object' && typeof document.all === 'undefined' && document.all !== undefined ? document.all : {};
 
@@ -2392,13 +2394,13 @@
 
   var IsCallable$1 = isCallable$2;
 
-  var GetIntrinsic$8 = getIntrinsic;
+  var GetIntrinsic$9 = getIntrinsic;
 
-  var $TypeError$2 = GetIntrinsic$8('%TypeError%');
+  var $TypeError$3 = GetIntrinsic$9('%TypeError%');
 
   var GetV = GetV$1;
   var IsCallable = IsCallable$1;
-  var IsPropertyKey = IsPropertyKey$2;
+  var IsPropertyKey$1 = IsPropertyKey$3;
 
   /**
    * 7.3.9 - https://ecma-international.org/ecma-262/6.0/#sec-getmethod
@@ -2412,8 +2414,8 @@
 
   var GetMethod$1 = function GetMethod(O, P) {
   	// 7.3.9.1
-  	if (!IsPropertyKey(P)) {
-  		throw new $TypeError$2('Assertion failed: IsPropertyKey(P) is not true');
+  	if (!IsPropertyKey$1(P)) {
+  		throw new $TypeError$3('Assertion failed: IsPropertyKey(P) is not true');
   	}
 
   	// 7.3.9.2
@@ -2426,16 +2428,18 @@
 
   	// 7.3.9.5
   	if (!IsCallable(func)) {
-  		throw new $TypeError$2(P + 'is not a function');
+  		throw new $TypeError$3(P + 'is not a function');
   	}
 
   	// 7.3.9.6
   	return func;
   };
 
-  var GetIntrinsic$7 = getIntrinsic;
+  var GetMethod$2 = GetMethod$1;
 
-  var $abs$1 = GetIntrinsic$7('%Math.abs%');
+  var GetIntrinsic$8 = getIntrinsic;
+
+  var $abs$1 = GetIntrinsic$8('%Math.abs%');
 
   // http://262.ecma-international.org/5.1/#sec-5.2
 
@@ -2477,9 +2481,11 @@
   	return floor$2(absValue) === absValue;
   };
 
-  var GetIntrinsic$6 = getIntrinsic;
+  var IsInteger$1 = IsInteger;
 
-  var $abs = GetIntrinsic$6('%Math.abs%');
+  var GetIntrinsic$7 = getIntrinsic;
+
+  var $abs = GetIntrinsic$7('%Math.abs%');
 
   // http://262.ecma-international.org/5.1/#sec-5.2
 
@@ -2547,14 +2553,14 @@
 
   // http://262.ecma-international.org/5.1/#sec-9.1
 
-  var ToPrimitive$3 = es5;
+  var ToPrimitive$4 = es5;
 
-  var ToPrimitive$2 = ToPrimitive$3;
+  var ToPrimitive$3 = ToPrimitive$4;
 
   // http://262.ecma-international.org/5.1/#sec-9.3
 
-  var ToNumber$3 = function ToNumber(value) {
-  	var prim = ToPrimitive$2(value, Number);
+  var ToNumber$4 = function ToNumber(value) {
+  	var prim = ToPrimitive$3(value, Number);
   	if (typeof prim !== 'string') {
   		return +prim; // eslint-disable-line no-implicit-coercion
   	}
@@ -2574,7 +2580,7 @@
 
   var abs = abs$1;
   var floor = floor$1;
-  var ToNumber$2 = ToNumber$3;
+  var ToNumber$3 = ToNumber$4;
 
   var $isNaN = _isNaN;
   var $isFinite = _isFinite;
@@ -2582,16 +2588,16 @@
 
   // http://262.ecma-international.org/5.1/#sec-9.4
 
-  var ToInteger$2 = function ToInteger(value) {
-  	var number = ToNumber$2(value);
+  var ToInteger$3 = function ToInteger(value) {
+  	var number = ToNumber$3(value);
   	if ($isNaN(number)) { return 0; }
   	if (number === 0 || !$isFinite(number)) { return number; }
   	return $sign(number) * floor(abs(number));
   };
 
-  var GetIntrinsic$5 = getIntrinsic;
+  var GetIntrinsic$6 = getIntrinsic;
 
-  var $test = GetIntrinsic$5('RegExp.prototype.test');
+  var $test = GetIntrinsic$6('RegExp.prototype.test');
 
   var callBind = callBind$2.exports;
 
@@ -2601,6 +2607,12 @@
 
   var isPrimitive$2 = function isPrimitive(value) {
   	return value === null || (typeof value !== 'function' && typeof value !== 'object');
+  };
+
+  var hasSymbols$2 = shams$1;
+
+  var shams = function hasToStringTagShams() {
+  	return hasSymbols$2() && !!Symbol.toStringTag;
   };
 
   var getDay = Date.prototype.getDay;
@@ -2615,7 +2627,7 @@
 
   var toStr$1 = Object.prototype.toString;
   var dateClass = '[object Date]';
-  var hasToStringTag = typeof Symbol === 'function' && !!Symbol.toStringTag;
+  var hasToStringTag = shams();
 
   var isDateObject = function isDateObject(value) {
   	if (typeof value !== 'object' || value === null) {
@@ -2627,7 +2639,7 @@
   var isSymbol$1 = {exports: {}};
 
   var toStr = Object.prototype.toString;
-  var hasSymbols$1 = hasSymbols$3();
+  var hasSymbols$1 = hasSymbols$4();
 
   if (hasSymbols$1) {
   	var symToStr = Symbol.prototype.toString;
@@ -2745,12 +2757,14 @@
   	return toPrimitive(input);
   };
 
-  var GetIntrinsic$4 = getIntrinsic;
+  var ToPrimitive$2 = ToPrimitive$1;
 
-  var $TypeError$1 = GetIntrinsic$4('%TypeError%');
-  var $Number$1 = GetIntrinsic$4('%Number%');
-  var $RegExp = GetIntrinsic$4('%RegExp%');
-  var $parseInteger = GetIntrinsic$4('%parseInt%');
+  var GetIntrinsic$5 = getIntrinsic;
+
+  var $TypeError$2 = GetIntrinsic$5('%TypeError%');
+  var $Number$1 = GetIntrinsic$5('%Number%');
+  var $RegExp = GetIntrinsic$5('%RegExp%');
+  var $parseInteger = GetIntrinsic$5('%parseInt%');
 
   var callBound = callBound$2;
   var regexTester = regexTester$1;
@@ -2784,10 +2798,10 @@
   var ToNumber$1 = function ToNumber(argument) {
   	var value = isPrimitive(argument) ? argument : ToPrimitive(argument, $Number$1);
   	if (typeof value === 'symbol') {
-  		throw new $TypeError$1('Cannot convert a Symbol value to a number');
+  		throw new $TypeError$2('Cannot convert a Symbol value to a number');
   	}
   	if (typeof value === 'bigint') {
-  		throw new $TypeError$1('Conversion from \'BigInt\' to \'number\' is not allowed.');
+  		throw new $TypeError$2('Conversion from \'BigInt\' to \'number\' is not allowed.');
   	}
   	if (typeof value === 'string') {
   		if (isBinary(value)) {
@@ -2806,7 +2820,9 @@
   	return $Number$1(value);
   };
 
-  var ES5ToInteger = ToInteger$2;
+  var ToNumber$2 = ToNumber$1;
+
+  var ES5ToInteger = ToInteger$3;
 
   var ToNumber = ToNumber$1;
 
@@ -2820,10 +2836,12 @@
   	return number === 0 ? 0 : number;
   };
 
-  var GetIntrinsic$3 = getIntrinsic;
+  var ToInteger$2 = ToInteger$1;
 
-  var $Math = GetIntrinsic$3('%Math%');
-  var $Number = GetIntrinsic$3('%Number%');
+  var GetIntrinsic$4 = getIntrinsic;
+
+  var $Math = GetIntrinsic$4('%Math%');
+  var $Number = GetIntrinsic$4('%Number%');
 
   var maxSafeInteger = $Number.MAX_SAFE_INTEGER || $Math.pow(2, 53) - 1;
 
@@ -2838,23 +2856,27 @@
   	return len;
   };
 
-  var GetIntrinsic$2 = getIntrinsic;
+  var ToLength$1 = ToLength;
 
-  var $String = GetIntrinsic$2('%String%');
-  var $TypeError = GetIntrinsic$2('%TypeError%');
+  var GetIntrinsic$3 = getIntrinsic;
+
+  var $String = GetIntrinsic$3('%String%');
+  var $TypeError$1 = GetIntrinsic$3('%TypeError%');
 
   // https://ecma-international.org/ecma-262/6.0/#sec-tostring
 
   var ToString = function ToString(argument) {
   	if (typeof argument === 'symbol') {
-  		throw new $TypeError('Cannot convert a Symbol value to a string');
+  		throw new $TypeError$1('Cannot convert a Symbol value to a string');
   	}
   	return $String(argument);
   };
 
+  var ToString$1 = ToString;
+
   // https://262.ecma-international.org/5.1/#sec-8
 
-  var Type$1 = function Type(x) {
+  var Type$3 = function Type(x) {
   	if (x === null) {
   		return 'Null';
   	}
@@ -2875,11 +2897,11 @@
   	}
   };
 
-  var ES5Type = Type$1;
+  var ES5Type = Type$3;
 
   // https://262.ecma-international.org/11.0/#sec-ecmascript-data-types-and-values
 
-  var Type = function Type(x) {
+  var Type$1 = function Type(x) {
   	if (typeof x === 'symbol') {
   		return 'Symbol';
   	}
@@ -2889,9 +2911,36 @@
   	return ES5Type(x);
   };
 
+  var Type$2 = Type$1;
+
+  var GetIntrinsic$2 = getIntrinsic;
+
+  var $TypeError = GetIntrinsic$2('%TypeError%');
+
+  var has = src;
+
+  var IsPropertyKey = IsPropertyKey$3;
+  var Type = Type$1;
+
+  // https://ecma-international.org/ecma-262/6.0/#sec-hasownproperty
+
+  var HasOwnProperty = function HasOwnProperty(O, P) {
+  	if (Type(O) !== 'Object') {
+  		throw new $TypeError('Assertion failed: `O` must be an Object');
+  	}
+  	if (!IsPropertyKey(P)) {
+  		throw new $TypeError('Assertion failed: `P` must be a Property Key');
+  	}
+  	return has(O, P);
+  };
+
+  var HasOwnProperty$1 = HasOwnProperty;
+
   // TODO: remove, semver-major
 
   var GetIntrinsic$1 = getIntrinsic;
+
+  var ESGetIntrinsic = GetIntrinsic$1;
 
   var INTRINSICS = {};
 
@@ -2974,7 +3023,7 @@
     INTRINSICS[key] = value;
   }
   function GetIntrinsic(intrinsic) {
-    return intrinsic in INTRINSICS ? INTRINSICS[intrinsic] : GetIntrinsic$1(intrinsic);
+    return intrinsic in INTRINSICS ? INTRINSICS[intrinsic] : ESGetIntrinsic(intrinsic);
   }
 
   // Instant
@@ -4590,22 +4639,14 @@
       }, cache);
       return days === 30;
     },
-    monthsInYear: function monthsInYear()
-    /* calendarYear, cache */
-    {
+    monthsInYear: function monthsInYear() {
       return 12;
     },
     minimumMonthLength: function minimumMonthLength() {
-      return (
-        /* calendarDate */
-        29
-      );
+      return 29;
     },
     maximumMonthLength: function maximumMonthLength() {
-      return (
-        /* calendarDate */
-        30
-      );
+      return 30;
     },
     DAYS_PER_ISLAMIC_YEAR: 354 + 11 / 30,
     DAYS_PER_ISO_YEAR: 365.2425,
@@ -4629,9 +4670,7 @@
       // even though Persian is solar and Islamic is lunar.
       return helperIslamic.inLeapYear(calendarDate, cache);
     },
-    monthsInYear: function monthsInYear()
-    /* calendarYear, cache */
-    {
+    monthsInYear: function monthsInYear() {
       return 12;
     },
     minimumMonthLength: function minimumMonthLength(calendarDate) {
@@ -4669,9 +4708,7 @@
       // is a leap year as well.
       return isGregorianLeapYear(calendarDate.year + 78);
     },
-    monthsInYear: function monthsInYear()
-    /* calendarYear, cache */
-    {
+    monthsInYear: function monthsInYear() {
       return 12;
     },
     minimumMonthLength: function minimumMonthLength(calendarDate) {
@@ -4935,9 +4972,7 @@
 
         return isGregorianLeapYear(year);
       },
-      monthsInYear: function monthsInYear()
-      /* calendarDate */
-      {
+      monthsInYear: function monthsInYear() {
         return 12;
       },
       minimumMonthLength: function minimumMonthLength(calendarDate) {
@@ -5108,9 +5143,7 @@
         var year = calendarDate.year;
         return (year + 1) % 4 === 0;
       },
-      monthsInYear: function monthsInYear()
-      /* calendarDate */
-      {
+      monthsInYear: function monthsInYear() {
         return 13;
       },
       minimumMonthLength: function minimumMonthLength(calendarDate) {
@@ -5355,16 +5388,10 @@
       return this.inLeapYear(calendarDate, cache) ? 13 : 12;
     },
     minimumMonthLength: function minimumMonthLength() {
-      return (
-        /* calendarDate */
-        29
-      );
+      return 29;
     },
     maximumMonthLength: function maximumMonthLength() {
-      return (
-        /* calendarDate */
-        30
-      );
+      return 30;
     },
     getMonthList: function getMonthList(calendarYear, cache) {
       var _this4 = this;
@@ -5921,7 +5948,7 @@
   var BEFORE_FIRST_DST = bigInt(-388152).multiply(1e13); // 1847-01-01T00:00:00Z
 
   var ToPositiveInteger = function ToPositiveInteger(value, property) {
-    value = ToInteger$1(value);
+    value = ToInteger$2(value);
 
     if (value < 1) {
       if (property !== undefined) {
@@ -5934,19 +5961,20 @@
     return value;
   };
 
-  var BUILTIN_CASTS = new Map([['year', ToInteger$1], ['month', ToPositiveInteger], ['monthCode', ToString], ['day', ToPositiveInteger], ['hour', ToInteger$1], ['minute', ToInteger$1], ['second', ToInteger$1], ['millisecond', ToInteger$1], ['microsecond', ToInteger$1], ['nanosecond', ToInteger$1], ['years', ToInteger$1], ['months', ToInteger$1], ['weeks', ToInteger$1], ['days', ToInteger$1], ['hours', ToInteger$1], ['minutes', ToInteger$1], ['seconds', ToInteger$1], ['milliseconds', ToInteger$1], ['microseconds', ToInteger$1], ['nanoseconds', ToInteger$1], ['era', ToString], ['eraYear', ToInteger$1], ['offset', ToString]]);
+  var BUILTIN_CASTS = new Map([['year', ToInteger$2], ['month', ToPositiveInteger], ['monthCode', ToString$1], ['day', ToPositiveInteger], ['hour', ToInteger$2], ['minute', ToInteger$2], ['second', ToInteger$2], ['millisecond', ToInteger$2], ['microsecond', ToInteger$2], ['nanosecond', ToInteger$2], ['years', ToInteger$2], ['months', ToInteger$2], ['weeks', ToInteger$2], ['days', ToInteger$2], ['hours', ToInteger$2], ['minutes', ToInteger$2], ['seconds', ToInteger$2], ['milliseconds', ToInteger$2], ['microseconds', ToInteger$2], ['nanoseconds', ToInteger$2], ['era', ToString$1], ['eraYear', ToInteger$2], ['offset', ToString$1]]);
   var ALLOWED_UNITS = ['year', 'month', 'week', 'day', 'hour', 'minute', 'second', 'millisecond', 'microsecond', 'nanosecond'];
   var SINGULAR_PLURAL_UNITS = [['years', 'year'], ['months', 'month'], ['weeks', 'week'], ['days', 'day'], ['hours', 'hour'], ['minutes', 'minute'], ['seconds', 'second'], ['milliseconds', 'millisecond'], ['microseconds', 'microsecond'], ['nanoseconds', 'nanosecond']];
   var ES2020 = {
-    Call: Call,
-    GetMethod: GetMethod$1,
-    IsInteger: IsInteger,
-    ToInteger: ToInteger$1,
-    ToLength: ToLength,
-    ToNumber: ToNumber$1,
-    ToPrimitive: ToPrimitive$1,
-    ToString: ToString,
-    Type: Type
+    Call: Call$1,
+    GetMethod: GetMethod$2,
+    HasOwnProperty: HasOwnProperty$1,
+    IsInteger: IsInteger$1,
+    ToInteger: ToInteger$2,
+    ToLength: ToLength$1,
+    ToNumber: ToNumber$2,
+    ToPrimitive: ToPrimitive$2,
+    ToString: ToString$1,
+    Type: Type$2
   };
   var IntlDateTimeFormatEnUsCache = new Map();
 
@@ -10228,8 +10256,8 @@
             oneYearDays = MathAbs(oneYearDays);
             var divisor = bigInt(oneYearDays).multiply(dayLengthNs);
             nanoseconds = divisor.multiply(years).plus(bigInt(days).multiply(dayLengthNs)).plus(nanoseconds);
-            var rounded = ES.RoundNumberToIncrement(nanoseconds, divisor * increment, roundingMode);
-            total = nanoseconds.toJSNumber() / divisor;
+            var rounded = ES.RoundNumberToIncrement(nanoseconds, divisor.multiply(increment).toJSNumber(), roundingMode);
+            total = nanoseconds.toJSNumber() / divisor.toJSNumber();
             years = rounded.divide(divisor).toJSNumber();
             nanoseconds = months = weeks = days = 0;
             break;
@@ -10284,9 +10312,9 @@
 
             nanoseconds = _divisor.multiply(months).plus(bigInt(days).multiply(dayLengthNs)).plus(nanoseconds);
 
-            var _rounded = ES.RoundNumberToIncrement(nanoseconds, _divisor * increment, roundingMode);
+            var _rounded = ES.RoundNumberToIncrement(nanoseconds, _divisor.multiply(increment).toJSNumber(), roundingMode);
 
-            total = nanoseconds.toJSNumber() / _divisor;
+            total = nanoseconds.toJSNumber() / _divisor.toJSNumber();
             months = _rounded.divide(_divisor).toJSNumber();
             nanoseconds = weeks = days = 0;
             break;
@@ -10323,9 +10351,9 @@
 
             nanoseconds = _divisor2.multiply(weeks).plus(bigInt(days).multiply(dayLengthNs)).plus(nanoseconds);
 
-            var _rounded2 = ES.RoundNumberToIncrement(nanoseconds, _divisor2 * increment, roundingMode);
+            var _rounded2 = ES.RoundNumberToIncrement(nanoseconds, _divisor2.multiply(increment).toJSNumber(), roundingMode);
 
-            total = nanoseconds.toJSNumber() / _divisor2;
+            total = nanoseconds.toJSNumber() / _divisor2.toJSNumber();
             weeks = _rounded2.divide(_divisor2).toJSNumber();
             nanoseconds = days = 0;
             break;
@@ -10337,9 +10365,9 @@
 
             nanoseconds = _divisor3.multiply(days).plus(nanoseconds);
 
-            var _rounded3 = ES.RoundNumberToIncrement(nanoseconds, _divisor3 * increment, roundingMode);
+            var _rounded3 = ES.RoundNumberToIncrement(nanoseconds, _divisor3.multiply(increment).toJSNumber(), roundingMode);
 
-            total = nanoseconds.toJSNumber() / _divisor3;
+            total = nanoseconds.toJSNumber() / _divisor3.toJSNumber();
             days = _rounded3.divide(_divisor3).toJSNumber();
             nanoseconds = 0;
             break;
@@ -10728,6 +10756,8 @@
   var TZ_RESOLVED = Symbol('timezone');
   var TZ_GIVEN = Symbol('timezone-id-given');
   var CAL_ID = Symbol('calendar-id');
+  var LOCALE = Symbol('locale');
+  var OPTIONS = Symbol('options');
 
   var descriptor = function descriptor(value) {
     return {
@@ -10739,22 +10769,77 @@
   };
 
   var IntlDateTimeFormat = globalThis.Intl.DateTimeFormat;
-  var ObjectAssign$1 = Object.assign;
+  var ObjectAssign$1 = Object.assign; // Construction of built-in Intl.DateTimeFormat objects is sloooooow,
+  // so we'll only create those instances when we need them.
+  // See https://bugs.chromium.org/p/v8/issues/detail?id=6528
+
+  function getPropLazy(obj, prop) {
+    var val = obj[prop];
+
+    if (typeof val === 'function') {
+      val = new IntlDateTimeFormat(obj[LOCALE], val(obj[OPTIONS]));
+      obj[prop] = val;
+    }
+
+    return val;
+  } // Similarly, lazy-init TimeZone instances.
+
+
+  function getResolvedTimeZoneLazy(obj) {
+    var val = obj[TZ_RESOLVED];
+
+    if (typeof val === 'string') {
+      val = new TimeZone(val);
+      obj[TZ_RESOLVED] = val;
+    }
+
+    return val;
+  }
+
   function DateTimeFormat() {
-    var locale = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : IntlDateTimeFormat().resolvedOptions().locale;
-    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var locale = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : undefined;
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
     if (!(this instanceof DateTimeFormat)) return new DateTimeFormat(locale, options);
+    var hasOptions = typeof options !== 'undefined';
+    options = hasOptions ? ObjectAssign$1({}, options) : {};
+    var original = new IntlDateTimeFormat(locale, options);
+    var ro = original.resolvedOptions(); // DateTimeFormat instances are very expensive to create. Therefore, they will
+    // be lazily created only when needed, using the locale and options provided.
+    // But it's possible for callers to mutate those inputs before lazy creation
+    // happens. For this reason, we clone the inputs instead of caching the
+    // original objects. To avoid the complexity of deep cloning any inputs that
+    // are themselves objects (e.g. the locales array, or options property values
+    // that will be coerced to strings), we rely on `resolvedOptions()` to do the
+    // coercion and cloning for us. Unfortunately, we can't just use the resolved
+    // options as-is because our options-amending logic adds additional fields if
+    // the user doesn't supply any unit fields like year, month, day, hour, etc.
+    // Therefore, we limit the properties in the clone to properties that were
+    // present in the original input.
+
+    if (hasOptions) {
+      var clonedResolved = ObjectAssign$1({}, ro);
+
+      for (var prop in clonedResolved) {
+        if (!ES.HasOwnProperty(options, prop)) delete clonedResolved[prop];
+      }
+
+      this[OPTIONS] = clonedResolved;
+    } else {
+      this[OPTIONS] = options;
+    }
+
     this[TZ_GIVEN] = options.timeZone ? options.timeZone : null;
-    this[ORIGINAL] = new IntlDateTimeFormat(locale, options);
-    this[TZ_RESOLVED] = new TimeZone(this.resolvedOptions().timeZone);
-    this[CAL_ID] = this.resolvedOptions().calendar;
-    this[DATE] = new IntlDateTimeFormat(locale, dateAmend(options));
-    this[YM] = new IntlDateTimeFormat(locale, yearMonthAmend(options));
-    this[MD] = new IntlDateTimeFormat(locale, monthDayAmend(options));
-    this[TIME] = new IntlDateTimeFormat(locale, timeAmend(options));
-    this[DATETIME] = new IntlDateTimeFormat(locale, datetimeAmend(options));
-    this[ZONED] = new IntlDateTimeFormat(locale, zonedDateTimeAmend(options));
-    this[INST] = new IntlDateTimeFormat(locale, instantAmend(options));
+    this[LOCALE] = ro.locale;
+    this[ORIGINAL] = original;
+    this[TZ_RESOLVED] = ro.timeZone;
+    this[CAL_ID] = ro.calendar;
+    this[DATE] = dateAmend;
+    this[YM] = yearMonthAmend;
+    this[MD] = monthDayAmend;
+    this[TIME] = timeAmend;
+    this[DATETIME] = datetimeAmend;
+    this[ZONED] = zonedDateTimeAmend;
+    this[INST] = instantAmend;
   }
 
   DateTimeFormat.supportedLocalesOf = function () {
@@ -10784,6 +10869,7 @@
   function adjustFormatterTimeZone(formatter, timeZone) {
     if (!timeZone) return formatter;
     var options = formatter.resolvedOptions();
+    if (options.timeZone === timeZone) return formatter;
     return new IntlDateTimeFormat(options.locale, _objectSpread2(_objectSpread2({}, options), {}, {
       timeZone: timeZone
     }));
@@ -11075,8 +11161,8 @@
       var nanosecond = GetSlot(temporalObj, ISO_NANOSECOND);
       var datetime = new DateTime(1970, 1, 1, hour, minute, second, millisecond, microsecond, nanosecond, main[CAL_ID]);
       return {
-        instant: ES.BuiltinTimeZoneGetInstantFor(main[TZ_RESOLVED], datetime, 'compatible'),
-        formatter: main[TIME]
+        instant: ES.BuiltinTimeZoneGetInstantFor(getResolvedTimeZoneLazy(main), datetime, 'compatible'),
+        formatter: getPropLazy(main, TIME)
       };
     }
 
@@ -11093,8 +11179,8 @@
       var _datetime = new DateTime(isoYear, isoMonth, referenceISODay, 12, 0, 0, 0, 0, 0, calendar);
 
       return {
-        instant: ES.BuiltinTimeZoneGetInstantFor(main[TZ_RESOLVED], _datetime, 'compatible'),
-        formatter: main[YM]
+        instant: ES.BuiltinTimeZoneGetInstantFor(getResolvedTimeZoneLazy(main), _datetime, 'compatible'),
+        formatter: getPropLazy(main, YM)
       };
     }
 
@@ -11114,8 +11200,8 @@
       var _datetime2 = new DateTime(referenceISOYear, _isoMonth, isoDay, 12, 0, 0, 0, 0, 0, _calendar);
 
       return {
-        instant: ES.BuiltinTimeZoneGetInstantFor(main[TZ_RESOLVED], _datetime2, 'compatible'),
-        formatter: main[MD]
+        instant: ES.BuiltinTimeZoneGetInstantFor(getResolvedTimeZoneLazy(main), _datetime2, 'compatible'),
+        formatter: getPropLazy(main, MD)
       };
     }
 
@@ -11135,8 +11221,8 @@
       var _datetime3 = new DateTime(_isoYear, _isoMonth2, _isoDay, 12, 0, 0, 0, 0, 0, main[CAL_ID]);
 
       return {
-        instant: ES.BuiltinTimeZoneGetInstantFor(main[TZ_RESOLVED], _datetime3, 'compatible'),
-        formatter: main[DATE]
+        instant: ES.BuiltinTimeZoneGetInstantFor(getResolvedTimeZoneLazy(main), _datetime3, 'compatible'),
+        formatter: getPropLazy(main, DATE)
       };
     }
 
@@ -11172,8 +11258,8 @@
       }
 
       return {
-        instant: ES.BuiltinTimeZoneGetInstantFor(main[TZ_RESOLVED], _datetime4, 'compatible'),
-        formatter: main[DATETIME]
+        instant: ES.BuiltinTimeZoneGetInstantFor(getResolvedTimeZoneLazy(main), _datetime4, 'compatible'),
+        formatter: getPropLazy(main, DATETIME)
       };
     }
 
@@ -11193,7 +11279,7 @@
 
       return {
         instant: GetSlot(temporalObj, INSTANT),
-        formatter: main[ZONED],
+        formatter: getPropLazy(main, ZONED),
         timeZone: objTimeZone
       };
     }
@@ -11201,7 +11287,7 @@
     if (ES.IsTemporalInstant(temporalObj)) {
       return {
         instant: temporalObj,
-        formatter: main[INST]
+        formatter: getPropLazy(main, INST)
       };
     }
 
@@ -13396,6 +13482,12 @@
     zonedDateTime: zonedDateTime,
     zonedDateTimeISO: zonedDateTimeISO
   };
+  Object.defineProperty(Now, Symbol.toStringTag, {
+    value: 'Temporal.Now',
+    writable: false,
+    enumerable: false,
+    configurable: true
+  });
 
   var ObjectAssign = Object.assign;
   var DISALLOWED_UNITS$1 = ['year', 'month', 'week', 'day'];
@@ -15179,6 +15271,12 @@
     configurable: true
   });
   copy(globalThis.Temporal, Temporal);
+  Object.defineProperty(globalThis.Temporal, Symbol.toStringTag, {
+    value: 'Temporal',
+    writable: false,
+    enumerable: false,
+    configurable: true
+  });
   copy(globalThis.Temporal.Now, Now);
   copy(globalThis.Intl, Intl$1);
   Object.defineProperty(globalThis.Date.prototype, 'toTemporalInstant', {
