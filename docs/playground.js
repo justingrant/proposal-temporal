@@ -3089,8 +3089,7 @@
     GetSlots(container)[id] = value;
   }
 
-  var _excluded = ["month", "monthCode"],
-      _excluded2 = ["month", "monthCode", "year", "era", "eraYear"];
+  var _excluded = ["month", "monthCode", "year", "era", "eraYear"];
   var ArrayIncludes = Array.prototype.includes;
   var ArrayPrototypePush$2 = Array.prototype.push;
   var IntlDateTimeFormat$2 = globalThis.Intl.DateTimeFormat;
@@ -3098,6 +3097,7 @@
   var MathFloor$1 = Math.floor;
   var ObjectAssign$3 = Object.assign;
   var ObjectEntries$1 = Object.entries;
+  var ObjectKeys = Object.keys;
   var impl = {};
   var Calendar = /*#__PURE__*/function () {
     function Calendar(id) {
@@ -3390,19 +3390,47 @@
       return _fields5;
     },
     mergeFields: function mergeFields(fields, additionalFields) {
-      var month = fields.month,
-          monthCode = fields.monthCode,
-          original = _objectWithoutProperties(fields, _excluded);
+      var merged = {};
 
-      var newMonth = additionalFields.month,
-          newMonthCode = additionalFields.monthCode;
+      var _iterator2 = _createForOfIteratorHelper(ObjectKeys(fields)),
+          _step2;
 
-      if (newMonth === undefined && newMonthCode === undefined) {
-        original.month = month;
-        original.monthCode = monthCode;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var nextKey = _step2.value;
+          if (nextKey === 'month' || nextKey === 'monthCode') continue;
+          merged[nextKey] = fields[nextKey];
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
       }
 
-      return _objectSpread2(_objectSpread2({}, original), additionalFields);
+      var newKeys = ObjectKeys(additionalFields);
+
+      var _iterator3 = _createForOfIteratorHelper(newKeys),
+          _step3;
+
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+          var _nextKey = _step3.value;
+          merged[_nextKey] = additionalFields[_nextKey];
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
+      }
+
+      if (!ArrayIncludes.call(newKeys, 'month') && !ArrayIncludes.call(newKeys, 'monthCode')) {
+        var month = fields.month,
+            monthCode = fields.monthCode;
+        if (month !== undefined) merged.month = month;
+        if (monthCode !== undefined) merged.monthCode = monthCode;
+      }
+
+      return merged;
     },
     dateAdd: function dateAdd(date, duration, overflow, calendar) {
       var years = duration.years,
@@ -3556,22 +3584,22 @@
       if (cacheToClone !== undefined) {
         var i = cacheToClone.length;
 
-        var _iterator2 = _createForOfIteratorHelper(cacheToClone.map.entries()),
-            _step2;
+        var _iterator4 = _createForOfIteratorHelper(cacheToClone.map.entries()),
+            _step4;
 
         try {
-          for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
             var _this$map;
 
-            var entry = _step2.value;
+            var entry = _step4.value;
             if (++i > OneObjectCache.MAX_CACHE_ENTRIES) break;
 
             (_this$map = this.map).set.apply(_this$map, _toConsumableArray(entry));
           }
         } catch (err) {
-          _iterator2.e(err);
+          _iterator4.e(err);
         } finally {
-          _iterator2.f();
+          _iterator4.f();
         }
       }
     }
@@ -3716,14 +3744,14 @@
 
       var result = {};
 
-      var _iterator3 = _createForOfIteratorHelper(parts),
-          _step3;
+      var _iterator5 = _createForOfIteratorHelper(parts),
+          _step5;
 
       try {
-        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-          var _step3$value = _step3.value,
-              type = _step3$value.type,
-              value = _step3$value.value;
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+          var _step5$value = _step5.value,
+              type = _step5$value.type,
+              value = _step5$value.value;
           if (type === 'year') result.eraYear = +value;
           if (type === 'relatedYear') result.eraYear = +value;
 
@@ -3758,9 +3786,9 @@
           }
         }
       } catch (err) {
-        _iterator3.e(err);
+        _iterator5.e(err);
       } finally {
-        _iterator3.f();
+        _iterator5.f();
       }
 
       if (result.eraYear === undefined) {
@@ -5701,18 +5729,22 @@
       return _fields6;
     },
     mergeFields: function mergeFields(fields, additionalFields) {
-      var month = fields.month,
-          monthCode = fields.monthCode,
-          year = fields.year,
-          era = fields.era,
-          eraYear = fields.eraYear,
-          original = _objectWithoutProperties(fields, _excluded2);
+      var fieldsCopy = _objectSpread2({}, fields);
 
-      var newMonth = additionalFields.month,
-          newMonthCode = additionalFields.monthCode,
-          newYear = additionalFields.year,
-          newEra = additionalFields.era,
-          newEraYear = additionalFields.eraYear;
+      var additionalFieldsCopy = _objectSpread2({}, additionalFields);
+
+      var month = fieldsCopy.month,
+          monthCode = fieldsCopy.monthCode,
+          year = fieldsCopy.year,
+          era = fieldsCopy.era,
+          eraYear = fieldsCopy.eraYear,
+          original = _objectWithoutProperties(fieldsCopy, _excluded);
+
+      var newMonth = additionalFieldsCopy.month,
+          newMonthCode = additionalFieldsCopy.monthCode,
+          newYear = additionalFieldsCopy.year,
+          newEra = additionalFieldsCopy.era,
+          newEraYear = additionalFieldsCopy.eraYear;
 
       if (newMonth === undefined && newMonthCode === undefined) {
         original.month = month;
@@ -5725,7 +5757,7 @@
         original.eraYear = eraYear;
       }
 
-      return _objectSpread2(_objectSpread2({}, original), additionalFields);
+      return _objectSpread2(_objectSpread2({}, original), additionalFieldsCopy);
     },
     dateAdd: function dateAdd(date, duration, overflow, calendar) {
       var years = duration.years,
@@ -5947,6 +5979,16 @@
   var YEAR_MAX = 275760;
   var BEFORE_FIRST_DST = bigInt(-388152).multiply(1e13); // 1847-01-01T00:00:00Z
 
+  var ToIntegerThrowOnInfinity = function ToIntegerThrowOnInfinity(value) {
+    var integer = ES.ToInteger(value);
+
+    if (!NumberIsFinite(integer)) {
+      throw new RangeError('infinity is out of range');
+    }
+
+    return integer;
+  };
+
   var ToPositiveInteger = function ToPositiveInteger(value, property) {
     value = ToInteger$2(value);
 
@@ -6001,15 +6043,7 @@
 
   var ES = ObjectAssign$2({}, ES2020, {
     ToPositiveInteger: ToPositiveInteger,
-    ToFiniteInteger: function ToFiniteInteger(value) {
-      var integer = ES.ToInteger(value);
-
-      if (!NumberIsFinite(integer)) {
-        throw new RangeError('infinity is out of range');
-      }
-
-      return integer;
-    },
+    ToIntegerThrowOnInfinity: ToIntegerThrowOnInfinity,
     IsTemporalInstant: function IsTemporalInstant(item) {
       return HasSlot(item, EPOCHNANOSECONDS) && !HasSlot(item, TIME_ZONE, CALENDAR);
     },
@@ -6299,7 +6333,7 @@
       fHours = fHours ? sign * ES.ToInteger(fHours) / Math.pow(10, fHours.length) : 0;
       fMinutes = fMinutes ? sign * ES.ToInteger(fMinutes) / Math.pow(10, fMinutes.length) : 0;
 
-      var _ES$DurationHandleFra = ES.DurationHandleFractions(fHours, minutes, fMinutes, seconds, 0, milliseconds, 0, microseconds, 0, nanoseconds, 0);
+      var _ES$DurationHandleFra = ES.DurationHandleFractions(fHours, minutes, fMinutes, seconds, milliseconds, microseconds, nanoseconds);
 
       minutes = _ES$DurationHandleFra.minutes;
       seconds = _ES$DurationHandleFra.seconds;
@@ -6440,9 +6474,9 @@
         month: month
       };
     },
-    DurationHandleFractions: function DurationHandleFractions(fHours, minutes, fMinutes, seconds, fSeconds, milliseconds, fMilliseconds, microseconds, fMicroseconds, nanoseconds, fNanoseconds) {
+    DurationHandleFractions: function DurationHandleFractions(fHours, minutes, fMinutes, seconds, milliseconds, microseconds, nanoseconds) {
       if (fHours !== 0) {
-        [minutes, fMinutes, seconds, fSeconds, milliseconds, fMilliseconds, microseconds, fMicroseconds, nanoseconds, fNanoseconds].forEach(function (val) {
+        [minutes, fMinutes, seconds, milliseconds, microseconds, nanoseconds].forEach(function (val) {
           if (val !== 0) throw new RangeError('only the smallest unit can be fractional');
         });
         var mins = fHours * 60;
@@ -6451,38 +6485,29 @@
       }
 
       if (fMinutes !== 0) {
-        [seconds, fSeconds, milliseconds, fMilliseconds, microseconds, fMicroseconds, nanoseconds, fNanoseconds].forEach(function (val) {
+        [seconds, milliseconds, microseconds, nanoseconds].forEach(function (val) {
           if (val !== 0) throw new RangeError('only the smallest unit can be fractional');
         });
         var secs = fMinutes * 60;
         seconds = MathTrunc(secs);
-        fSeconds = secs % 1;
-      }
+        var fSeconds = secs % 1;
 
-      if (fSeconds !== 0) {
-        [milliseconds, fMilliseconds, microseconds, fMicroseconds, nanoseconds, fNanoseconds].forEach(function (val) {
-          if (val !== 0) throw new RangeError('only the smallest unit can be fractional');
-        });
-        var mils = fSeconds * 1000;
-        milliseconds = MathTrunc(mils);
-        fMilliseconds = mils % 1;
-      }
+        if (fSeconds !== 0) {
+          var mils = fSeconds * 1000;
+          milliseconds = MathTrunc(mils);
+          var fMilliseconds = mils % 1;
 
-      if (fMilliseconds !== 0) {
-        [microseconds, fMicroseconds, nanoseconds, fNanoseconds].forEach(function (val) {
-          if (val !== 0) throw new RangeError('only the smallest unit can be fractional');
-        });
-        var mics = fMilliseconds * 1000;
-        microseconds = MathTrunc(mics);
-        fMicroseconds = mics % 1;
-      }
+          if (fMilliseconds !== 0) {
+            var mics = fMilliseconds * 1000;
+            microseconds = MathTrunc(mics);
+            var fMicroseconds = mics % 1;
 
-      if (fMicroseconds !== 0) {
-        [nanoseconds, fNanoseconds].forEach(function (val) {
-          if (val !== 0) throw new RangeError('only the smallest unit can be fractional');
-        });
-        var nans = fMicroseconds * 1000;
-        nanoseconds = MathTrunc(nans);
+            if (fMicroseconds !== 0) {
+              var nans = fMicroseconds * 1000;
+              nanoseconds = MathTrunc(nans);
+            }
+          }
+        }
       }
 
       return {
@@ -8434,7 +8459,7 @@
     GetIANATimeZonePreviousTransition: function GetIANATimeZonePreviousTransition(epochNanoseconds, id) {
       var lowercap = BEFORE_FIRST_DST; // 1847-01-01T00:00:00Z
 
-      var rightNanos = epochNanoseconds;
+      var rightNanos = bigInt(epochNanoseconds).minus(1);
       var rightOffsetNs = ES.GetIANATimeZoneOffsetNanoseconds(rightNanos, id);
       var leftNanos = rightNanos;
       var leftOffsetNs = rightOffsetNs;
@@ -9400,7 +9425,7 @@
             // 2) end is previous month from intermediate (negative duration)
             // 3) end is next month from intermediate (positive duration)
 
-            if (mid.month === end.month && mid.year === end.year) {
+            if (mid.month === end.month) {
               // 1) same month: use simple subtraction
               days = end.day - mid.day;
             } else if (sign < 0) {
@@ -11643,10 +11668,11 @@
 
       _classCallCheck(this, PlainDate);
 
-      isoYear = ES.ToFiniteInteger(isoYear);
-      isoMonth = ES.ToFiniteInteger(isoMonth);
-      isoDay = ES.ToFiniteInteger(isoDay);
-      calendar = ES.ToTemporalCalendar(calendar); // Note: if the arguments are not passed, ToInteger(undefined) will have returned 0, which will
+      isoYear = ES.ToIntegerThrowOnInfinity(isoYear);
+      isoMonth = ES.ToIntegerThrowOnInfinity(isoMonth);
+      isoDay = ES.ToIntegerThrowOnInfinity(isoDay);
+      calendar = ES.ToTemporalCalendar(calendar); // Note: if the arguments are not passed,
+      //       ToIntegerThrowOnInfinity(undefined) will have returned 0, which will
       //       be rejected by RejectISODate in CreateTemporalDateSlots. This check
       //       exists only to improve the error message.
 
@@ -12117,16 +12143,17 @@
 
       _classCallCheck(this, PlainDateTime);
 
-      isoYear = ES.ToFiniteInteger(isoYear);
-      isoMonth = ES.ToFiniteInteger(isoMonth);
-      isoDay = ES.ToFiniteInteger(isoDay);
-      hour = ES.ToFiniteInteger(hour);
-      minute = ES.ToFiniteInteger(minute);
-      second = ES.ToFiniteInteger(second);
-      millisecond = ES.ToFiniteInteger(millisecond);
-      microsecond = ES.ToFiniteInteger(microsecond);
-      nanosecond = ES.ToFiniteInteger(nanosecond);
-      calendar = ES.ToTemporalCalendar(calendar); // Note: if the arguments are not passed, ToInteger(undefined) will have returned 0, which will
+      isoYear = ES.ToIntegerThrowOnInfinity(isoYear);
+      isoMonth = ES.ToIntegerThrowOnInfinity(isoMonth);
+      isoDay = ES.ToIntegerThrowOnInfinity(isoDay);
+      hour = ES.ToIntegerThrowOnInfinity(hour);
+      minute = ES.ToIntegerThrowOnInfinity(minute);
+      second = ES.ToIntegerThrowOnInfinity(second);
+      millisecond = ES.ToIntegerThrowOnInfinity(millisecond);
+      microsecond = ES.ToIntegerThrowOnInfinity(microsecond);
+      nanosecond = ES.ToIntegerThrowOnInfinity(nanosecond);
+      calendar = ES.ToTemporalCalendar(calendar); // Note: if the arguments are not passed,
+      //       ToIntegerThrowOnInfinity(undefined) will have returned 0, which will
       //       be rejected by RejectDateTime in CreateTemporalDateTimeSlots. This
       //       check exists only to improve the error message.
 
@@ -13231,10 +13258,11 @@
 
       _classCallCheck(this, PlainMonthDay);
 
-      isoMonth = ES.ToFiniteInteger(isoMonth);
-      isoDay = ES.ToFiniteInteger(isoDay);
+      isoMonth = ES.ToIntegerThrowOnInfinity(isoMonth);
+      isoDay = ES.ToIntegerThrowOnInfinity(isoDay);
       calendar = ES.ToTemporalCalendar(calendar);
-      referenceISOYear = ES.ToFiniteInteger(referenceISOYear); // Note: if the arguments are not passed, ToInteger(undefined) will have returned 0, which will
+      referenceISOYear = ES.ToIntegerThrowOnInfinity(referenceISOYear); // Note: if the arguments are not passed,
+      //       ToIntegerThrowOnInfinity(undefined) will have returned 0, which will
       //       be rejected by RejectISODate in CreateTemporalMonthDaySlots. This
       //       check exists only to improve the error message.
 
@@ -13541,12 +13569,12 @@
 
       _classCallCheck(this, PlainTime);
 
-      isoHour = ES.ToFiniteInteger(isoHour);
-      isoMinute = ES.ToFiniteInteger(isoMinute);
-      isoSecond = ES.ToFiniteInteger(isoSecond);
-      isoMillisecond = ES.ToFiniteInteger(isoMillisecond);
-      isoMicrosecond = ES.ToFiniteInteger(isoMicrosecond);
-      isoNanosecond = ES.ToFiniteInteger(isoNanosecond);
+      isoHour = ES.ToIntegerThrowOnInfinity(isoHour);
+      isoMinute = ES.ToIntegerThrowOnInfinity(isoMinute);
+      isoSecond = ES.ToIntegerThrowOnInfinity(isoSecond);
+      isoMillisecond = ES.ToIntegerThrowOnInfinity(isoMillisecond);
+      isoMicrosecond = ES.ToIntegerThrowOnInfinity(isoMicrosecond);
+      isoNanosecond = ES.ToIntegerThrowOnInfinity(isoNanosecond);
       ES.RejectTime(isoHour, isoMinute, isoSecond, isoMillisecond, isoMicrosecond, isoNanosecond);
       CreateSlots(this);
       SetSlot(this, ISO_HOUR, isoHour);
@@ -14013,10 +14041,11 @@
 
       _classCallCheck(this, PlainYearMonth);
 
-      isoYear = ES.ToFiniteInteger(isoYear);
-      isoMonth = ES.ToFiniteInteger(isoMonth);
+      isoYear = ES.ToIntegerThrowOnInfinity(isoYear);
+      isoMonth = ES.ToIntegerThrowOnInfinity(isoMonth);
       calendar = ES.ToTemporalCalendar(calendar);
-      referenceISODay = ES.ToFiniteInteger(referenceISODay); // Note: if the arguments are not passed, ToInteger(undefined) will have returned 0, which will
+      referenceISODay = ES.ToIntegerThrowOnInfinity(referenceISODay); // Note: if the arguments are not passed,
+      //       ToIntegerThrowOnInfinity(undefined) will have returned 0, which will
       //       be rejected by RejectISODate in CreateTemporalYearMonthSlots. This
       //       check exists only to improve the error message.
 
