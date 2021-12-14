@@ -9,14 +9,9 @@
 
     if (Object.getOwnPropertySymbols) {
       var symbols = Object.getOwnPropertySymbols(object);
-
-      if (enumerableOnly) {
-        symbols = symbols.filter(function (sym) {
-          return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-        });
-      }
-
-      keys.push.apply(keys, symbols);
+      enumerableOnly && (symbols = symbols.filter(function (sym) {
+        return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+      })), keys.push.apply(keys, symbols);
     }
 
     return keys;
@@ -24,19 +19,12 @@
 
   function _objectSpread2(target) {
     for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i] != null ? arguments[i] : {};
-
-      if (i % 2) {
-        ownKeys(Object(source), true).forEach(function (key) {
-          _defineProperty(target, key, source[key]);
-        });
-      } else if (Object.getOwnPropertyDescriptors) {
-        Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
-      } else {
-        ownKeys(Object(source)).forEach(function (key) {
-          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
-        });
-      }
+      var source = null != arguments[i] ? arguments[i] : {};
+      i % 2 ? ownKeys(Object(source), !0).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
     }
 
     return target;
@@ -45,17 +33,11 @@
   function _typeof(obj) {
     "@babel/helpers - typeof";
 
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof = function (obj) {
-        return typeof obj;
-      };
-    } else {
-      _typeof = function (obj) {
-        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-      };
-    }
-
-    return _typeof(obj);
+    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+      return typeof obj;
+    } : function (obj) {
+      return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    }, _typeof(obj);
   }
 
   function _classCallCheck(instance, Constructor) {
@@ -77,6 +59,9 @@
   function _createClass(Constructor, protoProps, staticProps) {
     if (protoProps) _defineProperties(Constructor.prototype, protoProps);
     if (staticProps) _defineProperties(Constructor, staticProps);
+    Object.defineProperty(Constructor, "prototype", {
+      writable: false
+    });
     return Constructor;
   }
 
@@ -6148,7 +6133,7 @@
 
       if (ianaName) return ianaName;
       if (z) return 'UTC';
-      return offset;
+      return offset; // if !ianaName && !z then offset must be present
     },
     FormatCalendarAnnotation: function FormatCalendarAnnotation(id, showCalendar) {
       if (showCalendar === 'never') return '';
@@ -7031,9 +7016,10 @@
 
       return value;
     },
-    ToPartialRecord: function ToPartialRecord(bag, fields, callerCast) {
+    ToPartialRecord: function ToPartialRecord(bag, fields) {
       if (ES.Type(bag) !== 'Object') return false;
-      var any;
+      var any = false;
+      var result = {};
 
       var _iterator5 = _createForOfIteratorHelper(fields),
           _step5;
@@ -7044,14 +7030,12 @@
           var value = bag[property];
 
           if (value !== undefined) {
-            any = any || {};
+            any = true;
 
-            if (callerCast === undefined && BUILTIN_CASTS.has(property)) {
-              any[property] = BUILTIN_CASTS.get(property)(value);
-            } else if (callerCast !== undefined) {
-              any[property] = callerCast(value);
+            if (BUILTIN_CASTS.has(property)) {
+              result[property] = BUILTIN_CASTS.get(property)(value);
             } else {
-              any[property] = value;
+              result[property] = value;
             }
           }
         }
@@ -7061,10 +7045,13 @@
         _iterator5.f();
       }
 
-      return any ? any : false;
+      return any ? result : false;
     },
     PrepareTemporalFields: function PrepareTemporalFields(bag, fields) {
-      if (ES.Type(bag) !== 'Object') return false;
+      if (ES.Type(bag) !== 'Object') {
+        throw new TypeError('bag parameter must be Object');
+      }
+
       var result = {};
       var any = false;
 
@@ -8140,6 +8127,8 @@
             throw new RangeError('no such instant found');
           }
       }
+
+      throw new Error("assertion failed: invalid disambiguation value ".concat(disambiguation));
     },
     GetPossibleInstantsFor: function GetPossibleInstantsFor(timeZone, dateTime) {
       var getPossibleInstantsFor = ES.GetMethod(timeZone, 'getPossibleInstantsFor');
@@ -10324,8 +10313,7 @@
       if (relativeTo) {
         if (ES.IsTemporalZonedDateTime(relativeTo)) {
           zdtRelative = relativeTo;
-          var pdt = ES.BuiltinTimeZoneGetPlainDateTimeFor(GetSlot(relativeTo, TIME_ZONE), GetSlot(relativeTo, INSTANT), GetSlot(relativeTo, CALENDAR));
-          relativeTo = ES.TemporalDateTimeToDate(pdt);
+          relativeTo = ES.ToTemporalDate(relativeTo);
         } else if (!ES.IsTemporalDate(relativeTo)) {
           throw new TypeError('starting point must be PlainDate or ZonedDateTime');
         }
