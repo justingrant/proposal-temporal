@@ -3871,25 +3871,25 @@
     /*, fromLegacyDate = false */
     ) {
       if (this.calendarType === 'lunisolar') throw new RangeError('Override required for lunisolar calendars');
-      this.validateCalendarDate(calendarDate);
-      var largestMonth = this.monthsInYear(calendarDate, cache);
-      var _calendarDate = calendarDate,
-          month = _calendarDate.month,
-          year = _calendarDate.year,
-          eraYear = _calendarDate.eraYear,
-          monthCode = _calendarDate.monthCode; // For calendars that always use the same era, set it here so that derived
+      this.validateCalendarDate(calendarDate); // For calendars that always use the same era, set it here so that derived
       // calendars won't need to implement this method simply to set the era.
 
       if (this.constantEra) {
         // year and eraYear always match when there's only one possible era
-        if (year === undefined) year = eraYear;
-        if (eraYear === undefined) eraYear = year;
+        var _calendarDate = calendarDate,
+            year = _calendarDate.year,
+            eraYear = _calendarDate.eraYear;
         calendarDate = _objectSpread2(_objectSpread2({}, calendarDate), {}, {
           era: this.constantEra,
-          year: year,
-          eraYear: eraYear
+          year: year !== undefined ? year : eraYear,
+          eraYear: eraYear !== undefined ? eraYear : year
         });
       }
+
+      var largestMonth = this.monthsInYear(calendarDate, cache);
+      var _calendarDate2 = calendarDate,
+          month = _calendarDate2.month,
+          monthCode = _calendarDate2.monthCode;
 
       var _resolveNonLunisolarM = resolveNonLunisolarMonth(calendarDate, overflow, largestMonth);
 
@@ -4126,12 +4126,12 @@
       return addedCalendar;
     },
     addMonthsCalendar: function addMonthsCalendar(calendarDate, months, overflow, cache) {
-      var _calendarDate2 = calendarDate,
-          day = _calendarDate2.day;
+      var _calendarDate3 = calendarDate,
+          day = _calendarDate3.day;
 
       for (var i = 0, absMonths = MathAbs$1(months); i < absMonths; i++) {
-        var _calendarDate3 = calendarDate,
-            month = _calendarDate3.month;
+        var _calendarDate4 = calendarDate,
+            month = _calendarDate4.month;
         var oldCalendarDate = calendarDate;
         var days = months < 0 ? -Math.max(day, this.daysInPreviousMonth(calendarDate, cache)) : this.daysInMonth(calendarDate, cache);
         var isoDate = this.calendarToIsoDate(calendarDate, 'constrain', cache);
@@ -4626,14 +4626,18 @@
             ES.RejectToRange(month, 1, this.monthsInYear({
               year: year
             }));
-            ES.RejectToRange(day, 1, this.maximumMonthLength(calendarDate));
+            ES.RejectToRange(day, 1, this.maximumMonthLength({
+              year: year,
+              month: month
+            }));
           } else {
             month = ES.ConstrainToRange(month, 1, this.monthsInYear({
               year: year
             }));
-            day = ES.ConstrainToRange(day, 1, this.maximumMonthLength(_objectSpread2(_objectSpread2({}, calendarDate), {}, {
+            day = ES.ConstrainToRange(day, 1, this.maximumMonthLength({
+              year: year,
               month: month
-            })));
+            }));
           }
 
           if (monthCode === undefined) {
@@ -4867,10 +4871,8 @@
    * eras. Note that it mutates and normalizes the original era objects, which is
    * OK because this is non-observable, internal-only metadata.
    *
-   * The result is an array of eras with this shape:
-   * ```
-   * interface Era {
-   *   // name of the era
+   *  interface Era {
+   *   /** name of the era
    *   name: string;
    *
    *   // alternate name of the era used in old versions of ICU data
@@ -4878,25 +4880,29 @@
    *   // with the oldest era being 0.
    *   genericName: string;
    *
-   *   // Signed calendar year where this era begins. Will be
-   *   // 1 (or 0 for zero-based eras) for the anchor era assuming that `year`
-   *   // numbering starts at the beginning of the anchor era, which is true
-   *   // for all ICU calendars except Japanese. If an era starts mid-year
-   *   // then a calendar month and day are included. Otherwise
-   *   // `{ month: 1, day: 1 }` is assumed.
-   *   anchorEpoch:  { year: number } | { year: number, month: number, day: number }
+   *   // Signed calendar year where this era begins. Will be 1 (or 0 for zero-based
+   *   // eras) for the anchor era assuming that `year` numbering starts at the
+   *   // beginning of the anchor era, which is true for all ICU calendars except
+   *   // Japanese. For input, the month and day are optional. If an era starts
+   *   // mid-year then a calendar month and day are included.
+   *   // Otherwise `{ month: 1, day: 1 }` is assumed.
+   *   anchorEpoch: { year: number; month: number; day: number };
    *
    *   // ISO date of the first day of this era
-   *   isoEpoch: { year: number, month: number, day: number}
+   *   isoEpoch: { year: number; month: number; day: number };
    *
    *   // If present, then this era counts years backwards like BC
    *   // and this property points to the forward era. This must be
    *   // the last (oldest) era in the array.
-   *   reverseOf: Era;
+   *   reverseOf?: Era;
    *
    *   // If true, the era's years are 0-based. If omitted or false,
    *   // then the era's years are 1-based.
-   *   hasYearZero: boolean = false;
+   *   hasYearZero?: boolean;
+   *
+   *   // Override if this era is the anchor. Not normally used because
+   *   // anchor eras are inferred.
+   *   isAnchor?: boolean;
    * }
    * ```
    * */
@@ -4967,6 +4973,7 @@
     ArraySort.call(eras, function (e1, e2) {
       if (e1.reverseOf) return 1;
       if (e2.reverseOf) return -1;
+      if (!e1.isoEpoch || !e2.isoEpoch) throw new RangeError('Invalid era data: missing ISO epoch');
       return e2.isoEpoch.year - e1.isoEpoch.year;
     }); // If there's a reversed era, then the one before it must be the era that's
     // being reversed.
@@ -5127,9 +5134,9 @@
       /*, fromLegacyDate = false */
       ) {
         // Because this is not a lunisolar calendar, it's safe to convert monthCode to a number
-        var _calendarDate4 = calendarDate,
-            month = _calendarDate4.month,
-            monthCode = _calendarDate4.monthCode;
+        var _calendarDate5 = calendarDate,
+            month = _calendarDate5.month,
+            monthCode = _calendarDate5.monthCode;
         if (month === undefined) calendarDate = _objectSpread2(_objectSpread2({}, calendarDate), {}, {
           month: monthCodeNumberPart(monthCode)
         });
@@ -5140,10 +5147,10 @@
       },
       estimateIsoDate: function estimateIsoDate(calendarDate) {
         calendarDate = this.adjustCalendarDate(calendarDate);
-        var _calendarDate5 = calendarDate,
-            year = _calendarDate5.year,
-            month = _calendarDate5.month,
-            day = _calendarDate5.day;
+        var _calendarDate6 = calendarDate,
+            year = _calendarDate6.year,
+            month = _calendarDate6.month,
+            day = _calendarDate6.day;
         var anchorEra = this.anchorEra;
         var isoYearEstimate = year + anchorEra.isoEpoch.year - (anchorEra.hasYearZero ? 0 : 1);
         return ES.RegulateISODate(isoYearEstimate, month, day, 'constrain');
@@ -5959,11 +5966,12 @@
   var zonesplit = new RegExp("(?:([zZ])|(?:".concat(offset.source, ")?)(?:\\[(").concat(timeZoneID.source, ")\\])?"));
   var calendar = new RegExp("\\[u-ca=(".concat(calendarID.source, ")\\]"));
   var zoneddatetime = new RegExp("^".concat(datesplit.source, "(?:(?:T|\\s+)").concat(timesplit.source, ")?").concat(zonesplit.source, "(?:").concat(calendar.source, ")?$"), 'i');
-  var time = new RegExp("^".concat(timesplit.source, "(?:").concat(zonesplit.source, ")?(?:").concat(calendar.source, ")?$"), 'i'); // The short forms of YearMonth and MonthDay are only for the ISO calendar.
+  var time = new RegExp("^T?".concat(timesplit.source, "(?:").concat(zonesplit.source, ")?(?:").concat(calendar.source, ")?$"), 'i'); // The short forms of YearMonth and MonthDay are only for the ISO calendar.
   // Non-ISO calendar YearMonth and MonthDay have to parse as a Temporal.PlainDate,
   // with the reference fields.
-  // YYYYMM forbidden by ISO 8601, but since it is not ambiguous with anything
-  // else we could parse in a YearMonth context, we allow it
+  // YYYYMM forbidden by ISO 8601 because ambiguous with YYMMDD, but allowed by
+  // RFC 3339 and we don't allow 2-digit years, so we allow it.
+  // Not ambiguous with HHMMSS because that requires a 'T' prefix
 
   var yearmonth = new RegExp("^(".concat(yearpart.source, ")-?(").concat(monthpart.source, ")$"));
   var monthday = new RegExp("^(?:--)?(".concat(monthpart.source, ")-?(").concat(daypart.source, ")$"));
@@ -6141,6 +6149,10 @@
       return "[u-ca=".concat(id, "]");
     },
     ParseISODateTime: function ParseISODateTime(isoString) {
+      var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+          _ref$timeRequired = _ref.timeRequired,
+          timeRequired = _ref$timeRequired === void 0 ? false : _ref$timeRequired;
+
       // ZDT is the superset of fields for every other Temporal type
       var match = zoneddatetime.exec(isoString);
       if (!match) throw new RangeError("invalid ISO 8601 string: ".concat(isoString));
@@ -6149,6 +6161,7 @@
       var year = ES.ToInteger(yearString);
       var month = ES.ToInteger(match[2] || match[4]);
       var day = ES.ToInteger(match[3] || match[5]);
+      if (timeRequired && match[6] === undefined) throw new RangeError("invalid ISO 8601 string: ".concat(isoString));
       var hour = ES.ToInteger(match[6]);
       var minute = ES.ToInteger(match[7] || match[10]);
       var second = ES.ToInteger(match[8] || match[11]);
@@ -6244,7 +6257,9 @@
       } else {
         var z;
 
-        var _ES$ParseISODateTime = ES.ParseISODateTime(isoString);
+        var _ES$ParseISODateTime = ES.ParseISODateTime(isoString, {
+          timeRequired: true
+        });
 
         hour = _ES$ParseISODateTime.hour;
         minute = _ES$ParseISODateTime.minute;
@@ -6255,17 +6270,51 @@
         calendar = _ES$ParseISODateTime.calendar;
         z = _ES$ParseISODateTime.z;
         if (z) throw new RangeError('Z designator not supported for PlainTime');
+      } // if it's a date-time string, OK
+
+
+      if (/[tT ][0-9][0-9]/.test(isoString)) {
+        return {
+          hour: hour,
+          minute: minute,
+          second: second,
+          millisecond: millisecond,
+          microsecond: microsecond,
+          nanosecond: nanosecond,
+          calendar: calendar
+        };
+      } // slow but non-grammar-dependent way to ensure that time-only strings that
+      // are also valid PlainMonthDay and PlainYearMonth throw. corresponds to
+      // assertion in spec text
+
+
+      try {
+        var _ES$ParseTemporalMont = ES.ParseTemporalMonthDayString(isoString),
+            month = _ES$ParseTemporalMont.month,
+            day = _ES$ParseTemporalMont.day;
+
+        ES.RejectISODate(1972, month, day);
+      } catch (_unused2) {
+        try {
+          var _ES$ParseTemporalYear = ES.ParseTemporalYearMonthString(isoString),
+              year = _ES$ParseTemporalYear.year,
+              _month = _ES$ParseTemporalYear.month;
+
+          ES.RejectISODate(year, _month, 1);
+        } catch (_unused3) {
+          return {
+            hour: hour,
+            minute: minute,
+            second: second,
+            millisecond: millisecond,
+            microsecond: microsecond,
+            nanosecond: nanosecond,
+            calendar: calendar
+          };
+        }
       }
 
-      return {
-        hour: hour,
-        minute: minute,
-        second: second,
-        millisecond: millisecond,
-        microsecond: microsecond,
-        nanosecond: nanosecond,
-        calendar: calendar
-      };
+      throw new RangeError("invalid ISO 8601 time-only string ".concat(isoString, "; may need a T prefix"));
     },
     ParseTemporalYearMonthString: function ParseTemporalYearMonthString(isoString) {
       var match = yearmonth.exec(isoString);
@@ -6337,7 +6386,7 @@
             ianaName: canonicalIdent
           };
         }
-      } catch (_unused2) {// fall through
+      } catch (_unused4) {// fall through
       }
 
       try {
@@ -6347,7 +6396,7 @@
         if (result.z || result.offset || result.ianaName) {
           return result;
         }
-      } catch (_unused3) {// fall through
+      } catch (_unused5) {// fall through
       }
 
       throw new RangeError("Invalid time zone: ".concat(stringIdent));
@@ -6821,9 +6870,9 @@
     ToLargestTemporalUnit: function ToLargestTemporalUnit(options, fallback) {
       var disallowedStrings = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
       var autoValue = arguments.length > 3 ? arguments[3] : undefined;
-      var singular = new Map(SINGULAR_PLURAL_UNITS.filter(function (_ref) {
-        var _ref2 = _slicedToArray(_ref, 2),
-            sing = _ref2[1];
+      var singular = new Map(SINGULAR_PLURAL_UNITS.filter(function (_ref2) {
+        var _ref3 = _slicedToArray(_ref2, 2),
+            sing = _ref3[1];
 
         return !disallowedStrings.includes(sing);
       }));
@@ -6850,9 +6899,9 @@
     },
     ToSmallestTemporalUnit: function ToSmallestTemporalUnit(options, fallback) {
       var disallowedStrings = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
-      var singular = new Map(SINGULAR_PLURAL_UNITS.filter(function (_ref3) {
-        var _ref4 = _slicedToArray(_ref3, 2),
-            sing = _ref4[1];
+      var singular = new Map(SINGULAR_PLURAL_UNITS.filter(function (_ref4) {
+        var _ref5 = _slicedToArray(_ref4, 2),
+            sing = _ref5[1];
 
         return !disallowedStrings.includes(sing);
       }));
@@ -7090,9 +7139,9 @@
       var entries = [['day', undefined], ['month', undefined], ['monthCode', undefined], ['year', undefined]]; // Add extra fields from the calendar at the end
 
       fieldNames.forEach(function (fieldName) {
-        if (!entries.some(function (_ref5) {
-          var _ref6 = _slicedToArray(_ref5, 1),
-              name = _ref6[0];
+        if (!entries.some(function (_ref6) {
+          var _ref7 = _slicedToArray(_ref6, 1),
+              name = _ref7[0];
 
           return name === fieldName;
         })) {
@@ -7105,9 +7154,9 @@
       var entries = [['day', undefined], ['hour', 0], ['microsecond', 0], ['millisecond', 0], ['minute', 0], ['month', undefined], ['monthCode', undefined], ['nanosecond', 0], ['second', 0], ['year', undefined]]; // Add extra fields from the calendar at the end
 
       fieldNames.forEach(function (fieldName) {
-        if (!entries.some(function (_ref7) {
-          var _ref8 = _slicedToArray(_ref7, 1),
-              name = _ref8[0];
+        if (!entries.some(function (_ref8) {
+          var _ref9 = _slicedToArray(_ref8, 1),
+              name = _ref9[0];
 
           return name === fieldName;
         })) {
@@ -7120,9 +7169,9 @@
       var entries = [['day', undefined], ['month', undefined], ['monthCode', undefined], ['year', undefined]]; // Add extra fields from the calendar at the end
 
       fieldNames.forEach(function (fieldName) {
-        if (!entries.some(function (_ref9) {
-          var _ref10 = _slicedToArray(_ref9, 1),
-              name = _ref10[0];
+        if (!entries.some(function (_ref10) {
+          var _ref11 = _slicedToArray(_ref10, 1),
+              name = _ref11[0];
 
           return name === fieldName;
         })) {
@@ -7138,9 +7187,9 @@
       var entries = [['month', undefined], ['monthCode', undefined], ['year', undefined]]; // Add extra fields from the calendar at the end
 
       fieldNames.forEach(function (fieldName) {
-        if (!entries.some(function (_ref11) {
-          var _ref12 = _slicedToArray(_ref11, 1),
-              name = _ref12[0];
+        if (!entries.some(function (_ref12) {
+          var _ref13 = _slicedToArray(_ref12, 1),
+              name = _ref13[0];
 
           return name === fieldName;
         })) {
@@ -7153,9 +7202,9 @@
       var entries = [['day', undefined], ['hour', 0], ['microsecond', 0], ['millisecond', 0], ['minute', 0], ['month', undefined], ['monthCode', undefined], ['nanosecond', 0], ['second', 0], ['year', undefined], ['offset', undefined], ['timeZone']]; // Add extra fields from the calendar at the end
 
       fieldNames.forEach(function (fieldName) {
-        if (!entries.some(function (_ref13) {
-          var _ref14 = _slicedToArray(_ref13, 1),
-              name = _ref14[0];
+        if (!entries.some(function (_ref14) {
+          var _ref15 = _slicedToArray(_ref14, 1),
+              name = _ref15[0];
 
           return name === fieldName;
         })) {
@@ -7370,11 +7419,11 @@
 
       ES.ToTemporalOverflow(options); // validate and ignore
 
-      var _ES$ParseTemporalMont = ES.ParseTemporalMonthDayString(ES.ToString(item)),
-          month = _ES$ParseTemporalMont.month,
-          day = _ES$ParseTemporalMont.day,
-          referenceISOYear = _ES$ParseTemporalMont.referenceISOYear,
-          calendar = _ES$ParseTemporalMont.calendar;
+      var _ES$ParseTemporalMont2 = ES.ParseTemporalMonthDayString(ES.ToString(item)),
+          month = _ES$ParseTemporalMont2.month,
+          day = _ES$ParseTemporalMont2.day,
+          referenceISOYear = _ES$ParseTemporalMont2.referenceISOYear,
+          calendar = _ES$ParseTemporalMont2.calendar;
 
       if (calendar === undefined) calendar = ES.GetISO8601Calendar();
       calendar = ES.ToTemporalCalendar(calendar);
@@ -7463,11 +7512,11 @@
 
       ES.ToTemporalOverflow(options); // validate and ignore
 
-      var _ES$ParseTemporalYear = ES.ParseTemporalYearMonthString(ES.ToString(item)),
-          year = _ES$ParseTemporalYear.year,
-          month = _ES$ParseTemporalYear.month,
-          referenceISODay = _ES$ParseTemporalYear.referenceISODay,
-          calendar = _ES$ParseTemporalYear.calendar;
+      var _ES$ParseTemporalYear2 = ES.ParseTemporalYearMonthString(ES.ToString(item)),
+          year = _ES$ParseTemporalYear2.year,
+          month = _ES$ParseTemporalYear2.month,
+          referenceISODay = _ES$ParseTemporalYear2.referenceISODay,
+          calendar = _ES$ParseTemporalYear2.calendar;
 
       if (calendar === undefined) calendar = ES.GetISO8601Calendar();
       calendar = ES.ToTemporalCalendar(calendar);
@@ -7907,7 +7956,7 @@
         var _ES$ParseISODateTime5 = ES.ParseISODateTime(identifier);
 
         calendar = _ES$ParseISODateTime5.calendar;
-      } catch (_unused4) {
+      } catch (_unused6) {
         throw new RangeError("Invalid calendar: ".concat(identifier));
       }
 
@@ -8273,7 +8322,7 @@
       }
 
       if (decimalPart) secondParts.unshift('.', decimalPart);
-      if (!seconds.isZero() || secondParts.length) secondParts.unshift(seconds.abs().toString());
+      if (!seconds.isZero() || secondParts.length || precision !== 'auto') secondParts.unshift(seconds.abs().toString());
       if (secondParts.length) timeParts.push("".concat(secondParts.join(''), "S"));
       if (timeParts.length) timeParts.unshift('T');
       if (!dateParts.length && !timeParts.length) return 'PT0S';
