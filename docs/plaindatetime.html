@@ -534,6 +534,7 @@ For the ISO 8601 calendar, this is always 12, but in other calendar systems it m
 <pre class="language-javascript"><code class="language-javascript">dt <span class="token operator">=</span> Temporal<span class="token punctuation">.</span>PlainDate<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token string">'1900-01-01T12:00'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 dt<span class="token punctuation">.</span>monthsInYear<span class="token punctuation">;</span> <span class="token comment">// => 12</span></code></pre><h3 id="inLeapYear"><a class="heading-link" href="#inLeapYear"></a>datetime.<strong>inLeapYear</strong> : boolean</h3><p>The <code>inLeapYear</code> read-only property tells whether the year that the date falls in is a leap year or not.
 Its value is <code>true</code> if the year is a leap year, and <code>false</code> if not.</p>
+<p>NOTE: A &quot;leap year&quot; is a year that contains more days than other years (for solar or lunar calendars) or more months than other years (for lunisolar calendars like Hebrew or Chinese). In the ISO 8601 calendar, a year is a leap year (and has exactly one extra day, February 29) if it is evenly divisible by 4 but not 100 or if it is evenly divisible by 400.</p>
 <p>Usage example:</p>
 <pre class="language-javascript"><code class="language-javascript"><span class="token comment">// Is this year a leap year?</span>
 dt <span class="token operator">=</span> Temporal<span class="token punctuation">.</span>Now<span class="token punctuation">.</span><span class="token function">plainDateTime</span><span class="token punctuation">(</span><span class="token string">'iso8601'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -596,7 +597,7 @@ dt<span class="token punctuation">.</span><span class="token function">add</span
 <code>Temporal.YearMonth</code> and <code>Temporal.MonthDay</code> are not valid input because they lack all date units.
 Both of those types have a <code>toPlainDate</code> method that can be used to obtain a <code>Temporal.PlainDate</code> which can in turn be used as input to <code>withPlainDate</code>.</p>
 <p>If <code>plainDate</code> contains a non-ISO 8601 calendar, then the result of <code>withPlainDate</code> will be the calendar of <code>plainDate</code>.
-However, if <code>datetime.calendar</code> is already a non-ISO 8601 calendar, then this method wil throw a <code>RangeError</code>.
+However, if <code>datetime.calendar</code> is already a non-ISO 8601 calendar, then this method will throw a <code>RangeError</code>.
 To resolve the error, first convert one of the instances to the same calendar or the ISO 8601 calendar, e.g. using <code>.withCalendar(&#39;iso8601&#39;)</code>.</p>
 <p>This method is similar to <code>with</code>, but with a few important differences:</p>
 <ul>
