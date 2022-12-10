@@ -180,6 +180,8 @@
 </li>
 <li><a href="#weekOfYear">weekOfYear</a>
 </li>
+<li><a href="#yearOfWeek">yearOfWeek</a>
+</li>
 <li><a href="#daysInWeek">daysInWeek</a>
 </li>
 <li><a href="#daysInMonth">daysInMonth</a>
@@ -404,10 +406,16 @@ console<span class="token punctuation">.</span><span class="token function">log<
 For the ISO 8601 calendar, this is normally a value between 1 and 52, but in a few cases it can be 53 as well.
 ISO week 1 is the week containing the first Thursday of the year.
 For more information on ISO week numbers, see for example the Wikipedia article on <a href="https://en.wikipedia.org/wiki/ISO_week_date">ISO week date</a>.</p>
+<p>When combining the week number with a year number, make sure to use <code>date.yearOfWeek</code> instead of <code>date.year</code>.
+This is because the first few days of a calendar year may be part of the last week of the previous year, and the last few days of a calendar year may be part of the first week of the new year, depending on which year the first Thursday falls in.</p>
 <p>Usage example:</p>
-<pre class="language-javascript"><code class="language-javascript">date <span class="token operator">=</span> Temporal<span class="token punctuation">.</span>PlainDate<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token string">'2006-08-24'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre class="language-javascript"><code class="language-javascript">date <span class="token operator">=</span> Temporal<span class="token punctuation">.</span>PlainDate<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token string">'2022-01-01'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token comment">// ISO week date</span>
-console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>date<span class="token punctuation">.</span>year<span class="token punctuation">,</span> date<span class="token punctuation">.</span>weekOfYear<span class="token punctuation">,</span> date<span class="token punctuation">.</span>dayOfWeek<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// => '2006 34 4'</span></code></pre><h3 id="daysInWeek"><a class="heading-link" href="#daysInWeek"></a>date.<strong>daysInWeek</strong> : number</h3><p>The <code>daysInWeek</code> read-only property gives the number of days in the week that the date falls in.
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>date<span class="token punctuation">.</span>yearOfWeek<span class="token punctuation">,</span> date<span class="token punctuation">.</span>weekOfYear<span class="token punctuation">,</span> date<span class="token punctuation">.</span>dayOfWeek<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// => '2021 52 6'</span></code></pre><h3 id="yearOfWeek"><a class="heading-link" href="#yearOfWeek"></a>date.<strong>yearOfWeek</strong> : number</h3><p>The <code>yearOfWeek</code> read-only property gives the ISO &quot;week calendar year&quot; of the date, which is the year number corresponding to the ISO week number.
+For the ISO 8601 calendar, this is normally the same as <code>date.year</code>, but in a few cases it may be the previous or following year.
+For more information on ISO week numbers, see for example the Wikipedia article on <a href="https://en.wikipedia.org/wiki/ISO_week_date">ISO week date</a>.</p>
+<p>See <code>weekOfYear</code> for a usage example.</p>
+<h3 id="daysInWeek"><a class="heading-link" href="#daysInWeek"></a>date.<strong>daysInWeek</strong> : number</h3><p>The <code>daysInWeek</code> read-only property gives the number of days in the week that the date falls in.
 For the ISO 8601 calendar, this is always 7, but in other calendar systems it may differ from week to week.</p>
 <p>Usage example:</p>
 <pre class="language-javascript"><code class="language-javascript">date <span class="token operator">=</span> Temporal<span class="token punctuation">.</span>PlainDate<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token string">'2006-08-24'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -555,7 +563,7 @@ The default is <code>&#39;day&#39;</code>, i.e., no rounding.</li>
 <li><code>roundingIncrement</code> (number): The granularity to round to, of the unit given by <code>smallestUnit</code>.
 The default is 1.</li>
 <li><code>roundingMode</code> (string): How to handle the remainder, if rounding.
-Valid values are <code>&#39;halfExpand&#39;</code>, <code>&#39;ceil&#39;</code>, <code>&#39;trunc&#39;</code>, and <code>&#39;floor&#39;</code>.
+Valid values are <code>&#39;ceil&#39;</code>, <code>&#39;floor&#39;</code>, <code>&#39;expand&#39;</code>, <code>&#39;trunc&#39;</code>, <code>&#39;halfCeil&#39;</code>, <code>&#39;halfFloor&#39;</code>, <code>&#39;halfExpand&#39;</code>, <code>&#39;halfTrunc&#39;</code>, and <code>&#39;halfEven&#39;</code>.
 The default is <code>&#39;trunc&#39;</code>, which truncates any remainder towards zero.</li>
 </ul>
 </li>
@@ -619,7 +627,7 @@ The default is <code>&#39;day&#39;</code>, i.e., no rounding.</li>
 <li><code>roundingIncrement</code> (number): The granularity to round to, of the unit given by <code>smallestUnit</code>.
 The default is 1.</li>
 <li><code>roundingMode</code> (string): How to handle the remainder, if rounding.
-Valid values are <code>&#39;halfExpand&#39;</code>, <code>&#39;ceil&#39;</code>, <code>&#39;trunc&#39;</code>, and <code>&#39;floor&#39;</code>.
+Valid values are <code>&#39;ceil&#39;</code>, <code>&#39;floor&#39;</code>, <code>&#39;expand&#39;</code>, <code>&#39;trunc&#39;</code>, <code>&#39;halfCeil&#39;</code>, <code>&#39;halfFloor&#39;</code>, <code>&#39;halfExpand&#39;</code>, <code>&#39;halfTrunc&#39;</code>, and <code>&#39;halfEven&#39;</code>.
 The default is <code>&#39;trunc&#39;</code>, which truncates any remainder towards zero.</li>
 </ul>
 </li>
@@ -652,7 +660,7 @@ date<span class="token punctuation">.</span><span class="token function">equals<
 <li><code>options</code> (optional object): An object with properties influencing the formatting.
 The following options are recognized:<ul>
 <li><code>calendarName</code> (string): Whether to show the calendar annotation in the return value.
-Valid values are <code>&#39;auto&#39;</code>, <code>&#39;always&#39;</code>, and <code>&#39;never&#39;</code>.
+Valid values are <code>&#39;auto&#39;</code>, <code>&#39;always&#39;</code>, <code>&#39;never&#39;</code>, and <code>&#39;critical&#39;</code>.
 The default is <code>&#39;auto&#39;</code>.</li>
 </ul>
 </li>
@@ -662,6 +670,7 @@ The default is <code>&#39;auto&#39;</code>.</li>
 The string can be passed to <code>Temporal.PlainDate.from()</code> to create a new <code>Temporal.PlainDate</code> object.</p>
 <p>Normally, a calendar annotation is shown when <code>date</code>&#39;s calendar is not the ISO 8601 calendar.
 By setting the <code>calendarName</code> option to <code>&#39;always&#39;</code> or <code>&#39;never&#39;</code> this can be overridden to always or never show the annotation, respectively.
+Normally not necessary, a value of <code>&#39;critical&#39;</code> is equivalent to <code>&#39;always&#39;</code> but the annotation will contain an additional <code>!</code> for certain interoperation use cases.
 For more information on the calendar annotation, see <a href="./strings.html#calendar-systems">the <code>Temporal</code> string formats documentation</a>.</p>
 <p>Example usage:</p>
 <pre class="language-js"><code class="language-js">date <span class="token operator">=</span> Temporal<span class="token punctuation">.</span>PlainDate<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token string">'2006-08-24'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
