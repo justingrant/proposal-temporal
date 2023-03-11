@@ -97,33 +97,6 @@
     }
     return obj;
   }
-  function _objectWithoutPropertiesLoose(source, excluded) {
-    if (source == null) return {};
-    var target = {};
-    var sourceKeys = Object.keys(source);
-    var key, i;
-    for (i = 0; i < sourceKeys.length; i++) {
-      key = sourceKeys[i];
-      if (excluded.indexOf(key) >= 0) continue;
-      target[key] = source[key];
-    }
-    return target;
-  }
-  function _objectWithoutProperties(source, excluded) {
-    if (source == null) return {};
-    var target = _objectWithoutPropertiesLoose(source, excluded);
-    var key, i;
-    if (Object.getOwnPropertySymbols) {
-      var sourceSymbolKeys = Object.getOwnPropertySymbols(source);
-      for (i = 0; i < sourceSymbolKeys.length; i++) {
-        key = sourceSymbolKeys[i];
-        if (excluded.indexOf(key) >= 0) continue;
-        if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;
-        target[key] = source[key];
-      }
-    }
-    return target;
-  }
   function _slicedToArray(arr, i) {
     return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
   }
@@ -7594,10 +7567,11 @@
         var excluded = some$1(excludedKeys, function (e) {
           return SameValue$1(e, nextKey) === true;
         });
+        if (excluded) return;
         var enumerable = $isEnumerable(from, nextKey) ||
         // this is to handle string keys being non-enumerable in older engines
         typeof source === 'string' && nextKey >= 0 && IsIntegralNumber$1(ToNumber$2(nextKey));
-        if (excluded === false && enumerable) {
+        if (enumerable) {
           var propValue = Get$1(from, nextKey);
           if (excludedValues !== undefined) {
             forEach$1(excludedValues, function (e) {
@@ -8512,9 +8486,6 @@
       }
       if (requiredFields === 'partial' && !any) {
         throw new TypeError(emptySourceErrorMessage);
-      }
-      if (result['era'] === undefined !== (result['eraYear'] === undefined)) {
-        throw new RangeError("properties 'era' and 'eraYear' must be provided together");
       }
       return result;
     },
@@ -13003,7 +12974,6 @@
     return typeof BigInt === 'undefined' ? wrapper : wrapper.value;
   }
 
-  var _excluded = ["month", "monthCode", "year", "era", "eraYear"];
   var ArrayIncludes = Array.prototype.includes;
   var ArrayPrototypePush$3 = Array.prototype.push;
   var IntlDateTimeFormat = globalThis.Intl.DateTimeFormat;
@@ -13013,6 +12983,10 @@
   var ObjectAssign$1 = Object.assign;
   var ObjectCreate$6 = Object.create;
   var ObjectEntries = Object.entries;
+  var OriginalSet = Set;
+  var ReflectOwnKeys = Reflect.ownKeys;
+  var SetPrototypeAdd$2 = Set.prototype.add;
+  var SetPrototypeValues = Set.prototype.values;
   var impl = {};
   var Calendar = /*#__PURE__*/function () {
     function Calendar(id) {
@@ -13095,7 +13069,32 @@
       key: "mergeFields",
       value: function mergeFields(fields, additionalFields) {
         if (!ES.IsTemporalCalendar(this)) throw new TypeError('invalid receiver');
-        return impl[GetSlot(this, CALENDAR_ID)].mergeFields(fields, additionalFields);
+        fields = ES.ToObject(fields);
+        var fieldsCopy = ObjectCreate$6(null);
+        ES.CopyDataProperties(fieldsCopy, fields, [], [undefined]);
+        additionalFields = ES.ToObject(additionalFields);
+        var additionalFieldsCopy = ObjectCreate$6(null);
+        ES.CopyDataProperties(additionalFieldsCopy, additionalFields, [], [undefined]);
+        var additionalKeys = ReflectOwnKeys(additionalFieldsCopy);
+        var overriddenKeys = impl[GetSlot(this, CALENDAR_ID)].fieldKeysToIgnore(additionalKeys);
+        var merged = ObjectCreate$6(null);
+        var fieldsKeys = ReflectOwnKeys(fieldsCopy);
+        var _iterator2 = _createForOfIteratorHelper(fieldsKeys),
+          _step2;
+        try {
+          for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+            var key = _step2.value;
+            var propValue = undefined;
+            if (ES.Call(ArrayIncludes, overriddenKeys, [key])) propValue = additionalFieldsCopy[key];else propValue = fieldsCopy[key];
+            if (propValue !== undefined) merged[key] = propValue;
+          }
+        } catch (err) {
+          _iterator2.e(err);
+        } finally {
+          _iterator2.f();
+        }
+        ES.CopyDataProperties(merged, additionalFieldsCopy, []);
+        return merged;
       }
     }, {
       key: "dateAdd",
@@ -13304,19 +13303,18 @@
     fields: function fields(_fields5) {
       return _fields5;
     },
-    mergeFields: function mergeFields(fields, additionalFields) {
-      fields = ES.ToObject(fields);
-      additionalFields = ES.ToObject(additionalFields);
-      var merged = {};
-      ES.CopyDataProperties(merged, fields, [], [undefined]);
-      var additionalFieldsCopy = ObjectCreate$6(null);
-      ES.CopyDataProperties(additionalFieldsCopy, additionalFields, [], [undefined]);
-      if ('month' in additionalFieldsCopy || 'monthCode' in additionalFieldsCopy) {
-        delete merged.month;
-        delete merged.monthCode;
+    fieldKeysToIgnore: function fieldKeysToIgnore(keys) {
+      var result = new OriginalSet();
+      for (var ix = 0; ix < keys.length; ix++) {
+        var key = keys[ix];
+        ES.Call(SetPrototypeAdd$2, result, [key]);
+        if (key === 'month') {
+          ES.Call(SetPrototypeAdd$2, result, ['monthCode']);
+        } else if (key === 'monthCode') {
+          ES.Call(SetPrototypeAdd$2, result, ['month']);
+        }
       }
-      ES.CopyDataProperties(merged, additionalFieldsCopy, []);
-      return merged;
+      return _toConsumableArray(ES.Call(SetPrototypeValues, result, []));
     },
     dateAdd: function dateAdd(date, years, months, weeks, days, overflow, calendar) {
       var year = GetSlot(date, ISO_YEAR);
@@ -13457,19 +13455,19 @@
       this.misses = 0;
       if (cacheToClone !== undefined) {
         var i = 0;
-        var _iterator2 = _createForOfIteratorHelper(cacheToClone.map.entries()),
-          _step2;
+        var _iterator3 = _createForOfIteratorHelper(cacheToClone.map.entries()),
+          _step3;
         try {
-          for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
             var _this$map;
-            var entry = _step2.value;
+            var entry = _step3.value;
             if (++i > OneObjectCache.MAX_CACHE_ENTRIES) break;
             (_this$map = this.map).set.apply(_this$map, _toConsumableArray(entry));
           }
         } catch (err) {
-          _iterator2.e(err);
+          _iterator3.e(err);
         } finally {
-          _iterator2.f();
+          _iterator3.f();
         }
       }
     }
@@ -13598,13 +13596,13 @@
         })));
       }
       var result = {};
-      var _iterator3 = _createForOfIteratorHelper(parts),
-        _step3;
+      var _iterator4 = _createForOfIteratorHelper(parts),
+        _step4;
       try {
-        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-          var _step3$value = _step3.value,
-            type = _step3$value.type,
-            value = _step3$value.value;
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+          var _step4$value = _step4.value,
+            type = _step4$value.type,
+            value = _step4$value.value;
           if (type === 'year') result.eraYear = +value;
           if (type === 'relatedYear') result.eraYear = +value;
           if (type === 'month') {
@@ -13646,9 +13644,9 @@
           }
         }
       } catch (err) {
-        _iterator3.e(err);
+        _iterator4.e(err);
       } finally {
-        _iterator3.f();
+        _iterator4.f();
       }
       if (result.eraYear === undefined) {
         // Node 12 has outdated ICU data that lacks the `relatedYear` field in the
@@ -13710,6 +13708,11 @@
         }
         if (eraYear !== undefined && year !== undefined && eraYear !== year) {
           throw new RangeError("eraYear ".concat(eraYear, " does not match year ").concat(year));
+        }
+      }
+      if (this.hasEra) {
+        if (calendarDate['era'] === undefined !== (calendarDate['eraYear'] === undefined)) {
+          throw new RangeError("properties 'era' and 'eraYear' must be provided together");
         }
       }
     },
@@ -13861,7 +13864,6 @@
       // If the initial guess is not in the same month, then then bisect the
       // distance to the target, starting with 8 days per step.
       var increment = 8;
-      var maybeConstrained = false;
       while (sign) {
         isoEstimate = this.addDaysIso(isoEstimate, sign * increment);
         var oldRoundtripEstimate = roundtripEstimate;
@@ -13874,11 +13876,6 @@
             isoEstimate = calculateSameMonthResult(diff.days);
             // Signal the loop condition that there's a match.
             sign = 0;
-            // If the calendar day is larger than the minimal length for this
-            // month, then it might be larger than the actual length of the month.
-            // So we won't cache it as the correct calendar date for this ISO
-            // date.
-            maybeConstrained = date.day > this.minimumMonthLength(date);
           } else if (oldSign && sign !== oldSign) {
             if (increment > 1) {
               // If the estimate overshot the target, try again with a smaller increment
@@ -13896,7 +13893,6 @@
                 var order = this.compareCalendarDates(roundtripEstimate, oldRoundtripEstimate);
                 // If current value is larger, then back up to the previous value.
                 if (order > 0) isoEstimate = this.addDaysIso(isoEstimate, -1);
-                maybeConstrained = true;
                 sign = 0;
               }
             }
@@ -13907,17 +13903,6 @@
       if (keyOriginal) cache.set(keyOriginal, isoEstimate);
       if (date.year === undefined || date.month === undefined || date.day === undefined || date.monthCode === undefined || this.hasEra && (date.era === undefined || date.eraYear === undefined)) {
         throw new RangeError('Unexpected missing property');
-      }
-      if (!maybeConstrained) {
-        // Also cache the reverse mapping
-        var keyReverse = JSON.stringify({
-          func: 'isoToCalendarDate',
-          isoYear: isoEstimate.year,
-          isoMonth: isoEstimate.month,
-          isoDay: isoEstimate.day,
-          id: this.id
-        });
-        cache.set(keyReverse, date);
       }
       return isoEstimate;
     },
@@ -14153,40 +14138,34 @@
     // All built-in calendars except Chinese/Dangi and Hebrew use an era
     hasEra: true,
     monthDayFromFields: function monthDayFromFields(fields, overflow, cache) {
-      var year = fields.year,
-        month = fields.month,
-        monthCode = fields.monthCode,
-        day = fields.day,
-        era = fields.era,
-        eraYear = fields.eraYear;
+      var monthCode = fields.monthCode,
+        day = fields.day;
       if (monthCode === undefined) {
+        var year = fields.year,
+          era = fields.era,
+          eraYear = fields.eraYear;
         if (year === undefined && (era === undefined || eraYear === undefined)) {
-          throw new TypeError('`monthCode`, `year`, or `era` and `eraYear` is required');
+          throw new TypeError('when `monthCode` is omitted, `year` (or `era` and `eraYear`) and `month` are required');
         }
-        var _this$adjustCalendarD = this.adjustCalendarDate({
-          year: year,
-          month: month,
-          monthCode: monthCode,
-          day: day,
-          era: era,
-          eraYear: eraYear
-        }, cache, overflow);
-        monthCode = _this$adjustCalendarD.monthCode;
-        year = _this$adjustCalendarD.year;
+        // Apply overflow behaviour to year/month/day, to get correct monthCode/day
+        var _this$isoToCalendarDa = this.isoToCalendarDate(this.calendarToIsoDate(fields, overflow, cache), cache);
+        monthCode = _this$isoToCalendarDa.monthCode;
+        day = _this$isoToCalendarDa.day;
       }
       var isoYear, isoMonth, isoDay;
       var closestCalendar, closestIso;
-      // Look backwards starting from the calendar year of 1972-01-01 up to 100
-      // calendar years to find a year that has this month and day. Normal months
-      // and days will match immediately, but for leap days and leap months we may
-      // have to look for a while.
+      // Look backwards starting from one of the calendar years spanning ISO year
+      // 1972, up to 100 calendar years prior, to find a year that has this month
+      // and day. Normal months and days will match immediately, but for leap days
+      // and leap months we may have to look for a while.
       var startDateIso = {
         year: 1972,
-        month: 1,
-        day: 1
+        month: 12,
+        day: 31
       };
-      var _this$isoToCalendarDa = this.isoToCalendarDate(startDateIso, cache),
-        calendarYear = _this$isoToCalendarDa.year;
+      var calendarOfStartDateIso = this.isoToCalendarDate(startDateIso, cache);
+      // Note: relies on lexicographical ordering of monthCodes
+      var calendarYear = calendarOfStartDateIso.monthCode > monthCode || calendarOfStartDateIso.monthCode === monthCode && calendarOfStartDateIso.day >= day ? calendarOfStartDateIso.year : calendarOfStartDateIso.year - 1;
       for (var i = 0; i < 100; i++) {
         var testCalendarDate = this.adjustCalendarDate({
           day: day,
@@ -14409,10 +14388,9 @@
               if (overflow === 'reject') {
                 throw new RangeError("Hebrew monthCode M05L is invalid in year ".concat(year, " which is not a leap year"));
               } else {
-                // constrain to last day of previous month (Av)
-                month = 5;
-                day = 30;
-                monthCode = 'M05';
+                // constrain to same day of next month (Adar)
+                month = 6;
+                monthCode = 'M06';
               }
             }
           } else {
@@ -14495,8 +14473,8 @@
     DAYS_PER_ISO_YEAR: 365.2425,
     constantEra: 'ah',
     estimateIsoDate: function estimateIsoDate(calendarDate) {
-      var _this$adjustCalendarD2 = this.adjustCalendarDate(calendarDate),
-        year = _this$adjustCalendarD2.year;
+      var _this$adjustCalendarD = this.adjustCalendarDate(calendarDate),
+        year = _this$adjustCalendarD.year;
       return {
         year: MathFloor(year * this.DAYS_PER_ISLAMIC_YEAR / this.DAYS_PER_ISO_YEAR) + 622,
         month: 1,
@@ -14527,8 +14505,8 @@
     },
     constantEra: 'ap',
     estimateIsoDate: function estimateIsoDate(calendarDate) {
-      var _this$adjustCalendarD3 = this.adjustCalendarDate(calendarDate),
-        year = _this$adjustCalendarD3.year;
+      var _this$adjustCalendarD2 = this.adjustCalendarDate(calendarDate),
+        year = _this$adjustCalendarD2.year;
       return {
         year: year + 621,
         month: 1,
@@ -15168,6 +15146,7 @@
     // The last 3 Japanese eras confusingly return only one character in the
     // default "short" era, so need to use the long format.
     eraLength: 'long',
+    erasBeginMidYear: true,
     calendarIsVulnerableToJulianBug: true,
     reviseIntlEra: function reviseIntlEra(calendarDate, isoDate) {
       var era = calendarDate.era,
@@ -15351,15 +15330,14 @@
           if (numberPart[0] === '0') numberPart = numberPart.slice(1);
           var _monthInfo = _months[numberPart];
           month = _monthInfo && _monthInfo.monthIndex;
-          // If this leap month isn't present in this year, constrain down to the last day of the previous month.
-          if (month === undefined && monthCode.endsWith('L') && !ES.Call(ArrayIncludes, ['M01L', 'M12L', 'M13L'], [monthCode]) && overflow === 'constrain') {
+          // If this leap month isn't present in this year, constrain to the same
+          // day of the previous month.
+          if (month === undefined && monthCode.endsWith('L') && monthCode != 'M13L' && overflow === 'constrain') {
             var withoutML = monthCode.slice(1, -1);
             if (withoutML[0] === '0') withoutML = withoutML.slice(1);
             _monthInfo = _months[withoutML];
             if (_monthInfo) {
-              var _monthInfo2 = _monthInfo;
-              day = _monthInfo2.daysInMonth;
-              month = _monthInfo2.monthIndex;
+              month = _monthInfo.monthIndex;
               monthCode = buildMonthCode(withoutML);
             }
           }
@@ -15391,9 +15369,9 @@
           var _months3 = this.getMonthList(year, cache);
           var _numberPart = monthCode.replace('L', 'bis').slice(1);
           if (_numberPart[0] === '0') _numberPart = _numberPart.slice(1);
-          var _monthInfo3 = _months3[_numberPart];
-          if (!_monthInfo3) throw new RangeError("Unmatched monthCode ".concat(monthCode, " in Chinese year ").concat(year));
-          if (month !== _monthInfo3.monthIndex) {
+          var _monthInfo2 = _months3[_numberPart];
+          if (!_monthInfo2) throw new RangeError("Unmatched monthCode ".concat(monthCode, " in Chinese year ").concat(year));
+          if (month !== _monthInfo2.monthIndex) {
             throw new RangeError("monthCode ".concat(monthCode, " doesn't correspond to month ").concat(month, " in Chinese year ").concat(year));
           }
         }
@@ -15470,38 +15448,48 @@
       if (ES.Call(ArrayIncludes, _fields6, ['year'])) _fields6 = [].concat(_toConsumableArray(_fields6), ['era', 'eraYear']);
       return _fields6;
     },
-    mergeFields: function mergeFields(fields, additionalFields) {
-      fields = ES.ToObject(fields);
-      additionalFields = ES.ToObject(additionalFields);
-      var fieldsCopy = {};
-      ES.CopyDataProperties(fieldsCopy, fields, [], [undefined]);
-      var additionalFieldsCopy = {};
-      ES.CopyDataProperties(additionalFieldsCopy, additionalFields, [], [undefined]);
-
-      // era and eraYear are intentionally unused
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      var month = fieldsCopy.month,
-        monthCode = fieldsCopy.monthCode,
-        year = fieldsCopy.year;
-        fieldsCopy.era;
-        fieldsCopy.eraYear;
-        var original = _objectWithoutProperties(fieldsCopy, _excluded);
-      var newMonth = additionalFieldsCopy.month,
-        newMonthCode = additionalFieldsCopy.monthCode,
-        newYear = additionalFieldsCopy.year,
-        newEra = additionalFieldsCopy.era,
-        newEraYear = additionalFieldsCopy.eraYear;
-      if (newMonth === undefined && newMonthCode === undefined) {
-        if (month !== undefined) original.month = month;
-        if (monthCode !== undefined) original.monthCode = monthCode;
+    fieldKeysToIgnore: function fieldKeysToIgnore(keys) {
+      var result = new OriginalSet();
+      for (var ix = 0; ix < keys.length; ix++) {
+        var key = keys[ix];
+        ES.Call(SetPrototypeAdd$2, result, [key]);
+        switch (key) {
+          case 'era':
+            ES.Call(SetPrototypeAdd$2, result, ['eraYear']);
+            ES.Call(SetPrototypeAdd$2, result, ['year']);
+            break;
+          case 'eraYear':
+            ES.Call(SetPrototypeAdd$2, result, ['era']);
+            ES.Call(SetPrototypeAdd$2, result, ['year']);
+            break;
+          case 'year':
+            ES.Call(SetPrototypeAdd$2, result, ['era']);
+            ES.Call(SetPrototypeAdd$2, result, ['eraYear']);
+            break;
+          case 'month':
+            ES.Call(SetPrototypeAdd$2, result, ['monthCode']);
+            // See https://github.com/tc39/proposal-temporal/issues/1784
+            if (this.helper.erasBeginMidYear) {
+              ES.Call(SetPrototypeAdd$2, result, ['era']);
+              ES.Call(SetPrototypeAdd$2, result, ['eraYear']);
+            }
+            break;
+          case 'monthCode':
+            ES.Call(SetPrototypeAdd$2, result, ['month']);
+            if (this.helper.erasBeginMidYear) {
+              ES.Call(SetPrototypeAdd$2, result, ['era']);
+              ES.Call(SetPrototypeAdd$2, result, ['eraYear']);
+            }
+            break;
+          case 'day':
+            if (this.helper.erasBeginMidYear) {
+              ES.Call(SetPrototypeAdd$2, result, ['era']);
+              ES.Call(SetPrototypeAdd$2, result, ['eraYear']);
+            }
+            break;
+        }
       }
-      if (newYear === undefined && newEra === undefined && newEraYear === undefined) {
-        // Only `year` is needed. We don't set era and eraYear because it's
-        // possible to create a conflict for eras that start or end mid-year. See
-        // https://github.com/tc39/proposal-temporal/issues/1784.
-        original.year = year;
-      }
-      return _objectSpread2(_objectSpread2({}, original), additionalFieldsCopy);
+      return _toConsumableArray(ES.Call(SetPrototypeValues, result, []));
     },
     dateAdd: function dateAdd(date, years, months, weeks, days, overflow, calendar) {
       var cache = OneObjectCache.getCacheForObject(date);
