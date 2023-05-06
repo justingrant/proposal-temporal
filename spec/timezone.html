@@ -5,96 +5,153 @@
   <h1>Temporal.TimeZone Objects</h1>
   <p>A Temporal.TimeZone object is an Object referencing a time zone.</p>
 
-  <emu-clause id="sec-time-zone-names">
-    <h1>Time Zone Names</h1>
+  <emu-clause id="sec-time-zone-support">
+    <h1>Time Zone Support</h1>
 
-    <p>
-      An ECMAScript implementation must support a number of built-in time zones.
-      At a minimum, implementations must support a built-in time zone named *"UTC"*.
-      If the return value _tz_ of DefaultTimeZone is different from *"UTC"*, and IsTimeZoneOffsetString(_tz_) is *false*, then implementations must support that time zone as a built-in time zone as well.
-      In addition, implementations may support any number of other built-in time zones.
-    </p>
-    <p>
-      Built-in time zones may be <dfn variants="named time zone">named time zones</dfn>, represented by Strings for which IsAvailableTimeZoneName returns *true*.
-      They may also be <dfn variants="offset time zone">offset time zones</dfn>, represented by Strings for which IsTimeZoneOffsetString returns *true*.
-    </p>
-    <p>
-      <emu-xref href="#sec-temporal-timezone-constructor">The `Temporal.TimeZone` constructor</emu-xref>, when called with the name of a built-in time zone as the argument, will return a valid `Temporal.TimeZone` object.
-      When called with any other string, it will throw a *RangeError* exception.
-    </p>
-    <p>
-      An ECMAScript implementation that includes the ECMA-402 Internationalization API must define built-in named time zones in correspondence with the Zone and Link names of the IANA Time Zone Database (and <strong>only</strong> such names) and use best available current and historical information about their offsets from UTC and their daylight saving time rules in calculations as specified in the ECMA-402 specification.
-      Other implementations are encouraged to do the same.
-    </p>
+    <emu-clause id="sec-time-zone-identifiers">
+      <h1>Time Zone Identifiers</h1>
 
-    <emu-clause id="sec-isavailabletimezonename" type="abstract operation">
-      <h1>
-        IsAvailableTimeZoneName (
-          _timeZone_: a String,
-        ): a Boolean
-      </h1>
+      <p>
+        Time zones in ECMAScript are described using <dfn variants="time zone identifier">time zone identifiers</dfn>, which must be Strings composed entirely of characters from the Unicode Basic Latin block.
+        Time zone identifiers are case-insensitive and so are compared using ASCII case-insensitive comparisons.
+        Built-in time zones may be <dfn variants="named time zone">named time zones</dfn>, identified by Strings for which GetAvailableNamedTimeZoneIdentifier does not return ~empty~.
+        They may also be <dfn variants="offset time zone">offset time zones</dfn>, identified by Strings for which IsTimeZoneOffsetString returns *true*.
+      </p>
+      <p>
+        <emu-xref href="#sec-temporal-timezone-constructor">The `Temporal.TimeZone` constructor</emu-xref>, when called with the identifier of a built-in time zone as the argument, will return a valid `Temporal.TimeZone` object.
+        When called with any other string, it will throw a *RangeError* exception.
+      </p>
+      <p>
+        A <dfn variants="primary time zone identifiers">primary time zone identifier</dfn> represents the preferred identifier of a named time zone, while a <dfn variants="non-primary time zone identifiers">non-primary time zone identifier</dfn> is an alternate identifier for the same named time zone.
+        The set of built-in, named time zone identifiers (both primary and non-primary) that are supported by an ECMAScript implementation are called <dfn variants="available named time zone identifier">available named time zone identifiers</dfn>.
+      </p>
+      <p>
+        At a minimum, ECMAScript implementations must support a built-in time zone with the identifier *"UTC"*, which must be primary.
+        If the return value _tz_ of SystemTimeZoneIdentifier is different from *"UTC"*, and IsTimeZoneOffsetString(_tz_) is *false*, then implementations must also support _tz_ as an available named time zone identifier, and it must be primary as well.
+        In addition, implementations may support any number of other built-in time zones.
+      </p>
+      <p>
+        Implementations that follow the requirements for time zones as described in the ECMA-402 Internationalization API specification are called <dfn>time zone aware</dfn>.
+        Time zone aware implementations must define built-in named time zones corresponding to the Zone and Link names of the IANA Time Zone Database (and <b>only</b> such names) and use best available current and historical information about their offsets from UTC and their daylight saving time rules in calculations as specified in the ECMA-402 specification.
+        An ECMAScript implementation that includes the ECMA-402 Internationalization API <b>must</b> be time zone aware.
+        However, it is recommended that all ECMAScript implementations be time zone aware, including those that do not implement the ECMA-402 Internationalization API.
+        Furthermore, even non-time zone aware implementations that do not support the entire IANA Time Zone Database are still recommended to use IANA Time Zone Database names as identifiers to represent time zones.
+      </p>
+    </emu-clause>
+
+    <emu-clause id="sec-time-zone-identifier-record">
+      <h1>Time Zone Identifier Record</h1>
+      <p>A <dfn variants="Time Zone Identifier Records">Time Zone Identifier Record</dfn> is a Record used to describe an available named time zone identifier, as well as the primary time zone identifier corresponding to it.</p>
+      <p>Time Zone Identifier Records have the fields listed in <emu-xref href="#table-time-zone-identifier-record-fields"></emu-xref>.</p>
+      <emu-table id="table-time-zone-identifier-record-fields" caption="Time Zone Identifier Record Fields">
+        <table>
+          <tr>
+            <th>Field Name</th>
+            <th>Value</th>
+            <th>Meaning</th>
+          </tr>
+          <tr>
+            <td>[[Identifier]]</td>
+            <td>a String</td>
+            <td>An available named time zone identifier that is supported by the implementation.</td>
+          </tr>
+          <tr>
+            <td>[[PrimaryIdentifier]]</td>
+            <td>a String</td>
+            <td>The primary time zone identifier that [[Identifier]] resolves to.</td>
+          </tr>
+        </table>
+      </emu-table>
+      <emu-note>
+        <p>If [[Identifier]] is a primary time zone identifier, then [[Identifier]] will be [[PrimaryIdentifier]].</p>
+      </emu-note>
+      <emu-note>
+        <p>It is required for time zone aware implementations (and recommended for all others) to use Zone and Link names from the IANA Time Zone Database <a href="https://www.iana.org/time-zones/">https://www.iana.org/time-zones/</a> for both [[Identifier]] and [[PrimaryIdentifier]].</p>
+      </emu-note>
+    </emu-clause>
+
+    <emu-clause id="sec-availablenamedtimezoneidentifiers" type="implementation-defined abstract operation">
+      <h1>AvailableNamedTimeZoneIdentifiers ( ): a List of Time Zone Identifier Records</h1>
       <dl class="header">
         <dt>description</dt>
-        <dd>The returned value is *true* if _timeZone_ is an ASCII-case-insensitive match for a supported time zone name, and *false* otherwise.</dd>
+        <dd>
+          Its result describes all available named time zone identifiers in this implementation, as well as the primary time zone identifier corresponding to each available named time zone identifier.
+          The List is sorted by [[Identifier]] of each Time Zone Identifier Record.
+        </dd>
       </dl>
       <p>
-        Once IsAvailableTimeZoneName(_timeZone_) has returned *true*, for the lifetime of the surrounding agent, IsAvailableTimeZoneName(_variant_) must return *true* if _variant_ is an ASCII-case-insensitive match for either _timeZone_ or CanonicalizeTimeZoneName(_timeZone_).
+        Time zone aware implementations, including all implementations that implement the ECMA-402 Internationalization API, must implement the AvailableNamedTimeZoneIdentifiers abstract operation as specified in the ECMA-402 specification.
+        For implementations that are not time zone aware, the following specification is used.
       </p>
-
       <emu-alg>
-        1. Let _timeZones_ be AvailableTimeZones().
-        1. For each String _candidate_ in _timeZones_, do
-          1. If _timeZone_ is an ASCII-case-insensitive match for _candidate_, return *true*.
-        1. Return *false*.
+        1. If the implementation does not include local political rules for any time zones, then
+          1. Return « the Time Zone Identifier Record { [[Identifier]]: *"UTC"*, [[PrimaryIdentifier]]: *"UTC"* } ».
+        1. Let _identifiers_ be the List of String values representing time zones supported by the implementation.
+        1. Assert: No element of _identifiers_ is an ASCII-case-insensitive match for any other element.
+        1. Set _identifiers_ to SortStringListByCodeUnit(_identifiers_).
+        1. Let _result_ be a new empty List.
+        1. For each element _identifier_ of _identifiers_, do
+          1. Let _primary_ be _identifier_.
+          1. If _identifier_ is a non-primary time zone identifier in this implementation and _identifier_ is not *"UTC"*, then
+            1. Set _primary_ to the name of the primary time zone identifier that _identifier_ resolves to in this implementation.
+            1. NOTE: If _identifier_ resolves to another non-primary time zone identifier, then the implementation must continue resolution of the entire chain until its terminal primary time zone identifier.
+          1. Let _record_ be the Time Zone Identifier Record { [[Identifier]]: _identifier_, [[PrimaryIdentifier]]: _primary_ }.
+          1. Append _record_ to the end of _result_.
+        1. Assert: One element of _result_ is the Time Zone Identifier Record { [[Identifier]]: *"UTC"*, [[PrimaryIdentifier]]: *"UTC"* }.
+        1. Return _result_.
       </emu-alg>
     </emu-clause>
 
-    <emu-clause id="sec-canonicalizetimezonename" type="abstract operation">
+    <emu-clause id="sec-getavailabletimezoneidentifier" type="abstract operation">
       <h1>
-        CanonicalizeTimeZoneName (
-          _timeZone_: a String that is a valid time zone name as verified by IsAvailableTimeZoneName,
-        )
+        GetAvailableNamedTimeZoneIdentifier (
+          _timeZoneIdentifier_: a String,
+        ): either a Time Zone Identifier Record or ~empty~
       </h1>
+
       <dl class="header">
         <dt>description</dt>
-        <dd>It returns the canonical and case-regularized form of _timeZone_.</dd>
+        <dd>
+          If _timeZoneIdentifier_ is a named time zone identifier that is supported by the implementation, then it returns one of the records in the List returned by AvailableNamedTimeZoneIdentifiers.
+          Otherwise, ~empty~ will be returned.
+        </dd>
       </dl>
-
-      <p>
-        An ECMAScript implementation that includes the ECMA-402 Internationalization API must implement the CanonicalizeTimeZoneName abstract operation as specified in the ECMA-402 specification.
-      </p>
-      <p>
-        The minimum implementation of CanonicalizeTimeZoneName for ECMAScript implementations that do not include local political rules for any time zones performs the following steps when called:
-      </p>
-
       <emu-alg>
-        1. Assert: _timeZone_ is an ASCII-case-insensitive match for *"UTC"*.
-        1. Return *"UTC"*.
+        1. For each element _record_ of AvailableNamedTimeZoneIdentifiers(), do
+          1. If _record_.[[Identifier]] is an ASCII-case-insensitive match for _timeZoneIdentifier_, return _record_.
+        1. Return ~empty~.
       </emu-alg>
+      <emu-note>
+        Given the same value of _timeZoneIdentifier_ or any value that is an ASCII-case-insensitive match for it, it is recommended that the resulting Time Zone Identifier Record contain the same property values for the lifetime of the surrounding agent.
+        Furthermore, it is recommended that time zone identifiers do not dynamically change from primary to non-primary, meaning that if _timeZoneIdentifier_ is a case-insensitive match for the [[PrimaryIdentifier]] property of the result of a previous call to GetAvailableNamedTimeZoneIdentifier, then GetAvailableNamedTimeZoneIdentifier(_timeZoneIdentifier_) will return a record where [[Identifier]] is [[PrimaryIdentifier]].
+        Due to the complexity of supporting these recommendations, it is recommended that the result of AvailableNamedTimeZoneIdentifiers (and therefore GetAvailableNamedTimeZoneIdentifier) remains the same for the lifetime of the surrounding agent.
+      </emu-note>
     </emu-clause>
 
-    <emu-clause id="sec-availabletimezones" type="implementation-defined abstract operation">
-      <h1>
-        AvailableTimeZones (
-        ): a List of Strings
-      </h1>
+    <emu-clause id="sec-systemtimezoneidentifier" oldids="sec-defaulttimezone" type="implementation-defined abstract operation">
+      <h1>SystemTimeZoneIdentifier ( ): a String</h1>
       <dl class="header">
         <dt>description</dt>
-        <dd>The returned List is a sorted List of identifiers for time zones for which the implementation includes local political rules, and aliases for those identifiers.</dd>
+        <dd>
+          It returns a String representing the host environment's current time zone, which is either a String representing a UTC offset for which IsTimeZoneOffsetString returns *true*, or a primary time zone identifier.
+        </dd>
       </dl>
 
-      <p>
-        An ECMAScript implementation that includes the ECMA-402 Internationalization API must implement the AvailableTimeZones abstract operation as specified in the ECMA-402 specification.
-        If an ECMAScript implementation does not include the ECMA-402 API the following specification of the AvailableTimeZones abstract operation is used.
-      </p>
       <emu-alg>
-        1. Let _timeZones_ be the List of String values representing time zones supported by the implementation.
-        1. Assert: _timeZones_ contains *"UTC"*.
-        1. Return SortStringListByCodeUnit(_timeZones_).
+        1. If the implementation only supports the UTC time zone, return *"UTC"*.
+        1. Let _systemTimeZoneString_ be the String representing the host environment's current time zone, either a named time zone identifier or a UTC offset string.
+        1. If IsTimeZoneOffsetString(_systemTimeZoneString_) is *true*, return _systemTimeZoneString_.
+        1. Assert: _systemTimeZoneString_ is the value of the [[PrimaryIdentifier]] field of at least one Time Zone Identifier Record returned by AvailableNamedTimeZoneIdentifiers().
+        1. Return _systemTimeZoneString_.
       </emu-alg>
-      <emu-note><p>
-        For example, an ECMAScript implementation that does not include local political rules for any time zone could return a List with the single String *"UTC"* here.
-      </p></emu-note>
+
+      <emu-note>
+        <p>
+          To ensure the level of functionality that implementations commonly provide in the methods of the Date object, it is recommended that SystemTimeZoneIdentifier return an IANA time zone name corresponding to the host environment's time zone setting, if such a thing exists.
+          GetNamedTimeZoneEpochNanoseconds and GetNamedTimeZoneOffsetNanoseconds must reflect the local political rules for standard time and daylight saving time in that time zone, if such rules exist.
+        </p>
+        <p>For example, if the host environment is a browser on a system where the user has chosen US Eastern Time as their time zone, SystemTimeZoneIdentifier returns *"America/New_York"*.</p>
+      </emu-note>
     </emu-clause>
   </emu-clause>
 
@@ -126,9 +183,9 @@
           1. Throw a *TypeError* exception.
         1. Set _identifier_ to ? ToString(_identifier_).
         1. If IsTimeZoneOffsetString(_identifier_) is *false*, then
-          1. If IsAvailableTimeZoneName(_identifier_) is *false*, then
-            1. Throw a *RangeError* exception.
-          1. Set _identifier_ to ! CanonicalizeTimeZoneName(_identifier_).
+          1. Let _timeZoneIdentifierRecord_ be GetAvailableNamedTimeZoneIdentifier(_identifier_).
+          1. If _timeZoneIdentifierRecord_ is ~empty~, throw a *RangeError* exception.
+          1. Set _identifier_ to _timeZoneIdentifierRecord_.[[PrimaryIdentifier]].
         1. Return ? CreateTemporalTimeZone(_identifier_, NewTarget).
       </emu-alg>
     </emu-clause>
@@ -403,7 +460,7 @@
           1. Set _object_.[[Identifier]] to ~empty~.
           1. Set _object_.[[OffsetNanoseconds]] to ParseTimeZoneOffsetString(_identifier_).
         1. Else,
-          1. Assert: ! CanonicalizeTimeZoneName(_identifier_) is _identifier_.
+          1. Assert: GetAvailableNamedTimeZoneIdentifier(_identifier_).[[PrimaryIdentifier]] is _identifier_.
           1. Set _object_.[[Identifier]] to _identifier_.
           1. Set _object_.[[OffsetNanoseconds]] to ~empty~.
         1. Return _object_.
@@ -622,8 +679,9 @@
         1. If _parseResult_.[[Name]] is not *undefined*, then
           1. Let _name_ be _parseResult_.[[Name]].
           1. If IsTimeZoneOffsetString(_name_) is *true*, return CanonicalizeTimeZoneOffsetString(_name_).
-          1. If IsAvailableTimeZoneName(_name_) is *false*, throw a *RangeError* exception.
-          1. Return ! CanonicalizeTimeZoneName(_name_).
+          1. Let _timeZoneIdentifierRecord_ be GetAvailableNamedTimeZoneIdentifier(_name_).
+          1. If _timeZoneIdentifierRecord_ is ~empty~, throw a *RangeError* exception.
+          1. Return _timeZoneIdentifierRecord_.[[PrimaryIdentifier]].
         1. If _parseResult_.[[Z]] is *true*, return *"UTC"*.
         1. Return CanonicalizeTimeZoneOffsetString(_parseResult_.[[OffsetString]]).
       </emu-alg>
@@ -641,7 +699,7 @@
       </dl>
       <emu-alg>
         1. If _timeZoneSlotValue_ is a String, then
-          1. Assert: Either IsTimeZoneOffsetString(_timeZoneSlotValue_) or IsAvailableTimeZoneName(_timeZoneSlotValue_) is *true*.
+          1. Assert: Either IsTimeZoneOffsetString(_timeZoneSlotValue_) is *true*, or GetAvailableNamedTimeZoneIdentifier(_timeZoneSlotValue_) is not ~empty~.
           1. Return _timeZoneSlotValue_.
         1. Let _identifier_ be ? Get(_timeZoneSlotValue_, *"id"*).
         1. If _identifier_ is not a String, throw a *TypeError* exception.

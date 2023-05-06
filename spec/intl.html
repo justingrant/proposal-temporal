@@ -40,23 +40,76 @@
     </del>
   </emu-clause>
 
-  <emu-clause id="sup-time-zone-names">
-    <h1><a href="https://tc39.es/ecma402/#sec-time-zone-names">Time Zone Names</a></h1>
+  <emu-clause id="sup-time-zone-support" oldids="sec-time-zone-names">
+    <h1><a href="https://tc39.es/ecma402/#sec-time-zone-support">Time Zone Support</a></h1>
 
     <ins class="block">
       <p>
-        <emu-xref href="#sec-time-zone-names"></emu-xref> defines a set of abstract operations concerning the names of supported time zones.
+        <emu-xref href="#sec-time-zone-support"></emu-xref> defines a set of abstract operations related to the identifiers of supported time zones.
         This section introduces additional requirements on these operations for implementations.
       </p>
+
+      <emu-clause id="sup-time-zone-identifiers">
+        <h1>Time Zone Identifiers</h1>
+
+        <p>
+          The ECMAScript Internationalization API Specification identifies time zones using the Zone and Link names of the IANA Time Zone Database <a href="https://www.iana.org/time-zones/">https://www.iana.org/time-zones/</a>.
+          Time zone identifiers are case-insensitive and so are compared using ASCII case-insensitive comparisons, but time zone identifiers returned by ECMAScript built-in objects always use the casing found in the IANA Time Zone Database.
+          A primary time zone identifier is a Zone name, and a non-primary time zone identifier is a Link name, respectively, in the IANA Time Zone Database except as specifically overridden by AvailableNamedTimeZoneIdentifiers.
+          In an implementation that implements the ECMAScript Internationalization API Specification, available named time zone identifiers are the set of Zone and Link identifiers that are supported by an ECMAScript implementation.
+        </p>
+
+        <p>
+          In the IANA Time Zone Database, the UTC time zone is represented by the Zone *"Etc/UTC"*, and is distinct from the Zone *"Etc/GMT"*.
+          For historical reasons, ECMAScript uses *"UTC"* as the primary identifier for the former Zone and does not recognize the latter Zone as distinct, instead requiring treatment of *"Etc/UTC"*, *"Etc/GMT"*, and *"GMT"* (if available) as non-primary identifiers that resolve to *"UTC"*.
+          This is the only deviation from the IANA Time Zone Database that is required of an ECMAScript implementation.
+        </p>
+
+        <p>
+          Time zone aware ECMAScript implementations support *"UTC"* and all other Zone and Link names (and <b>only</b> such names) from the IANA Time Zone Database, the mapping between Link names and corresponding Zone names, and the UTC offsets and transitions associated with Zone names that represent local political rules for that time zone.
+          An ECMAScript implementation that includes the ECMA-402 Internationalization API <b>must</b> be time zone aware.
+          Some implementations that do not implement the ECMA-402 Internationalization API may also be time zone aware.
+        </p>
+
+        <p>
+          The IANA Time Zone Database is typically updated between five and ten times per year, so it is recommended to use the best available current and historical time zone information.
+          This information includes which identifiers are supported, the primary time zone identifier associated with any identifier, and the UTC offsets and transitions associated with any Zone.
+        </p>
+
+        <p>
+          New Zone identifiers can be added to the IANA Time Zone Database, for example when one part of a country starts observing Daylight Saving Time differently from other parts, or when a new country declares independence.
+          ECMAScript implementations are recommended to include newly-added identifiers as soon as possible into the results of AvailableNamedTimeZoneIdentifiers.
+          Such prompt action ensures that ECMAScript programs receiving those identifiers from an external source (including the host's operating system) will be able to recognize and calculate using the new time zone.
+        </p>
+
+        <p>
+          It is recommended that implementations maintain a fully consistent copy of the IANA Time Zone Database for the lifetime of each agent.
+          If implementations do revise time zone information during the lifetime of an agent, then it is recommended that changes to time zone data, including which identifiers are supported, the primary time zone identifier associated with any identifier, and the UTC offsets and transitions associated with any Zone, can be incorporated into an agent only if they are consistent with results already observed by all ECMAScript code that can reach that agent.
+          For example, it is recommended that a new identifier can be incorporated only if no ECMAScript code has already tried to use it, and it is recommended that replacement of a primary identifier with a Link to a different identifier can only be incorporated only if no ECMAScript code has already resulted in resolving it as primary.
+          Due to the complexity of supporting these recommendations, it is recommended that implementations maintain a fully consistent copy of the IANA Time Zone Database for the lifetime of each agent.
+        </p>
+
+        <emu-note>
+          <p>
+            The IANA Time Zone Database offers build options that affect which time zone identifiers are primary.
+            It is recommended that ECMAScript implementations <b>should not</b> determine which identifiers are primary and non-primary using the data generated by the default build options of the IANA Time Zone Database, because those default build options merge geographically unrelated time zones together, such as *"Atlantic/Reykjavik"* as a Link to the Zone *"Africa/Abidjan"*.
+            These merges can be problematic because geographically and politically distinct locations, especially across country boundaries, are more likely to introduce divergent time zone rules in a future version of the IANA Time Zone Database.
+            Therefore, it is recommended that all identifiers listed in the IANA Time Zone Database's <code>zone.tab</code> file (which lists at least one Link or Zone name for each <a href="https://www.iso.org/glossary-for-iso-3166.html">ISO 3166-1 Alpha-2</a> country code in the IANA Time Zone Database) should be primary identifiers.
+            One way to achieve this result is to build the IANA Time Zone Database with the <code>PACKRATDATA=backzone PACKRATLIST=zone.tab</code> build options.
+          </p>
+        </emu-note>
+      </emu-clause>
     </ins>
 
+    <del class="block">
     <p>
       The ECMAScript 2023 Internationalization API Specification identifies time zones using the Zone and Link names of the IANA Time Zone Database. Their canonical form is the corresponding Zone name in the casing used in the IANA Time Zone Database except as specifically overridden by CanonicalizeTimeZoneName.
     </p>
 
     <p>
-      A conforming implementation must recognize *"UTC"* and all other Zone and Link names (and <strong>only</strong> such names), and use best available current and historical information about their offsets from UTC and their daylight saving time rules in calculations. However, the set of combinations of time zone name and language tag for which localized time zone names are available is implementation dependent.
+      A conforming implementation must recognize *"UTC"* and all other Zone and Link names (and <b>only</b> such names), and use best available current and historical information about their offsets from UTC and their daylight saving time rules in calculations. However, the set of combinations of time zone name and language tag for which localized time zone names are available is implementation dependent.
     </p>
+    </del>
 
     <del class="block">
       <emu-clause id="sup-isvalidtimezonename">
@@ -74,10 +127,11 @@
       </emu-clause>
     </del>
 
+    <del class="block">
     <emu-clause id="sup-canonicalizetimezonename" type="abstract operation">
       <h1>
         CanonicalizeTimeZoneName (
-          _timeZone_: a String value that is <del>a valid</del><ins>an available</ins> time zone name as verified by <del>IsValidTimeZoneName</del><ins>IsAvailableTimeZoneName</ins>,
+          _timeZone_: a String value that is a valid time zone name as verified by IsValidTimeZoneName,
         )
       </h1>
       <dl class="header">
@@ -93,32 +147,46 @@
         1. If _ianaTimeZone_ is *"Etc/UTC"* or *"Etc/GMT"*, return *"UTC"*.
         1. Return _ianaTimeZone_.
       </emu-alg>
-
-      <ins class="block">
-        <p>This definition supersedes the definition provided in <emu-xref href="#sec-canonicalizetimezonename"></emu-xref>.</p>
-      </ins>
     </emu-clause>
+    </del>
 
     <ins class="block">
-      <emu-clause id="sup-availabletimezones" type="implementation-defined abstract operation">
-        <h1>
-          AvailableTimeZones (
-          ): a List of Strings
-        </h1>
+      <emu-clause id="sup-availablenamedtimezoneidentifiers" oldids="sec-availabletimezones" type="implementation-defined abstract operation">
+        <h1>AvailableNamedTimeZoneIdentifiers ( ): a List of Time Zone Identifier Records</h1>
         <dl class="header">
           <dt>description</dt>
-          <dd>The returned List is a sorted List of supported Zone and Link names in the IANA Time Zone Database.</dd>
+          <dd>
+            Its result describes all available named time zone identifiers in this implementation, as well as the primary time zone identifier corresponding to each available identifier.
+            The List is sorted by [[Identifier]] of each Time Zone Identifier Record.
+          </dd>
           <dt>redefinition</dt>
           <dd>true</dd>
         </dl>
         <emu-alg>
-          1. Let _timeZones_ be a List containing the String value of each Zone or Link name in the IANA Time Zone Database that is supported by the implementation.
-          1. Assert: _timeZones_ contains *"UTC"*.
-          1. Assert: _timeZones_ does not contain any element that does not identify a Zone or Link name in the IANA Time Zone Database.
-          1. Return SortStringListByCodeUnit(_timeZones_).
+          1. Let _identifiers_ be a List containing the String value of each Zone or Link name in the IANA Time Zone Database that is supported by the implementation.
+          1. Assert: No element of _identifiers_ is an ASCII-case-insensitive match for any other element.
+          1. Assert: Every element of _identifiers_ identifies a Zone or Link name in the IANA Time Zone Database.
+          1. Set _identifiers_ to SortStringListByCodeUnit(_identifiers_).
+          1. Let _result_ be a new empty List.
+          1. For each element _identifier_ of _identifiers_, do
+            1. Let _primary_ be _identifier_.
+            1. If _identifier_ is a non-primary time zone identifier and _identifier_ is not *"UTC"*, then
+              1. Set _primary_ to the name of the primary time zone identifier that _identifier_ resolves to, according to the rules for resolving Link names in the IANA Time Zone Database.
+              1. NOTE: An implementation may need to resolve _identifier_ iteratively to obtain the primary time zone identifier.
+            1. If _primary_ is one of *"Etc/UTC"*, *"Etc/GMT"*, or *"GMT"*, set _primary_ to *"UTC"*.
+            1. Let _record_ be the Time Zone Identifier Record { [[Identifier]]: _identifier_, [[PrimaryIdentifier]]: _primary_ }.
+            1. Append _record_ to the end of _result_.
+          1. Assert: One element of _result_ is the Time Zone Identifier Record { [[Identifier]]: *"UTC"*, [[PrimaryIdentifier]]: *"UTC"* }.
+          1. Return _result_.
         </emu-alg>
 
-        <p>This definition supersedes the definition provided in <emu-xref href="#sec-availabletimezones"></emu-xref>.</p>
+        <emu-note>
+          Time zone identifiers in the IANA Time Zone Database can change over time.
+          At a minimum, it is recommended that implementations limit changes to the result of AvailableNamedTimeZoneIdentifiers to the changes allowed by GetAvailableNamedTimeZoneIdentifier, for the lifetime of the surrounding agent.
+          Due to the complexity of supporting these recommendations, it is recommended that the result of AvailableNamedTimeZoneIdentifiers remains the same for the lifetime of the surrounding agent.
+        </emu-note>
+
+        <p>This definition supersedes the definition provided in <emu-xref href="#sec-availablenamedtimezoneidentifiers"></emu-xref>.</p>
       </emu-clause>
     </ins>
   </emu-clause>
@@ -244,13 +312,14 @@
           1. <ins>If _toLocaleStringTimeZone_ is present, then</ins>
             1. <ins>Set _timeZone_ to _toLocaleStringTimeZone_.</ins>
           1. <ins>Else,</ins>
-            1. Set _timeZone_ to DefaultTimeZone().
+            1. Set _timeZone_ to SystemTimeZoneIdentifier().
         1. Else,
           1. <ins>If _toLocaleStringTimeZone_ is present, throw a *TypeError* exception.</ins>
           1. Set _timeZone_ to ? ToString(_timeZone_).
-          1. If <del>the result of IsValidTimeZoneName(_timeZone_)</del><ins>IsAvailableTimeZoneName(_timeZone_)</ins> is *false*, then
+          1. <ins>Let _timeZoneIdentifierRecord_ be GetAvailableNamedTimeZoneIdentifier(_timeZone_).</ins>
+          1. If <del>the result of IsValidTimeZoneName(_timeZone_) is *false*</del><ins>_timeZoneIdentifierRecord_ is ~empty~</ins>, then
             1. Throw a *RangeError* exception.
-          1. Set _timeZone_ to CanonicalizeTimeZoneName(_timeZone_).
+          1. Set _timeZone_ to <del>CanonicalizeTimeZoneName(_timeZone_)</del><ins>_timeZoneIdentifierRecord_.[[PrimaryIdentifier]]</ins>.
         1. Set _dateTimeFormat_.[[TimeZone]] to _timeZone_.
         1. Let _formatOptions_ be a new Record.
         1. Set _formatOptions_.[[hourCycle]] to _hc_.
@@ -1274,7 +1343,8 @@
       </p>
 
       <emu-note>
-        In this version of the ECMAScript 2023 Internationalization API, the *"timeZone"* property will be the name of the default time zone if no *"timeZone"* property was provided in the options object provided to the Intl.DateTimeFormat constructor. The first edition left the *"timeZone"* property *undefined* in this case.
+        In this version of the ECMAScript Internationalization API, the *"timeZone"* property will be the name of the system time zone identifier if no *"timeZone"* property was provided in the options object provided to the Intl.DateTimeFormat constructor.
+        The first edition left the *"timeZone"* property *undefined* in this case.
       </emu-note>
 
       <emu-note>
@@ -2464,8 +2534,9 @@
             1. Let _dateTimeFormat_ be ! OrdinaryCreateFromConstructor(%DateTimeFormat%, %DateTimeFormat.prototype%, « [[InitializedDateTimeFormat]], [[Locale]], [[Calendar]], [[NumberingSystem]], [[TimeZone]], [[Weekday]], [[Era]], [[Year]], [[Month]], [[Day]], [[DayPeriod]], [[Hour]], [[Minute]], [[Second]], [[FractionalSecondDigits]], [[TimeZoneName]], [[HourCycle]], [[Pattern]], [[BoundFormat]] »).
             1. Let _timeZone_ be ? ToTemporalTimeZoneIdentifier(_zonedDateTime_.[[TimeZone]]).
             1. If IsTimeZoneOffsetString(_timeZone_) is *true*, throw a *RangeError* exception.
-            1. If IsAvailableTimeZoneName(_timeZone_) is *false*, throw a *RangeError* exception.
-            1. Set _timeZone_ to CanonicalizeTimeZoneName(_timeZone_).
+            1. Let _timeZoneIdentifierRecord_ be GetAvailableNamedTimeZoneIdentifier(_timeZone_).
+            1. If _timeZoneIdentifierRecord_ is ~empty~, throw a RangeError exception.
+            1. Set _timeZone_ to _timeZoneIdentifierRecord_.[[PrimaryIdentifier]].
             1. Perform ? InitializeDateTimeFormat(_dateTimeFormat_, _locales_, _options_, _timeZone_).
             1. Let _calendar_ be ? ToTemporalCalendarIdentifier(_zonedDateTime_.[[Calendar]]).
             1. If _calendar_ is not *"iso8601"* and not equal to _dateTimeFormat_.[[Calendar]], then
