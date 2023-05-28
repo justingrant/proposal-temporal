@@ -107,7 +107,7 @@ export function DateTimeFormat(locale = undefined, options = undefined) {
     }
     const record = ES.GetAvailableNamedTimeZoneIdentifier(id);
     if (!record) throw new RangeError(`Intl.DateTimeFormat formats built-in time zones, not ${id}`);
-    this[TZ_ORIGINAL] = record.primaryIdentifier;
+    this[TZ_ORIGINAL] = record.identifier;
   }
 }
 

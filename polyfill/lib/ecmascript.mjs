@@ -371,7 +371,7 @@ export function ParseTemporalTimeZone(stringIdent) {
     if (IsTimeZoneOffsetString(tzName)) return CanonicalizeTimeZoneOffsetString(tzName);
     const record = GetAvailableNamedTimeZoneIdentifier(tzName);
     if (!record) throw new RangeError(`Unrecognized time zone ${tzName}`);
-    return record.primaryIdentifier;
+    return record.identifier;
   }
   if (z) return 'UTC';
   // if !tzName && !z then offset must be present
@@ -2119,7 +2119,16 @@ export function TimeZoneEquals(one, two) {
   if (one === two) return true;
   const tz1 = ToTemporalTimeZoneIdentifier(one);
   const tz2 = ToTemporalTimeZoneIdentifier(two);
-  return tz1 === tz2;
+  if (tz1 === tz2) return true;
+  if (IsTimeZoneOffsetString(tz1)) {
+    if (!IsTimeZoneOffsetString(tz2)) return false;
+    return CanonicalizeTimeZoneOffsetString(tz1) === CanonicalizeTimeZoneOffsetString(tz2);
+  }
+  const idRecord1 = GetAvailableNamedTimeZoneIdentifier(tz1);
+  if (!idRecord1) return false;
+  const idRecord2 = GetAvailableNamedTimeZoneIdentifier(tz2);
+  if (!idRecord2) return false;
+  return idRecord1.primaryIdentifier === idRecord2.primaryIdentifier;
 }
 
 export function TemporalDateTimeToDate(dateTime) {
