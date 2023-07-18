@@ -7980,6 +7980,7 @@
   var ObjectDefineProperty = Object.defineProperty;
   var ObjectEntries$1 = Object.entries;
   var ObjectGetOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+  var StringCtor = String;
   var StringFromCharCode = String.fromCharCode;
   var StringPrototypeCharCodeAt = String.prototype.charCodeAt;
   var StringPrototypeMatchAll = String.prototype.matchAll;
@@ -8023,7 +8024,24 @@
     if (number === 0) return 0; // ℝ(value) in spec text; converts -0 to 0
     return number;
   }
-  var BUILTIN_CASTS = new Map([['year', ToIntegerWithTruncation], ['month', ToPositiveIntegerWithTruncation], ['monthCode', ToString$1], ['day', ToPositiveIntegerWithTruncation], ['hour', ToIntegerWithTruncation], ['minute', ToIntegerWithTruncation], ['second', ToIntegerWithTruncation], ['millisecond', ToIntegerWithTruncation], ['microsecond', ToIntegerWithTruncation], ['nanosecond', ToIntegerWithTruncation], ['years', ToIntegerIfIntegral], ['months', ToIntegerIfIntegral], ['weeks', ToIntegerIfIntegral], ['days', ToIntegerIfIntegral], ['hours', ToIntegerIfIntegral], ['minutes', ToIntegerIfIntegral], ['seconds', ToIntegerIfIntegral], ['milliseconds', ToIntegerIfIntegral], ['microseconds', ToIntegerIfIntegral], ['nanoseconds', ToIntegerIfIntegral], ['era', ToString$1], ['eraYear', ToIntegerOrInfinity$1], ['offset', ToString$1]]);
+
+  // This convenience function isn't in the spec, but is useful in the polyfill
+  // for DRY and better error messages.
+  function RequireString(value) {
+    if (Type$5(value) !== 'String') {
+      // Use String() to ensure that Symbols won't throw
+      throw new TypeError("expected a string, not ".concat(StringCtor(value)));
+    }
+    return value;
+  }
+
+  // This function is an enum in the spec, but it's helpful to make it a
+  // function in the polyfill.
+  function ToPrimitiveAndRequireString(value) {
+    value = ToPrimitive$2(value, StringCtor);
+    return RequireString(value);
+  }
+  var BUILTIN_CASTS = new Map([['year', ToIntegerWithTruncation], ['month', ToPositiveIntegerWithTruncation], ['monthCode', ToPrimitiveAndRequireString], ['day', ToPositiveIntegerWithTruncation], ['hour', ToIntegerWithTruncation], ['minute', ToIntegerWithTruncation], ['second', ToIntegerWithTruncation], ['millisecond', ToIntegerWithTruncation], ['microsecond', ToIntegerWithTruncation], ['nanosecond', ToIntegerWithTruncation], ['years', ToIntegerIfIntegral], ['months', ToIntegerIfIntegral], ['weeks', ToIntegerIfIntegral], ['days', ToIntegerIfIntegral], ['hours', ToIntegerIfIntegral], ['minutes', ToIntegerIfIntegral], ['seconds', ToIntegerIfIntegral], ['milliseconds', ToIntegerIfIntegral], ['microseconds', ToIntegerIfIntegral], ['nanoseconds', ToIntegerIfIntegral], ['era', ToPrimitiveAndRequireString], ['eraYear', ToIntegerOrInfinity$1], ['offset', ToPrimitiveAndRequireString]]);
   var BUILTIN_DEFAULTS = new Map([['hour', 0], ['minute', 0], ['second', 0], ['millisecond', 0], ['microsecond', 0], ['nanosecond', 0]]);
 
   // each item is [plural, singular, category]
@@ -8565,7 +8583,7 @@
   }
   function ToTemporalDurationRecord(item) {
     if (Type$5(item) !== 'Object') {
-      return ParseTemporalDurationString(ToString$1(item));
+      return ParseTemporalDurationString(RequireString(item));
     }
     if (IsTemporalDuration(item)) {
       return {
@@ -8874,7 +8892,7 @@
       if (timeZone !== undefined) timeZone = ToTemporalTimeZoneSlotValue(timeZone);
     } else {
       var tzName, z;
-      var _ParseISODateTime4 = ParseISODateTime(ToString$1(relativeTo));
+      var _ParseISODateTime4 = ParseISODateTime(RequireString(relativeTo));
       year = _ParseISODateTime4.year;
       month = _ParseISODateTime4.month;
       day = _ParseISODateTime4.day;
@@ -9007,7 +9025,7 @@
       return CalendarDateFromFields(_calendar, fields, options);
     }
     ToTemporalOverflow(options); // validate and ignore
-    var _ParseTemporalDateStr = ParseTemporalDateString(ToString$1(item)),
+    var _ParseTemporalDateStr = ParseTemporalDateString(RequireString(item)),
       year = _ParseTemporalDateStr.year,
       month = _ParseTemporalDateStr.month,
       day = _ParseTemporalDateStr.day,
@@ -9079,7 +9097,7 @@
     } else {
       ToTemporalOverflow(options); // validate and ignore
       var z;
-      var _ParseTemporalDateTim = ParseTemporalDateTimeString(ToString$1(item));
+      var _ParseTemporalDateTim = ParseTemporalDateTimeString(RequireString(item));
       year = _ParseTemporalDateTim.year;
       month = _ParseTemporalDateTim.month;
       day = _ParseTemporalDateTim.day;
@@ -9121,7 +9139,8 @@
       var _TemporalInstant = GetIntrinsic('%Temporal.Instant%');
       return new _TemporalInstant(GetSlot(item, EPOCHNANOSECONDS));
     }
-    var ns = ParseTemporalInstant(ToString$1(item));
+    item = ToPrimitive$2(item, StringCtor);
+    var ns = ParseTemporalInstant(RequireString(item));
     var TemporalInstant = GetIntrinsic('%Temporal.Instant%');
     return new TemporalInstant(ns);
   }
@@ -9149,7 +9168,7 @@
       return CalendarMonthDayFromFields(_calendar2, fields, options);
     }
     ToTemporalOverflow(options); // validate and ignore
-    var _ParseTemporalMonthDa2 = ParseTemporalMonthDayString(ToString$1(item)),
+    var _ParseTemporalMonthDa2 = ParseTemporalMonthDayString(RequireString(item)),
       month = _ParseTemporalMonthDa2.month,
       day = _ParseTemporalMonthDa2.day,
       referenceISOYear = _ParseTemporalMonthDa2.referenceISOYear,
@@ -9191,7 +9210,7 @@
       microsecond = _RegulateTime2.microsecond;
       nanosecond = _RegulateTime2.nanosecond;
     } else {
-      var _ParseTemporalTimeStr = ParseTemporalTimeString(ToString$1(item));
+      var _ParseTemporalTimeStr = ParseTemporalTimeString(RequireString(item));
       hour = _ParseTemporalTimeStr.hour;
       minute = _ParseTemporalTimeStr.minute;
       second = _ParseTemporalTimeStr.second;
@@ -9212,7 +9231,7 @@
       return CalendarYearMonthFromFields(_calendar3, fields, options);
     }
     ToTemporalOverflow(options); // validate and ignore
-    var _ParseTemporalYearMon2 = ParseTemporalYearMonthString(ToString$1(item)),
+    var _ParseTemporalYearMon2 = ParseTemporalYearMonthString(RequireString(item)),
       year = _ParseTemporalYearMon2.year,
       month = _ParseTemporalYearMon2.month,
       referenceISODay = _ParseTemporalYearMon2.referenceISODay,
@@ -9300,7 +9319,7 @@
       nanosecond = _InterpretTemporalDat3.nanosecond;
     } else {
       var tzName, z;
-      var _ParseTemporalZonedDa = ParseTemporalZonedDateTimeString(ToString$1(item));
+      var _ParseTemporalZonedDa = ParseTemporalZonedDateTimeString(RequireString(item));
       year = _ParseTemporalZonedDa.year;
       month = _ParseTemporalZonedDa.month;
       day = _ParseTemporalZonedDa.day;
@@ -9776,7 +9795,7 @@
       }
       return calendarLike;
     }
-    var identifier = ToString$1(calendarLike);
+    var identifier = RequireString(calendarLike);
     if (IsBuiltinCalendar(identifier)) return ASCIILowercase(identifier);
     var calendar;
     try {
@@ -9889,7 +9908,7 @@
       }
       return temporalTimeZoneLike;
     }
-    var identifier = ToString$1(temporalTimeZoneLike);
+    var identifier = RequireString(temporalTimeZoneLike);
     var _ParseTemporalTimeZon = ParseTemporalTimeZoneString(identifier),
       tzName = _ParseTemporalTimeZon.tzName,
       offset = _ParseTemporalTimeZon.offset,
@@ -13598,18 +13617,13 @@
   var Calendar = /*#__PURE__*/function () {
     function Calendar(id) {
       _classCallCheck(this, Calendar);
-      // Note: if the argument is not passed, IsBuiltinCalendar("undefined") will fail. This check
-      //       exists only to improve the error message.
-      if (arguments.length < 1) {
-        throw new RangeError('missing argument: id is required');
-      }
-      id = ToString$1(id);
-      if (!IsBuiltinCalendar(id)) throw new RangeError("invalid calendar identifier ".concat(id));
+      var stringId = RequireString(id);
+      if (!IsBuiltinCalendar(stringId)) throw new RangeError("invalid calendar identifier ".concat(stringId));
       CreateSlots(this);
-      SetSlot(this, CALENDAR_ID, ASCIILowercase(id));
+      SetSlot(this, CALENDAR_ID, ASCIILowercase(stringId));
       {
         Object.defineProperty(this, '_repr_', {
-          value: "".concat(this[Symbol.toStringTag], " <").concat(id, ">"),
+          value: "".concat(this[Symbol.toStringTag], " <").concat(stringId, ">"),
           writable: false,
           enumerable: false,
           configurable: false
@@ -18041,12 +18055,7 @@
   var TimeZone = /*#__PURE__*/function () {
     function TimeZone(identifier) {
       _classCallCheck(this, TimeZone);
-      // Note: if the argument is not passed, GetCanonicalTimeZoneIdentifier(undefined) will throw.
-      //       This check exists only to improve the error message.
-      if (arguments.length < 1) {
-        throw new RangeError('missing argument: identifier is required');
-      }
-      var stringIdentifier = ToString$1(identifier);
+      var stringIdentifier = RequireString(identifier);
       var parseResult = ParseTimeZoneIdentifier(identifier);
       if (parseResult.offsetNanoseconds !== undefined) {
         stringIdentifier = FormatOffsetTimeZoneIdentifier(parseResult.offsetNanoseconds);
