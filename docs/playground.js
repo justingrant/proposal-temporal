@@ -7927,7 +7927,8 @@
   var daypart = /(?:0[1-9]|[12]\d|3[01])/;
   var datesplit = new RegExp("(".concat(yearpart.source, ")(?:-(").concat(monthpart.source, ")-(").concat(daypart.source, ")|(").concat(monthpart.source, ")(").concat(daypart.source, "))"));
   var timesplit = /(\d{2})(?::(\d{2})(?::(\d{2})(?:[.,](\d{1,9}))?)?|(\d{2})(?:(\d{2})(?:[.,](\d{1,9}))?)?)?/;
-  var offset = /([+\u2212-])([01][0-9]|2[0-3])(?::?([0-5][0-9])(?::?([0-5][0-9])(?:[.,](\d{1,9}))?)?)?/;
+  var offsetWithParts = /([+\u2212-])([01][0-9]|2[0-3])(?::?([0-5][0-9])(?::?([0-5][0-9])(?:[.,](\d{1,9}))?)?)?/;
+  var offset = /((?:[+\u2212-])(?:[01][0-9]|2[0-3])(?::?(?:[0-5][0-9])(?::?(?:[0-5][0-9])(?:[.,](?:\d{1,9}))?)?)?)/;
   var offsetpart = new RegExp("([zZ])|".concat(offset.source, "?"));
   var offsetIdentifier = /([+\u2212-])([01][0-9]|2[0-3])(?::?([0-5][0-9])?)?/;
   var annotation = /\[(!)?([a-z_][a-z0-9_-]*)=([A-Za-z0-9]+(?:-[A-Za-z0-9]+)*)\]/g;
@@ -8219,23 +8220,11 @@
     if (match[13]) {
       offset = undefined;
       z = true;
-    } else if (match[14] && match[15]) {
-      var offsetSign = match[14] === '-' || match[14] === "\u2212" ? '-' : '+';
-      var offsetHours = match[15] || '00';
-      var offsetMinutes = match[16] || '00';
-      var offsetSeconds = match[17] || '00';
-      var offsetFraction = match[18] || '0';
-      offset = "".concat(offsetSign).concat(offsetHours, ":").concat(offsetMinutes);
-      if (+offsetFraction) {
-        while (offsetFraction.endsWith('0')) offsetFraction = offsetFraction.slice(0, -1);
-        offset += ":".concat(offsetSeconds, ".").concat(offsetFraction);
-      } else if (+offsetSeconds) {
-        offset += ":".concat(offsetSeconds);
-      }
-      if (offset === '-00:00') offset = '+00:00';
+    } else if (match[14]) {
+      offset = match[14];
     }
-    var tzName = match[19];
-    var calendar = processAnnotations(match[20]);
+    var tzName = match[15];
+    var calendar = processAnnotations(match[16]);
     RejectDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond);
     return {
       year: year,
@@ -8282,7 +8271,7 @@
       millisecond = ToIntegerOrInfinity$1(fraction.slice(0, 3));
       microsecond = ToIntegerOrInfinity$1(fraction.slice(3, 6));
       nanosecond = ToIntegerOrInfinity$1(fraction.slice(6, 9));
-      processAnnotations(match[14]); // ignore found calendar
+      processAnnotations(match[10]); // ignore found calendar
       if (match[8]) throw new RangeError('Z designator not supported for PlainTime');
     } else {
       var z, hasTime;
@@ -8400,7 +8389,7 @@
       var _ParseDateTimeUTCOffs = ParseDateTimeUTCOffset(identifier),
         offsetNanoseconds = _ParseDateTimeUTCOffs.offsetNanoseconds;
       return {
-        offsetNanoseconds: offsetNanoseconds
+        offsetMinutes: offsetNanoseconds / 60e9
       };
     }
     return {
@@ -8471,7 +8460,7 @@
     var microseconds = MathTrunc(excessNanoseconds / 1000) % 1000;
     var milliseconds = MathTrunc(excessNanoseconds / 1e6) % 1000;
     seconds += MathTrunc(excessNanoseconds / 1e9) % 60;
-    minutes += MathTrunc(excessNanoseconds / 6e10);
+    minutes += MathTrunc(excessNanoseconds / 60e9);
     return {
       years: years,
       months: months,
@@ -9908,11 +9897,11 @@
     if (tzName) {
       // tzName is any valid identifier string in brackets, and could be an offset identifier
       var _ParseTimeZoneIdentif = ParseTimeZoneIdentifier(tzName),
-        _offsetNanoseconds = _ParseTimeZoneIdentif.offsetNanoseconds;
-      if (_offsetNanoseconds !== undefined) return FormatOffsetTimeZoneIdentifier(_offsetNanoseconds);
+        offsetMinutes = _ParseTimeZoneIdentif.offsetMinutes;
+      if (offsetMinutes !== undefined) return FormatOffsetTimeZoneIdentifier(offsetMinutes);
       var record = GetAvailableNamedTimeZoneIdentifier(tzName);
       if (!record) throw new RangeError("Unrecognized time zone ".concat(tzName));
-      return record.primaryIdentifier;
+      return record.identifier;
     }
     if (z) return 'UTC';
     // if !tzName && !z then offset must be present
@@ -9922,7 +9911,7 @@
     if (hasSubMinutePrecision) {
       throw new RangeError("Seconds not allowed in offset time zone: ".concat(offset));
     }
-    return FormatOffsetTimeZoneIdentifier(offsetNanoseconds);
+    return FormatOffsetTimeZoneIdentifier(offsetNanoseconds / 60e9);
   }
   function ToTemporalTimeZoneIdentifier(slotValue) {
     if (typeof slotValue === 'string') return slotValue;
@@ -9939,7 +9928,23 @@
     if (one === two) return true;
     var tz1 = ToTemporalTimeZoneIdentifier(one);
     var tz2 = ToTemporalTimeZoneIdentifier(two);
-    return tz1 === tz2;
+    if (tz1 === tz2) return true;
+    var offsetMinutes1 = ParseTimeZoneIdentifier(tz1).offsetMinutes;
+    var offsetMinutes2 = ParseTimeZoneIdentifier(tz2).offsetMinutes;
+    if (offsetMinutes1 === undefined && offsetMinutes2 === undefined) {
+      // Calling GetAvailableNamedTimeZoneIdentifier is costly, so (unlike the
+      // spec) the polyfill will early-return if one of them isn't recognized. Try
+      // the second ID first because it's more likely to be unknown, because it
+      // can come from the argument of TimeZone.p.equals as opposed to the first
+      // ID which comes from the receiver.
+      var idRecord2 = GetAvailableNamedTimeZoneIdentifier(tz2);
+      if (!idRecord2) return false;
+      var idRecord1 = GetAvailableNamedTimeZoneIdentifier(tz1);
+      if (!idRecord1) return false;
+      return idRecord1.primaryIdentifier === idRecord2.primaryIdentifier;
+    } else {
+      return offsetMinutes1 === offsetMinutes2;
+    }
   }
   function TemporalDateTimeToDate(dateTime) {
     return CreateTemporalDate(GetSlot(dateTime, ISO_YEAR), GetSlot(dateTime, ISO_MONTH), GetSlot(dateTime, ISO_DAY), GetSlot(dateTime, CALENDAR));
@@ -9973,20 +9978,15 @@
   // In the spec, the code below only exists as part of GetOffsetStringFor.
   // But in the polyfill, we re-use it to provide clearer error messages.
   function formatOffsetStringNanoseconds(offsetNs) {
-    var offsetMinutes = MathTrunc(offsetNs / 6e10);
-    var offsetStringMinutes = FormatOffsetTimeZoneIdentifier(offsetMinutes * 6e10);
-    var subMinuteNanoseconds = MathAbs$1(offsetNs) % 6e10;
-    if (!subMinuteNanoseconds) return offsetStringMinutes;
-
-    // For offsets between -1s and 0, exclusive, FormatOffsetTimeZoneIdentifier's
-    // return value of "+00:00" is incorrect if there are sub-minute units.
-    if (!offsetMinutes && offsetNs < 0) offsetStringMinutes = '-00:00';
-    var seconds = MathFloor$1(subMinuteNanoseconds / 1e9) % 60;
-    var secondString = ISODateTimePartString(seconds);
-    var nanoseconds = subMinuteNanoseconds % 1e9;
-    if (!nanoseconds) return "".concat(offsetStringMinutes, ":").concat(secondString);
-    var fractionString = "".concat(nanoseconds).padStart(9, '0').replace(/0+$/, '');
-    return "".concat(offsetStringMinutes, ":").concat(secondString, ".").concat(fractionString);
+    var sign = offsetNs < 0 ? '-' : '+';
+    var absoluteNs = MathAbs$1(offsetNs);
+    var hour = MathFloor$1(absoluteNs / 3600e9);
+    var minute = MathFloor$1(absoluteNs / 60e9) % 60;
+    var second = MathFloor$1(absoluteNs / 1e9) % 60;
+    var subSecondNs = absoluteNs % 1e9;
+    var precision = second === 0 && subSecondNs === 0 ? 'minute' : 'auto';
+    var timeString = FormatTimeString(hour, minute, second, subSecondNs, precision);
+    return "".concat(sign).concat(timeString);
   }
   function GetPlainDateTimeFor(timeZone, instant, calendar) {
     var ns = GetSlot(instant, EPOCHNANOSECONDS);
@@ -10294,7 +10294,7 @@
     return OFFSET.test(string);
   }
   function ParseDateTimeUTCOffset(string) {
-    var match = OFFSET.exec(string);
+    var match = OFFSET_WITH_PARTS.exec(string);
     if (!match) {
       throw new RangeError("invalid time zone offset: ".concat(string));
     }
@@ -10428,18 +10428,17 @@
     var utc = reducedUTC.plus(nsIn400YearCycle.multiply(yearCycles));
     return +utc.minus(epochNanoseconds);
   }
-  function FormatOffsetTimeZoneIdentifier(offsetNanoseconds) {
-    var sign = offsetNanoseconds < 0 ? '-' : '+';
-    var absoluteMinutes = MathAbs$1(offsetNanoseconds / 6e10);
-    var intHours = MathFloor$1(absoluteMinutes / 60);
-    var hh = ISODateTimePartString(intHours);
-    var intMinutes = absoluteMinutes % 60;
-    var mm = ISODateTimePartString(intMinutes);
-    return "".concat(sign).concat(hh, ":").concat(mm);
+  function FormatOffsetTimeZoneIdentifier(offsetMinutes) {
+    var sign = offsetMinutes < 0 ? '-' : '+';
+    var absoluteMinutes = MathAbs$1(offsetMinutes);
+    var hour = MathFloor$1(absoluteMinutes / 60);
+    var minute = absoluteMinutes % 60;
+    var timeString = FormatTimeString(hour, minute, 0, 0, 'minute');
+    return "".concat(sign).concat(timeString);
   }
   function FormatDateTimeUTCOffsetRounded(offsetNanoseconds) {
     offsetNanoseconds = RoundNumberToIncrement(bigInt(offsetNanoseconds), 60e9, 'halfExpand').toJSNumber();
-    return FormatOffsetTimeZoneIdentifier(offsetNanoseconds);
+    return FormatOffsetTimeZoneIdentifier(offsetNanoseconds / 60e9);
   }
   function GetUTCEpochNanoseconds(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond) {
     // Note: Date.UTC() interprets one and two-digit years as being in the
@@ -12929,6 +12928,7 @@
     }]);
   }
   var OFFSET = new RegExp("^".concat(offset.source, "$"));
+  var OFFSET_WITH_PARTS = new RegExp("^".concat(offsetWithParts.source, "$"));
   function bisect(getState, left, right) {
     var lstate = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : getState(left);
     var rstate = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : getState(right);
@@ -13074,7 +13074,7 @@
   });
   function resolvedOptions() {
     var resolved = this[ORIGINAL].resolvedOptions();
-    resolved.timeZone = this[TZ_CANONICAL];
+    resolved.timeZone = this[TZ_ORIGINAL];
     return resolved;
   }
   function format(datetime) {
@@ -18061,12 +18061,12 @@
       _classCallCheck(this, TimeZone);
       var stringIdentifier = RequireString(identifier);
       var parseResult = ParseTimeZoneIdentifier(identifier);
-      if (parseResult.offsetNanoseconds !== undefined) {
-        stringIdentifier = FormatOffsetTimeZoneIdentifier(parseResult.offsetNanoseconds);
+      if (parseResult.offsetMinutes !== undefined) {
+        stringIdentifier = FormatOffsetTimeZoneIdentifier(parseResult.offsetMinutes);
       } else {
         var record = GetAvailableNamedTimeZoneIdentifier(stringIdentifier);
         if (!record) throw new RangeError("Invalid time zone identifier: ".concat(stringIdentifier));
-        stringIdentifier = record.primaryIdentifier;
+        stringIdentifier = record.identifier;
       }
       CreateSlots(this);
       SetSlot(this, TIMEZONE_ID, stringIdentifier);
@@ -18086,13 +18086,20 @@
         return GetSlot(this, TIMEZONE_ID);
       }
     }, {
+      key: "equals",
+      value: function equals(other) {
+        if (!IsTemporalTimeZone(this)) throw new TypeError('invalid receiver');
+        var timeZoneSlotValue = ToTemporalTimeZoneSlotValue(other);
+        return TimeZoneEquals(this, timeZoneSlotValue);
+      }
+    }, {
       key: "getOffsetNanosecondsFor",
       value: function getOffsetNanosecondsFor(instant) {
         if (!IsTemporalTimeZone(this)) throw new TypeError('invalid receiver');
         instant = ToTemporalInstant(instant);
         var id = GetSlot(this, TIMEZONE_ID);
-        var offsetNanoseconds = ParseTimeZoneIdentifier(id).offsetNanoseconds;
-        if (offsetNanoseconds !== undefined) return offsetNanoseconds;
+        var offsetMinutes = ParseTimeZoneIdentifier(id).offsetMinutes;
+        if (offsetMinutes !== undefined) return offsetMinutes * 60e9;
         return GetNamedTimeZoneOffsetNanoseconds(id, GetSlot(instant, EPOCHNANOSECONDS));
       }
     }, {
@@ -18128,11 +18135,11 @@
         dateTime = ToTemporalDateTime(dateTime);
         var Instant = GetIntrinsic('%Temporal.Instant%');
         var id = GetSlot(this, TIMEZONE_ID);
-        var offsetNanoseconds = ParseTimeZoneIdentifier(id).offsetNanoseconds;
-        if (offsetNanoseconds !== undefined) {
+        var offsetMinutes = ParseTimeZoneIdentifier(id).offsetMinutes;
+        if (offsetMinutes !== undefined) {
           var epochNs = GetUTCEpochNanoseconds(GetSlot(dateTime, ISO_YEAR), GetSlot(dateTime, ISO_MONTH), GetSlot(dateTime, ISO_DAY), GetSlot(dateTime, ISO_HOUR), GetSlot(dateTime, ISO_MINUTE), GetSlot(dateTime, ISO_SECOND), GetSlot(dateTime, ISO_MILLISECOND), GetSlot(dateTime, ISO_MICROSECOND), GetSlot(dateTime, ISO_NANOSECOND));
           if (epochNs === null) throw new RangeError('DateTime outside of supported range');
-          return [new Instant(epochNs.minus(offsetNanoseconds))];
+          return [new Instant(epochNs.minus(offsetMinutes * 60e9))];
         }
         var possibleEpochNs = GetNamedTimeZoneEpochNanoseconds(id, GetSlot(dateTime, ISO_YEAR), GetSlot(dateTime, ISO_MONTH), GetSlot(dateTime, ISO_DAY), GetSlot(dateTime, ISO_HOUR), GetSlot(dateTime, ISO_MINUTE), GetSlot(dateTime, ISO_SECOND), GetSlot(dateTime, ISO_MILLISECOND), GetSlot(dateTime, ISO_MICROSECOND), GetSlot(dateTime, ISO_NANOSECOND));
         return possibleEpochNs.map(function (ns) {
@@ -18879,7 +18886,7 @@
         } else {
           var record = GetAvailableNamedTimeZoneIdentifier(timeZoneIdentifier);
           if (!record) throw new RangeError("toLocaleString formats built-in time zones, not ".concat(timeZoneIdentifier));
-          optionsCopy.timeZone = record.primaryIdentifier;
+          optionsCopy.timeZone = record.identifier;
         }
         var formatter = new DateTimeFormat(locales, optionsCopy);
         var localeCalendarIdentifier = Call$1(customResolvedOptions, formatter, []).calendar;
