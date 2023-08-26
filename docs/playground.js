@@ -1530,7 +1530,7 @@
 	var origSymbol = typeof Symbol !== 'undefined' && Symbol;
 	var hasSymbolSham = shams$1;
 
-	var hasSymbols$4 = function hasNativeSymbols() {
+	var hasSymbols$5 = function hasNativeSymbols() {
 		if (typeof origSymbol !== 'function') { return false; }
 		if (typeof Symbol !== 'function') { return false; }
 		if (typeof origSymbol('foo') !== 'symbol') { return false; }
@@ -1650,7 +1650,7 @@
 		}())
 		: throwTypeError;
 
-	var hasSymbols$3 = hasSymbols$4();
+	var hasSymbols$4 = hasSymbols$5();
 	var hasProto = hasProto$1();
 
 	var getProto = Object.getPrototypeOf || (
@@ -1667,7 +1667,7 @@
 		'%AggregateError%': typeof AggregateError === 'undefined' ? undefined$1 : AggregateError,
 		'%Array%': Array,
 		'%ArrayBuffer%': typeof ArrayBuffer === 'undefined' ? undefined$1 : ArrayBuffer,
-		'%ArrayIteratorPrototype%': hasSymbols$3 && getProto ? getProto([][Symbol.iterator]()) : undefined$1,
+		'%ArrayIteratorPrototype%': hasSymbols$4 && getProto ? getProto([][Symbol.iterator]()) : undefined$1,
 		'%AsyncFromSyncIteratorPrototype%': undefined$1,
 		'%AsyncFunction%': needsEval,
 		'%AsyncGenerator%': needsEval,
@@ -1697,10 +1697,10 @@
 		'%Int32Array%': typeof Int32Array === 'undefined' ? undefined$1 : Int32Array,
 		'%isFinite%': isFinite,
 		'%isNaN%': isNaN,
-		'%IteratorPrototype%': hasSymbols$3 && getProto ? getProto(getProto([][Symbol.iterator]())) : undefined$1,
+		'%IteratorPrototype%': hasSymbols$4 && getProto ? getProto(getProto([][Symbol.iterator]())) : undefined$1,
 		'%JSON%': typeof JSON === 'object' ? JSON : undefined$1,
 		'%Map%': typeof Map === 'undefined' ? undefined$1 : Map,
-		'%MapIteratorPrototype%': typeof Map === 'undefined' || !hasSymbols$3 || !getProto ? undefined$1 : getProto(new Map()[Symbol.iterator]()),
+		'%MapIteratorPrototype%': typeof Map === 'undefined' || !hasSymbols$4 || !getProto ? undefined$1 : getProto(new Map()[Symbol.iterator]()),
 		'%Math%': Math,
 		'%Number%': Number,
 		'%Object%': Object,
@@ -1713,11 +1713,11 @@
 		'%Reflect%': typeof Reflect === 'undefined' ? undefined$1 : Reflect,
 		'%RegExp%': RegExp,
 		'%Set%': typeof Set === 'undefined' ? undefined$1 : Set,
-		'%SetIteratorPrototype%': typeof Set === 'undefined' || !hasSymbols$3 || !getProto ? undefined$1 : getProto(new Set()[Symbol.iterator]()),
+		'%SetIteratorPrototype%': typeof Set === 'undefined' || !hasSymbols$4 || !getProto ? undefined$1 : getProto(new Set()[Symbol.iterator]()),
 		'%SharedArrayBuffer%': typeof SharedArrayBuffer === 'undefined' ? undefined$1 : SharedArrayBuffer,
 		'%String%': String,
-		'%StringIteratorPrototype%': hasSymbols$3 && getProto ? getProto(''[Symbol.iterator]()) : undefined$1,
-		'%Symbol%': hasSymbols$3 ? Symbol : undefined$1,
+		'%StringIteratorPrototype%': hasSymbols$4 && getProto ? getProto(''[Symbol.iterator]()) : undefined$1,
+		'%Symbol%': hasSymbols$4 ? Symbol : undefined$1,
 		'%SyntaxError%': $SyntaxError$2,
 		'%ThrowTypeError%': ThrowTypeError,
 		'%TypedArray%': TypedArray,
@@ -6771,20 +6771,11 @@
 
 	var Get$3 = /*@__PURE__*/getDefaultExportFromCjs(Get$2);
 
-	var shams;
-	var hasRequiredShams;
+	var hasSymbols$3 = shams$1;
 
-	function requireShams () {
-		if (hasRequiredShams) return shams;
-		hasRequiredShams = 1;
-
-		var hasSymbols = shams$1;
-
-		shams = function hasToStringTagShams() {
-			return hasSymbols() && !!Symbol.toStringTag;
-		};
-		return shams;
-	}
+	var shams = function hasToStringTagShams() {
+		return hasSymbols$3() && !!Symbol.toStringTag;
+	};
 
 	var isString;
 	var hasRequiredIsString;
@@ -6804,7 +6795,7 @@
 		};
 		var toStr = Object.prototype.toString;
 		var strClass = '[object String]';
-		var hasToStringTag = requireShams()();
+		var hasToStringTag = shams();
 
 		isString = function isString(value) {
 			if (typeof value === 'string') {
@@ -6825,7 +6816,7 @@
 		if (hasRequiredGetIteratorMethod) return getIteratorMethod$1;
 		hasRequiredGetIteratorMethod = 1;
 
-		var hasSymbols = hasSymbols$4();
+		var hasSymbols = hasSymbols$5();
 		var GetIntrinsic = getIntrinsic;
 		var callBound = callBound$2;
 		var isString = requireIsString();
@@ -7127,7 +7118,7 @@
 	var $asyncIterator = GetIntrinsic$d('%Symbol.asyncIterator%', true);
 
 	var inspect = requireObjectInspect();
-	var hasSymbols$2 = hasSymbols$4();
+	var hasSymbols$2 = hasSymbols$5();
 
 	var getIteratorMethod = requireGetIteratorMethod();
 	var AdvanceStringIndex = requireAdvanceStringIndex();
@@ -7410,7 +7401,7 @@
 
 	var toStr$1 = Object.prototype.toString;
 	var dateClass = '[object Date]';
-	var hasToStringTag = requireShams()();
+	var hasToStringTag = shams();
 
 	var isDateObject = function isDateObject(value) {
 		if (typeof value !== 'object' || value === null) {
@@ -7422,7 +7413,7 @@
 	var isSymbol$1 = {exports: {}};
 
 	var toStr = Object.prototype.toString;
-	var hasSymbols$1 = hasSymbols$4();
+	var hasSymbols$1 = hasSymbols$5();
 
 	if (hasSymbols$1) {
 		var symToStr = Symbol.prototype.toString;
@@ -7552,7 +7543,7 @@
 		hasRequiredIsRegex = 1;
 
 		var callBound = callBound$2;
-		var hasToStringTag = requireShams()();
+		var hasToStringTag = shams();
 		var has;
 		var $exec;
 		var isRegexMarker;
@@ -9809,8 +9800,7 @@
 	  return CalendarYearMonthFromFields(calendar, result);
 	}
 	function InterpretISODateTimeOffset(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, offsetBehaviour, offsetNs, timeZone, disambiguation, offsetOpt, matchMinute) {
-	  const DateTime = GetIntrinsic('%Temporal.PlainDateTime%');
-	  const dt = new DateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond);
+	  const dt = CreateTemporalDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, 'iso8601');
 	  if (offsetBehaviour === 'wall' || offsetOpt === 'ignore') {
 	    // Simple case: ISO string without a TZ offset (or caller wants to ignore
 	    // the offset), so just convert DateTime to Instant in the given time zone
@@ -10604,6 +10594,7 @@
 	        }
 	    }
 	  }
+	  if (disambiguation === 'reject') throw new RangeError('multiple instants found');
 	  const year = GetSlot(dateTime, ISO_YEAR);
 	  const month = GetSlot(dateTime, ISO_MONTH);
 	  const day = GetSlot(dateTime, ISO_DAY);
@@ -10626,9 +10617,8 @@
 	    case 'earlier':
 	      {
 	        const calendar = GetSlot(dateTime, CALENDAR);
-	        const PlainDateTime = GetIntrinsic('%Temporal.PlainDateTime%');
 	        const earlier = AddDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, calendar, 0, 0, 0, 0, 0, 0, 0, 0, 0, -nanoseconds, undefined);
-	        const earlierPlainDateTime = new PlainDateTime(earlier.year, earlier.month, earlier.day, earlier.hour, earlier.minute, earlier.second, earlier.millisecond, earlier.microsecond, earlier.nanosecond, calendar);
+	        const earlierPlainDateTime = CreateTemporalDateTime(earlier.year, earlier.month, earlier.day, earlier.hour, earlier.minute, earlier.second, earlier.millisecond, earlier.microsecond, earlier.nanosecond, calendar);
 	        return GetPossibleInstantsFor(timeZone, earlierPlainDateTime)[0];
 	      }
 	    case 'compatible':
@@ -10636,15 +10626,14 @@
 	    case 'later':
 	      {
 	        const calendar = GetSlot(dateTime, CALENDAR);
-	        const PlainDateTime = GetIntrinsic('%Temporal.PlainDateTime%');
 	        const later = AddDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, calendar, 0, 0, 0, 0, 0, 0, 0, 0, 0, nanoseconds, undefined);
-	        const laterPlainDateTime = new PlainDateTime(later.year, later.month, later.day, later.hour, later.minute, later.second, later.millisecond, later.microsecond, later.nanosecond, calendar);
+	        const laterPlainDateTime = CreateTemporalDateTime(later.year, later.month, later.day, later.hour, later.minute, later.second, later.millisecond, later.microsecond, later.nanosecond, calendar);
 	        const possible = GetPossibleInstantsFor(timeZone, laterPlainDateTime);
 	        return possible[possible.length - 1];
 	      }
 	    case 'reject':
 	      {
-	        throw new RangeError('no such instant found');
+	        throw new Error('should not be reached: reject handled earlier');
 	      }
 	  }
 	  throw new Error("assertion failed: invalid disambiguation value ".concat(disambiguation));
@@ -13984,7 +13973,6 @@
 	  return true;
 	}
 	function extractOverrides(temporalObj, main) {
-	  const DateTime = GetIntrinsic('%Temporal.PlainDateTime%');
 	  if (IsTemporalTime(temporalObj)) {
 	    const hour = GetSlot(temporalObj, ISO_HOUR);
 	    const minute = GetSlot(temporalObj, ISO_MINUTE);
@@ -13992,7 +13980,7 @@
 	    const millisecond = GetSlot(temporalObj, ISO_MILLISECOND);
 	    const microsecond = GetSlot(temporalObj, ISO_MICROSECOND);
 	    const nanosecond = GetSlot(temporalObj, ISO_NANOSECOND);
-	    const datetime = new DateTime(1970, 1, 1, hour, minute, second, millisecond, microsecond, nanosecond, main[CAL_ID]);
+	    const datetime = CreateTemporalDateTime(1970, 1, 1, hour, minute, second, millisecond, microsecond, nanosecond, 'iso8601');
 	    return {
 	      instant: GetInstantFor(main[TZ_CANONICAL], datetime, 'compatible'),
 	      formatter: getPropLazy(main, TIME)
@@ -14006,7 +13994,7 @@
 	    if (calendar !== main[CAL_ID]) {
 	      throw new RangeError("cannot format PlainYearMonth with calendar ".concat(calendar, " in locale with calendar ").concat(main[CAL_ID]));
 	    }
-	    const datetime = new DateTime(isoYear, isoMonth, referenceISODay, 12, 0, 0, 0, 0, 0, calendar);
+	    const datetime = CreateTemporalDateTime(isoYear, isoMonth, referenceISODay, 12, 0, 0, 0, 0, 0, calendar);
 	    return {
 	      instant: GetInstantFor(main[TZ_CANONICAL], datetime, 'compatible'),
 	      formatter: getPropLazy(main, YM)
@@ -14020,7 +14008,7 @@
 	    if (calendar !== main[CAL_ID]) {
 	      throw new RangeError("cannot format PlainMonthDay with calendar ".concat(calendar, " in locale with calendar ").concat(main[CAL_ID]));
 	    }
-	    const datetime = new DateTime(referenceISOYear, isoMonth, isoDay, 12, 0, 0, 0, 0, 0, calendar);
+	    const datetime = CreateTemporalDateTime(referenceISOYear, isoMonth, isoDay, 12, 0, 0, 0, 0, 0, calendar);
 	    return {
 	      instant: GetInstantFor(main[TZ_CANONICAL], datetime, 'compatible'),
 	      formatter: getPropLazy(main, MD)
@@ -14034,32 +14022,19 @@
 	    if (calendar !== 'iso8601' && calendar !== main[CAL_ID]) {
 	      throw new RangeError("cannot format PlainDate with calendar ".concat(calendar, " in locale with calendar ").concat(main[CAL_ID]));
 	    }
-	    const datetime = new DateTime(isoYear, isoMonth, isoDay, 12, 0, 0, 0, 0, 0, main[CAL_ID]);
+	    const datetime = CreateTemporalDateTime(isoYear, isoMonth, isoDay, 12, 0, 0, 0, 0, 0, main[CAL_ID]);
 	    return {
 	      instant: GetInstantFor(main[TZ_CANONICAL], datetime, 'compatible'),
 	      formatter: getPropLazy(main, DATE)
 	    };
 	  }
 	  if (IsTemporalDateTime(temporalObj)) {
-	    const isoYear = GetSlot(temporalObj, ISO_YEAR);
-	    const isoMonth = GetSlot(temporalObj, ISO_MONTH);
-	    const isoDay = GetSlot(temporalObj, ISO_DAY);
-	    const hour = GetSlot(temporalObj, ISO_HOUR);
-	    const minute = GetSlot(temporalObj, ISO_MINUTE);
-	    const second = GetSlot(temporalObj, ISO_SECOND);
-	    const millisecond = GetSlot(temporalObj, ISO_MILLISECOND);
-	    const microsecond = GetSlot(temporalObj, ISO_MICROSECOND);
-	    const nanosecond = GetSlot(temporalObj, ISO_NANOSECOND);
 	    const calendar = ToTemporalCalendarIdentifier(GetSlot(temporalObj, CALENDAR));
 	    if (calendar !== 'iso8601' && calendar !== main[CAL_ID]) {
 	      throw new RangeError("cannot format PlainDateTime with calendar ".concat(calendar, " in locale with calendar ").concat(main[CAL_ID]));
 	    }
-	    let datetime = temporalObj;
-	    if (calendar === 'iso8601') {
-	      datetime = new DateTime(isoYear, isoMonth, isoDay, hour, minute, second, millisecond, microsecond, nanosecond, main[CAL_ID]);
-	    }
 	    return {
-	      instant: GetInstantFor(main[TZ_CANONICAL], datetime, 'compatible'),
+	      instant: GetInstantFor(main[TZ_CANONICAL], temporalObj, 'compatible'),
 	      formatter: getPropLazy(main, DATETIME)
 	    };
 	  }
@@ -17125,7 +17100,7 @@
 	  withCalendar(calendar) {
 	    if (!IsTemporalDate(this)) throw new TypeError('invalid receiver');
 	    calendar = ToTemporalCalendarSlotValue(calendar);
-	    return new PlainDate(GetSlot(this, ISO_YEAR), GetSlot(this, ISO_MONTH), GetSlot(this, ISO_DAY), calendar);
+	    return CreateTemporalDate(GetSlot(this, ISO_YEAR), GetSlot(this, ISO_MONTH), GetSlot(this, ISO_DAY), calendar);
 	  }
 	  add(temporalDurationLike) {
 	    let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
@@ -17462,7 +17437,7 @@
 	  withCalendar(calendar) {
 	    if (!IsTemporalDateTime(this)) throw new TypeError('invalid receiver');
 	    calendar = ToTemporalCalendarSlotValue(calendar);
-	    return new PlainDateTime(GetSlot(this, ISO_YEAR), GetSlot(this, ISO_MONTH), GetSlot(this, ISO_DAY), GetSlot(this, ISO_HOUR), GetSlot(this, ISO_MINUTE), GetSlot(this, ISO_SECOND), GetSlot(this, ISO_MILLISECOND), GetSlot(this, ISO_MICROSECOND), GetSlot(this, ISO_NANOSECOND), calendar);
+	    return CreateTemporalDateTime(GetSlot(this, ISO_YEAR), GetSlot(this, ISO_MONTH), GetSlot(this, ISO_DAY), GetSlot(this, ISO_HOUR), GetSlot(this, ISO_MINUTE), GetSlot(this, ISO_SECOND), GetSlot(this, ISO_MILLISECOND), GetSlot(this, ISO_MICROSECOND), GetSlot(this, ISO_NANOSECOND), calendar);
 	  }
 	  add(temporalDurationLike) {
 	    let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
@@ -18461,8 +18436,7 @@
 	    const millisecond = GetSlot(this, ISO_MILLISECOND);
 	    const microsecond = GetSlot(this, ISO_MICROSECOND);
 	    const nanosecond = GetSlot(this, ISO_NANOSECOND);
-	    const PlainDateTime = GetIntrinsic('%Temporal.PlainDateTime%');
-	    const dt = new PlainDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, calendar);
+	    const dt = CreateTemporalDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, calendar);
 	    const instant = GetInstantFor(timeZone, dt, 'compatible');
 	    return CreateTemporalZonedDateTime(GetSlot(instant, EPOCHNANOSECONDS), timeZone, calendar);
 	  }
@@ -18890,13 +18864,12 @@
 	  get hoursInDay() {
 	    if (!IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
 	    const dt = dateTime(this);
-	    const DateTime = GetIntrinsic('%Temporal.PlainDateTime%');
 	    const year = GetSlot(dt, ISO_YEAR);
 	    const month = GetSlot(dt, ISO_MONTH);
 	    const day = GetSlot(dt, ISO_DAY);
-	    const today = new DateTime(year, month, day, 0, 0, 0, 0, 0, 0);
+	    const today = CreateTemporalDateTime(year, month, day, 0, 0, 0, 0, 0, 0, 'iso8601');
 	    const tomorrowFields = AddISODate(year, month, day, 0, 0, 0, 1, 'reject');
-	    const tomorrow = new DateTime(tomorrowFields.year, tomorrowFields.month, tomorrowFields.day, 0, 0, 0, 0, 0, 0);
+	    const tomorrow = CreateTemporalDateTime(tomorrowFields.year, tomorrowFields.month, tomorrowFields.day, 0, 0, 0, 0, 0, 0, 'iso8601');
 	    const timeZone = GetSlot(this, TIME_ZONE);
 	    const todayNs = GetSlot(GetInstantFor(timeZone, today, 'compatible'), EPOCHNANOSECONDS);
 	    const tomorrowNs = GetSlot(GetInstantFor(timeZone, tomorrow, 'compatible'), EPOCHNANOSECONDS);
@@ -18993,8 +18966,7 @@
 	    const nanosecond = GetSlot(thisDt, ISO_NANOSECOND);
 	    calendar = ConsolidateCalendars(GetSlot(this, CALENDAR), calendar);
 	    const timeZone = GetSlot(this, TIME_ZONE);
-	    const PlainDateTime = GetIntrinsic('%Temporal.PlainDateTime%');
-	    const dt = new PlainDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, calendar);
+	    const dt = CreateTemporalDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, calendar);
 	    const instant = GetInstantFor(timeZone, dt, 'compatible');
 	    return CreateTemporalZonedDateTime(GetSlot(instant, EPOCHNANOSECONDS), timeZone, calendar);
 	  }
@@ -19015,8 +18987,7 @@
 	    const microsecond = GetSlot(temporalTime, ISO_MICROSECOND);
 	    const nanosecond = GetSlot(temporalTime, ISO_NANOSECOND);
 	    const timeZone = GetSlot(this, TIME_ZONE);
-	    const PlainDateTime = GetIntrinsic('%Temporal.PlainDateTime%');
-	    const dt = new PlainDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, calendar);
+	    const dt = CreateTemporalDateTime(year, month, day, hour, minute, second, millisecond, microsecond, nanosecond, calendar);
 	    const instant = GetInstantFor(timeZone, dt, 'compatible');
 	    return CreateTemporalZonedDateTime(GetSlot(instant, EPOCHNANOSECONDS), timeZone, calendar);
 	  }
@@ -19089,9 +19060,8 @@
 	    let millisecond = GetSlot(dt, ISO_MILLISECOND);
 	    let microsecond = GetSlot(dt, ISO_MICROSECOND);
 	    let nanosecond = GetSlot(dt, ISO_NANOSECOND);
-	    const DateTime = GetIntrinsic('%Temporal.PlainDateTime%');
 	    const calendar = GetSlot(this, CALENDAR);
-	    const dtStart = new DateTime(GetSlot(dt, ISO_YEAR), GetSlot(dt, ISO_MONTH), GetSlot(dt, ISO_DAY), 0, 0, 0, 0, 0, 0);
+	    const dtStart = CreateTemporalDateTime(GetSlot(dt, ISO_YEAR), GetSlot(dt, ISO_MONTH), GetSlot(dt, ISO_DAY), 0, 0, 0, 0, 0, 0, 'iso8601');
 	    const instantStart = GetInstantFor(timeZone, dtStart, 'compatible');
 	    const endNs = AddZonedDateTime(instantStart, timeZone, calendar, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0);
 	    const dayLengthNs = endNs.subtract(GetSlot(instantStart, EPOCHNANOSECONDS));
@@ -19195,9 +19165,8 @@
 	  startOfDay() {
 	    if (!IsTemporalZonedDateTime(this)) throw new TypeError('invalid receiver');
 	    const dt = dateTime(this);
-	    const DateTime = GetIntrinsic('%Temporal.PlainDateTime%');
 	    const calendar = GetSlot(this, CALENDAR);
-	    const dtStart = new DateTime(GetSlot(dt, ISO_YEAR), GetSlot(dt, ISO_MONTH), GetSlot(dt, ISO_DAY), 0, 0, 0, 0, 0, 0, calendar);
+	    const dtStart = CreateTemporalDateTime(GetSlot(dt, ISO_YEAR), GetSlot(dt, ISO_MONTH), GetSlot(dt, ISO_DAY), 0, 0, 0, 0, 0, 0, calendar);
 	    const timeZone = GetSlot(this, TIME_ZONE);
 	    const instant = GetInstantFor(timeZone, dtStart, 'compatible');
 	    return CreateTemporalZonedDateTime(GetSlot(instant, EPOCHNANOSECONDS), timeZone, calendar);
